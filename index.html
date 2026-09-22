@@ -645,9 +645,18 @@
   .cj-branch-del-confirm .txt{font-size:13px;color:var(--text);margin-bottom:var(--space-3);line-height:1.4;}
   .cj-branch-del-confirm .row{display:flex;gap:var(--space-2);justify-content:flex-end;}
 
+  .cj-merge-title-wrap{position:relative;display:flex;align-items:center;gap:6px;}
+  .cj-merge-help-btn{width:24px;height:24px;}
+  .cj-merge-help-btn svg{width:16px;height:16px;}
+  .cj-merge-help-popover{top:32px;left:0;right:auto;width:280px;}
+  .cj-merge-help-list{margin:0;padding-left:18px;font-size:13px;color:var(--text-secondary);line-height:1.6;}
+  .cj-merge-help-list li{margin-bottom:var(--space-2);}
+  .cj-merge-help-list li:last-child{margin-bottom:0;}
+
   .cj-merge-compare{display:flex;align-items:stretch;gap:var(--space-3);margin-top:var(--space-5);}
   .cj-merge-compare .col{flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4);}
-  .cj-merge-compare .col .hd{font-weight:700;font-size:13.5px;margin-bottom:var(--space-2);}
+  .cj-merge-compare .col .hd{font-weight:700;font-size:13.5px;}
+  .cj-merge-compare .col .sub{font-size:11.5px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.03em;margin-bottom:var(--space-2);}
   .cj-merge-compare .col .row{font-size:12.5px;color:var(--text-secondary);line-height:1.6;}
   .cj-merge-compare .arrow{display:flex;align-items:center;color:var(--text-tertiary);flex:0 0 auto;}
   .cj-merge-strategy{display:flex;flex-direction:column;gap:var(--space-3);}
@@ -6290,16 +6299,33 @@ function CjBranchCreatePanel(){
 
 function CjMergePanel(){
   const p = state.cjMergePanel;
+  // the whole panel is rebuilt from scratch on every click inside it (source/target/
+  // strategy pills all trigger a full render()) — only play the open animation on the
+  // very first paint, or every one of those clicks replays it and the screen flashes.
+  const firstPaint = !p._entered;
+  p._entered = true;
   const cjId = state.cjOpen.cjId;
   const branches = cjBranchList(cjId);
   const srcStats = cjTreeStats(cjBranchTree(cjId, p.source));
   const tgtStats = cjTreeStats(cjBranchTree(cjId, p.target));
   const canMerge = !!p.source && !!p.target && p.source!==p.target;
   return `
-    <div class="backdrop enter" data-action="cj-close-merge"></div>
-    <div class="side-panel enter">
+    <div class="backdrop${firstPaint?" enter":""}" data-action="cj-close-merge"></div>
+    <div class="side-panel${firstPaint?" enter":""}">
       <div class="side-head">
-        <h2>Объединение веток</h2>
+        <div class="cj-merge-title-wrap">
+          <h2>Объединение веток</h2>
+          <button class="icon-btn cj-merge-help-btn" data-action="toggle-popover" data-popover="cj-merge-help" title="Как это работает">${icon("info")}</button>
+          ${state.popover==="cj-merge-help" ? `
+            <div class="popover cj-merge-help-popover">
+              <div class="pv-title">Как работает объединение</div>
+              <ul class="cj-merge-help-list">
+                <li><b>Откуда → Куда</b> — из какой ветки берём изменения и в какую их вносим.</li>
+                <li><b>Добавление</b> — добавит только то, чего нет в целевой ветке; то, что там уже есть, не трогает.</li>
+                <li><b>Замена</b> — полностью заменит состав целевой ветки составом исходной.</li>
+              </ul>
+            </div>` : ""}
+        </div>
         <button class="wizard-close" data-action="cj-close-merge">${icon("x")}</button>
       </div>
       <div class="side-body">
@@ -6322,6 +6348,7 @@ function CjMergePanel(){
         <div class="cj-merge-compare">
           <div class="col">
             <div class="hd">${escapeHtml(p.source)}</div>
+            <div class="sub">Откуда</div>
             <div class="row">${srcStats.stages} ${ruPlural(srcStats.stages,"этап","этапа","этапов")}</div>
             <div class="row">${srcStats.scenarios} ${ruPlural(srcStats.scenarios,"сценарий","сценария","сценариев")}</div>
             <div class="row">${srcStats.sources} ${ruPlural(srcStats.sources,"источник","источника","источников")}</div>
@@ -6329,6 +6356,7 @@ function CjMergePanel(){
           <div class="arrow">${icon("chevronRight")}</div>
           <div class="col">
             <div class="hd">${escapeHtml(p.target)}</div>
+            <div class="sub">Куда</div>
             <div class="row">${tgtStats.stages} ${ruPlural(tgtStats.stages,"этап","этапа","этапов")}</div>
             <div class="row">${tgtStats.scenarios} ${ruPlural(tgtStats.scenarios,"сценарий","сценария","сценариев")}</div>
             <div class="row">${tgtStats.sources} ${ruPlural(tgtStats.sources,"источник","источника","источников")}</div>
@@ -6353,7 +6381,7 @@ function CjMergePanel(){
       </div>
       <div class="side-foot">
         <button class="btn btn-outline" data-action="cj-close-merge">Отменить</button>
-        <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"}>${icon("gitMerge")} Объединить</button>
+        <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"}>Объединить</button>
       </div>
     </div>
   `;
