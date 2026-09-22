@@ -603,7 +603,9 @@
   .cj-card.branch-empty{border-style:dashed;}
   .cj-card.branch-empty .cj-card-title,.cj-card.branch-empty .cj-card-desc,.cj-card.branch-empty .cj-card-field-val{opacity:.55;}
 
-  /* branch-context switch on the library toolbar */
+  /* branch-context switch — its own row above search/filters, since the branch is the
+     top-level axis (everything else on the page is scoped inside the selected branch). */
+  .cj-library-branch-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-5);}
   .branch-switch{display:flex;border:1px solid var(--border-strong);border-radius:11px;overflow:hidden;flex:0 0 auto;}
   .branch-switch-btn{height:44px;padding:0 var(--space-4);border:none;background:var(--bg);color:var(--text-tertiary);font-size:13.5px;font-weight:600;}
   .branch-switch-btn:not(:last-child){border-right:1px solid var(--border-strong);}
@@ -3467,13 +3469,15 @@ const CJ_META = {
 };
 
 // Создание артефакта = создание трёх системных веток (design/develop/main), см. §3.1.
-// Пользователь клонирует именованные ветки от любого родителя (kind:"user"), системные
-// ветки (kind:"system") удалить нельзя (§4.3/§6.6).
+// Жизненный цикл идёт по порядку design → develop → main; design — самая первая ветка
+// (в ней всегда есть черновой состав, пустой design не бывает), Пользователь клонирует
+// именованные ветки от любого родителя (kind:"user"), системные ветки (kind:"system")
+// удалить нельзя (§4.3/§6.6).
 const CJ_BRANCH_META = {
   cj1: [
-    {id:"main", kind:"system", parent:null, createdBy:null, createdAt:null},
-    {id:"develop", kind:"system", parent:null, createdBy:null, createdAt:null},
     {id:"design", kind:"system", parent:null, createdBy:null, createdAt:null},
+    {id:"develop", kind:"system", parent:null, createdBy:null, createdAt:null},
+    {id:"main", kind:"system", parent:null, createdBy:null, createdAt:null},
   ],
 };
 
@@ -3581,15 +3585,15 @@ const CJ_DEVELOP_STAGES = deepClone(CJ_MAIN_STAGES);
   });
 })();
 
-// Ветка design — ещё не начата, состав пуст (миграция существующих данных кладёт всё в
-// main; design/develop стартуют пустыми — см. §3.1).
-const CJ_DESIGN_STAGES = [];
+// Ветка design — самая первая ветка жизненного цикла, пустой не бывает: черновой состав
+// заводится здесь ещё до develop/main (только первые 2 этапа продуманы, остальное впереди).
+const CJ_DESIGN_STAGES = deepClone(CJ_MAIN_STAGES.slice(0,2));
 
 const CJ_BRANCHES = {
   cj1: {
-    main: { stages: CJ_MAIN_STAGES },
-    develop: { stages: CJ_DEVELOP_STAGES },
     design: { stages: CJ_DESIGN_STAGES },
+    develop: { stages: CJ_DEVELOP_STAGES },
+    main: { stages: CJ_MAIN_STAGES },
   },
 };
 
@@ -3604,7 +3608,9 @@ function cjBranchTree(cjId, branchId){
 // весь их состав считается лежащим в main, design/develop — пусты.
 function cjHasComposition(cjId, branchId){
   if(CJ_BRANCHES[cjId]) return cjBranchTree(cjId, branchId).length>0;
-  return branchId==="main";
+  // design никогда не бывает пустой (самая первая ветка жизненного цикла) — та же
+  // договорённость действует и для карточек без собственного CJ_BRANCHES.
+  return branchId==="main" || branchId==="design";
 }
 function activeCjStages(){
   return state.cjOpen ? cjBranchTree(state.cjOpen.cjId, state.cjOpen.branch) : [];
@@ -5766,6 +5772,12 @@ function CjLibraryPage(){
       <h1>Библиотека CJ</h1>
       <div class="actions"><button class="btn btn-primary" data-action="cj-open-create">${icon("plus")} Создать CJ</button></div>
     </div>
+    <div class="cj-library-branch-row">
+      <span class="cj-branch-bar-label">${icon("gitBranch")} Ветка</span>
+      <div class="branch-switch" title="Ветка, в которой показан состав библиотеки">
+        ${["design","develop","main"].map(b=>`<button class="branch-switch-btn ${state.cjLibraryBranch===b?"active":""}" data-action="cj-set-library-branch" data-branch="${b}">${b}</button>`).join("")}
+      </div>
+    </div>
     <div class="cj-toolbar">
       <div class="search-wrap field-with-icon">
         ${icon("search")}
@@ -5773,9 +5785,6 @@ function CjLibraryPage(){
       </div>
       <button class="btn btn-outline" data-action="cj-open-filters">${icon("layers")} Фильтры${activeCount?` <span class="badge blue" style="margin-left:4px;">${activeCount}</span>`:""}</button>
       ${hasReset ? `<span class="reset-link" data-action="cj-reset-search-all">Сбросить</span>` : ""}
-      <div class="branch-switch" title="Ветка, в которой показан состав библиотеки">
-        ${["design","develop","main"].map(b=>`<button class="branch-switch-btn ${state.cjLibraryBranch===b?"active":""}" data-action="cj-set-library-branch" data-branch="${b}">${b}</button>`).join("")}
-      </div>
       <div class="view-toggle">
         <button class="view-toggle-btn ${state.cjView==="grid"?"active":""}" data-action="cj-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
         <button class="view-toggle-btn ${state.cjView==="table"?"active":""}" data-action="cj-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
@@ -6217,7 +6226,7 @@ function CjBranchBar(cjId){
         }).join("")}
         <button class="cj-branch-add" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
       </div>
-      <button class="btn btn-outline btn-sm" data-action="cj-open-merge" style="margin-left:auto;">${icon("gitMerge")} Слить ветки</button>
+      <button class="btn btn-outline btn-sm" data-action="cj-open-merge" style="margin-left:auto;">${icon("gitMerge")} Объединить ветки</button>
     </div>
   `;
 }
@@ -6297,7 +6306,7 @@ function CjMergePanel(){
     <div class="backdrop enter" data-action="cj-close-merge"></div>
     <div class="side-panel enter">
       <div class="side-head">
-        <h2>Слияние веток</h2>
+        <h2>Объединение веток</h2>
         <button class="wizard-close" data-action="cj-close-merge">${icon("x")}</button>
       </div>
       <div class="side-body">
@@ -6334,7 +6343,7 @@ function CjMergePanel(){
         </div>
 
         <div class="field-block" style="margin-top:var(--space-5);">
-          <label class="field-label">Стратегия слияния</label>
+          <label class="field-label">Стратегия объединения</label>
           <div class="cj-merge-strategy">
             <div class="cj-merge-strategy-card ${p.strategy==="add"?"active":""}" data-action="cj-merge-set-strategy" data-strategy="add">
               <div class="t">Добавление (add)</div>
@@ -6347,11 +6356,11 @@ function CjMergePanel(){
           </div>
         </div>
 
-        ${p.target==="main" ? `<div class="readonly-note" style="align-items:flex-start;margin-top:var(--space-5);background:var(--blue-bg);color:var(--blue-text);">${icon("info")} Слияние в main обновляет канон сразу после подтверждения. Апрув вторым лицом в вижен-доке не зафиксирован (открытый вопрос).</div>` : ""}
+        ${p.target==="main" ? `<div class="readonly-note" style="align-items:flex-start;margin-top:var(--space-5);background:var(--blue-bg);color:var(--blue-text);">${icon("info")} Объединение с main обновляет канон сразу после подтверждения. Апрув вторым лицом в вижен-доке не зафиксирован (открытый вопрос).</div>` : ""}
       </div>
       <div class="side-foot">
         <button class="btn btn-outline" data-action="cj-close-merge">Отменить</button>
-        <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"}>${icon("gitMerge")} Слить</button>
+        <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"}>${icon("gitMerge")} Объединить</button>
       </div>
     </div>
   `;
@@ -9938,7 +9947,7 @@ function handleAction(action, el){
       const p = state.cjMergePanel;
       if(!p.source || !p.target || p.source===p.target) break;
       cjMergeExecute(state.cjOpen.cjId, p.source, p.target, p.strategy);
-      showToast(`Ветка «${p.source}» слита в «${p.target}» (${p.strategy==="replace"?"замена":"добавление"})`);
+      showToast(`Ветка «${p.source}» объединена с «${p.target}» (${p.strategy==="replace"?"замена":"добавление"})`);
       state.cjMergePanel = null;
       render();
       break;
