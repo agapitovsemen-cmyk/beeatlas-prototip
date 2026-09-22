@@ -3297,7 +3297,7 @@ const state = {
   cjSearch:"",
   cjView:"grid",
   cjFiltersOpen:false,
-  cjFilters:{onlyPublished:false, status:"", type:"", channel:""},
+  cjFilters:{withGrafana:false, product:"", status:"", format:"", channel:"", type:""},
   cjOpen:null,        // {cjId} when the CJ detail overlay is open
   cjMenuOpen:false,
   cjVersionsOpen:false,
@@ -5570,20 +5570,26 @@ function GraphAddRelOverlay(){
 
 /* ============================= CJ LIBRARY PAGE ============================= */
 const CJ_FILTER_TYPE_OPTIONS = ["E2E","B2C"];
+const CJ_FILTER_FORMAT_OPTIONS = ["BPMN","Beeatlas"];
 function cjFilterChannelOptions(){
   return [...new Set(CJ_LIBRARY.flatMap(c=>c.channels==="—"?[]:c.channels.split(", ")))];
 }
+function cjFilterProductOptions(){
+  return [...new Set(CJ_LIBRARY.map(c=>c.app).filter(a=>a!=="—"))];
+}
 function cjActiveFilterCount(){
   const f = state.cjFilters;
-  return (f.onlyPublished?1:0) + (f.status?1:0) + (f.type?1:0) + (f.channel?1:0);
+  return (f.withGrafana?1:0) + (f.product?1:0) + (f.status?1:0) + (f.format?1:0) + (f.channel?1:0) + (f.type?1:0);
 }
 function filteredCjLibrary(){
   const q = state.cjSearch.trim().toLowerCase();
   const f = state.cjFilters;
   return CJ_LIBRARY.filter(c=>{
     if(q && !(c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q))) return false;
-    if(f.onlyPublished && c.status!=="Опубликован") return false;
+    if(f.withGrafana && !c.extraBadges.some(b=>b.t==="GRAFANA")) return false;
+    if(f.product && c.app!==f.product) return false;
     if(f.status && c.status!==f.status) return false;
+    if(f.format && !c.extraBadges.some(b=>b.t===f.format)) return false;
     if(f.type && !c.tags.includes(f.type)) return false;
     if(f.channel && !c.channels.includes(f.channel)) return false;
     return true;
@@ -5658,6 +5664,7 @@ function CjTableRow(c){
 function CjFiltersPanel(){
   const f = state.cjFilters;
   const channelOptions = cjFilterChannelOptions();
+  const productOptions = cjFilterProductOptions();
   return `
     <div class="backdrop enter" data-action="cj-close-filters"></div>
     <div class="side-panel enter">
@@ -5667,8 +5674,15 @@ function CjFiltersPanel(){
       </div>
       <div class="side-body">
         <div class="toggle-wrap" style="margin-bottom:var(--space-6);">
-          <div class="toggle ${f.onlyPublished?"on":""}" data-action="cj-toggle-only-published"><div class="knob"></div></div>
-          <span>Только опубликованные CJ</span>
+          <div class="toggle ${f.withGrafana?"on":""}" data-action="cj-toggle-with-grafana"><div class="knob"></div></div>
+          <span>Показать CJ с дашбордами в Grafana</span>
+        </div>
+        <div class="field-block">
+          <label class="field-label">Продукт</label>
+          <select class="select" id="cjFilterProductSelect">
+            <option value="">Все</option>
+            ${productOptions.map(p=>`<option value="${escapeHtml(p)}" ${f.product===p?"selected":""}>${escapeHtml(p)}</option>`).join("")}
+          </select>
         </div>
         <div class="field-block">
           <label class="field-label">Статус</label>
@@ -5679,10 +5693,10 @@ function CjFiltersPanel(){
           </select>
         </div>
         <div class="field-block">
-          <label class="field-label">Тип</label>
-          <select class="select" id="cjFilterTypeSelect">
+          <label class="field-label">Формат</label>
+          <select class="select" id="cjFilterFormatSelect">
             <option value="">Все</option>
-            ${CJ_FILTER_TYPE_OPTIONS.map(t=>`<option value="${t}" ${f.type===t?"selected":""}>${t}</option>`).join("")}
+            ${CJ_FILTER_FORMAT_OPTIONS.map(t=>`<option value="${t}" ${f.format===t?"selected":""}>${t}</option>`).join("")}
           </select>
         </div>
         <div class="field-block">
@@ -5690,6 +5704,13 @@ function CjFiltersPanel(){
           <select class="select" id="cjFilterChannelSelect">
             <option value="">Все</option>
             ${channelOptions.map(c=>`<option value="${escapeHtml(c)}" ${f.channel===c?"selected":""}>${escapeHtml(c)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field-block">
+          <label class="field-label">Тип</label>
+          <select class="select" id="cjFilterTypeSelect">
+            <option value="">Все</option>
+            ${CJ_FILTER_TYPE_OPTIONS.map(t=>`<option value="${t}" ${f.type===t?"selected":""}>${t}</option>`).join("")}
           </select>
         </div>
       </div>
@@ -9149,7 +9170,9 @@ document.addEventListener("change", function(e){
     const part = state.ucWizard && state.ucWizard.data.parts.find(x=>x.id===e.target.dataset.id);
     if(part){ part[e.target.dataset.partField] = e.target.value; render(); }
   }
+  else if(e.target.id==="cjFilterProductSelect"){ state.cjFilters.product = e.target.value; render(); }
   else if(e.target.id==="cjFilterStatusSelect"){ state.cjFilters.status = e.target.value; render(); }
+  else if(e.target.id==="cjFilterFormatSelect"){ state.cjFilters.format = e.target.value; render(); }
   else if(e.target.id==="cjFilterTypeSelect"){ state.cjFilters.type = e.target.value; render(); }
   else if(e.target.id==="cjFilterChannelSelect"){ state.cjFilters.channel = e.target.value; render(); }
   else if(e.target.id==="acTechStatusSelect"){ state.appcat.techStatusFilter = e.target.value; render(); }
@@ -9185,15 +9208,15 @@ function handleAction(action, el){
     case "cj-reset-search": state.cjSearch=""; render(); break;
     case "cj-reset-search-all":
       state.cjSearch = "";
-      state.cjFilters = {onlyPublished:false, status:"", type:"", channel:""};
+      state.cjFilters = {withGrafana:false, product:"", status:"", format:"", channel:"", type:""};
       render();
       break;
     case "cj-set-view": state.cjView = el.dataset.mode; render(); break;
     case "cj-open-filters": state.cjFiltersOpen = true; render(); break;
     case "cj-close-filters": state.cjFiltersOpen = false; render(); break;
-    case "cj-toggle-only-published": state.cjFilters.onlyPublished = !state.cjFilters.onlyPublished; render(); break;
+    case "cj-toggle-with-grafana": state.cjFilters.withGrafana = !state.cjFilters.withGrafana; render(); break;
     case "cj-reset-filters":
-      state.cjFilters = {onlyPublished:false, status:"", type:"", channel:""};
+      state.cjFilters = {withGrafana:false, product:"", status:"", format:"", channel:"", type:""};
       render();
       break;
     case "open-cj":
