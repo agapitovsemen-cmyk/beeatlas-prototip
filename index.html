@@ -3673,7 +3673,7 @@ const NAV_GROUPS = [
   {label:"Архитектура решения", color:"gray", items:[
     {id:"projects", label:"Проекты", icon:"mail", filled:true,
       desc:"Рабочее место для работы над проектами архитектуры решений — от оценки до публикации HLD."},
-    {id:"companyarch", label:"Управление решениями", icon:"network", filled:true,
+    {id:"companyarch", label:"Управление метамоделью", icon:"network", filled:true,
       desc:"Инструмент для оценки влияния сбойных элементов на бизнес-процессы компании."},
   ]},
   {label:"Техническая архитектура", color:"green", items:[
@@ -4885,11 +4885,11 @@ function CompanyArchModule(){
   const g = state.graph;
   return `
     <div class="page-title-row">
-      <h1>Управление решениями</h1>
+      <h1>Управление метамоделью</h1>
     </div>
     <div class="page-tabs">
-      <div class="page-tab ${g.page==="graph"?"active":""}" data-action="graph-set-page" data-page="graph">Граф</div>
-      <div class="page-tab ${g.page==="types"?"active":""}" data-action="graph-set-page" data-page="types">Расширение графа</div>
+      <div class="page-tab ${g.page==="graph"?"active":""}" data-action="graph-set-page" data-page="graph">Просмотр архитектуры</div>
+      <div class="page-tab ${g.page==="types"?"active":""}" data-action="graph-set-page" data-page="types">Настройка модели</div>
     </div>
     ${g.page==="types" ? GraphTypesPage() : GraphCanvasPage()}
   `;
