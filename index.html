@@ -603,13 +603,10 @@
   .cj-card.branch-empty{border-style:dashed;}
   .cj-card.branch-empty .cj-card-title,.cj-card.branch-empty .cj-card-desc,.cj-card.branch-empty .cj-card-field-val{opacity:.55;}
 
-  /* branch-context switch — its own row above search/filters, since the branch is the
-     top-level axis (everything else on the page is scoped inside the selected branch). */
-  .cj-library-branch-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-5);}
-  .branch-switch{display:flex;border:1px solid var(--border-strong);border-radius:11px;overflow:hidden;flex:0 0 auto;}
-  .branch-switch-btn{height:44px;padding:0 var(--space-4);border:none;background:var(--bg);color:var(--text-tertiary);font-size:13.5px;font-weight:600;}
-  .branch-switch-btn:not(:last-child){border-right:1px solid var(--border-strong);}
-  .branch-switch-btn.active{background:var(--bg-alt);color:var(--text);}
+  /* branch-context switch — sits below search/filters, since search/filters run across
+     all branches at once; the chips only narrow which branch's composition state shows
+     on each card. Reuses .cj-branch-pill (same chip look as the CJ_DETAIL branch bar). */
+  .cj-library-branch-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);}
 
   /* ---------- CJ detail overlay ---------- */
   .cj-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
@@ -629,8 +626,6 @@
 
   /* ---------- CJ branches (design/develop/main + user) ---------- */
   .cj-branch-bar{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border);background:var(--bg-alt);flex-wrap:wrap;}
-  .cj-branch-bar-label{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--text-secondary);flex:0 0 auto;}
-  .cj-branch-bar-label svg{width:15px;height:15px;}
   .cj-branch-pills{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
   .cj-branch-pill-wrap{position:relative;}
   .cj-branch-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg);border:1px solid var(--border-strong);color:var(--text-secondary);}
@@ -5772,12 +5767,6 @@ function CjLibraryPage(){
       <h1>Библиотека CJ</h1>
       <div class="actions"><button class="btn btn-primary" data-action="cj-open-create">${icon("plus")} Создать CJ</button></div>
     </div>
-    <div class="cj-library-branch-row">
-      <span class="cj-branch-bar-label">${icon("gitBranch")} Ветка</span>
-      <div class="branch-switch" title="Ветка, в которой показан состав библиотеки">
-        ${["design","develop","main"].map(b=>`<button class="branch-switch-btn ${state.cjLibraryBranch===b?"active":""}" data-action="cj-set-library-branch" data-branch="${b}">${b}</button>`).join("")}
-      </div>
-    </div>
     <div class="cj-toolbar">
       <div class="search-wrap field-with-icon">
         ${icon("search")}
@@ -5788,6 +5777,11 @@ function CjLibraryPage(){
       <div class="view-toggle">
         <button class="view-toggle-btn ${state.cjView==="grid"?"active":""}" data-action="cj-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
         <button class="view-toggle-btn ${state.cjView==="table"?"active":""}" data-action="cj-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
+      </div>
+    </div>
+    <div class="cj-library-branch-row">
+      <div class="cj-branch-pills">
+        ${["design","develop","main"].map(b=>`<div class="cj-branch-pill ${state.cjLibraryBranch===b?"active":""}" data-action="cj-set-library-branch" data-branch="${b}">${b}</div>`).join("")}
       </div>
     </div>
     ${list.length
@@ -6210,7 +6204,6 @@ function CjBranchBar(cjId){
   const active = state.cjOpen.branch;
   return `
     <div class="cj-branch-bar">
-      <span class="cj-branch-bar-label">${icon("gitBranch")} Ветка</span>
       <div class="cj-branch-pills">
         ${branches.map(b=>{
           const has = cjHasComposition(cjId, b.id);
