@@ -597,6 +597,17 @@
   .cj-card-tags{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-4);}
   .cj-tag{background:var(--gray-bg);color:var(--gray-text);border-radius:20px;padding:2px var(--space-3);font-size:12px;font-weight:600;}
   .cj-card-date{margin-top:auto;padding-top:var(--space-3);border-top:1px solid var(--border);font-size:12px;color:var(--text-tertiary);}
+  .cj-card-branch-state{margin-top:var(--space-2);font-size:12px;display:flex;align-items:center;gap:6px;color:var(--text-secondary);}
+  .cj-card-branch-state svg{width:13px;height:13px;flex:0 0 auto;}
+  .cj-card-branch-state.empty{color:var(--text-tertiary);font-style:italic;}
+  .cj-card.branch-empty{border-style:dashed;}
+  .cj-card.branch-empty .cj-card-title,.cj-card.branch-empty .cj-card-desc,.cj-card.branch-empty .cj-card-field-val{opacity:.55;}
+
+  /* branch-context switch on the library toolbar */
+  .branch-switch{display:flex;border:1px solid var(--border-strong);border-radius:11px;overflow:hidden;flex:0 0 auto;}
+  .branch-switch-btn{height:44px;padding:0 var(--space-4);border:none;background:var(--bg);color:var(--text-tertiary);font-size:13.5px;font-weight:600;}
+  .branch-switch-btn:not(:last-child){border-right:1px solid var(--border-strong);}
+  .branch-switch-btn.active{background:var(--bg-alt);color:var(--text);}
 
   /* ---------- CJ detail overlay ---------- */
   .cj-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
@@ -613,6 +624,40 @@
   .cj-menu-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:8px;font-size:14px;color:var(--text);cursor:pointer;}
   .cj-menu-item:hover{background:var(--bg-alt);}
   .cj-menu-item svg{width:17px;height:17px;color:var(--text-secondary);}
+
+  /* ---------- CJ branches (design/develop/main + user) ---------- */
+  .cj-branch-bar{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border);background:var(--bg-alt);flex-wrap:wrap;}
+  .cj-branch-bar-label{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--text-secondary);flex:0 0 auto;}
+  .cj-branch-bar-label svg{width:15px;height:15px;}
+  .cj-branch-pills{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
+  .cj-branch-pill-wrap{position:relative;}
+  .cj-branch-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg);border:1px solid var(--border-strong);color:var(--text-secondary);}
+  .cj-branch-pill:hover{border-color:var(--text-tertiary);}
+  .cj-branch-pill.active{background:var(--yellow);border-color:var(--yellow);color:#1a1a1a;}
+  .cj-branch-pill.user{border-style:dashed;}
+  .cj-branch-pill.disabled{opacity:.4;cursor:not-allowed;border-style:dashed;}
+  .cj-branch-pill .empty-dot{width:6px;height:6px;border-radius:50%;background:var(--text-tertiary);flex:0 0 auto;}
+  .cj-branch-pill.active .empty-dot{background:#1a1a1a;opacity:.5;}
+  .cj-branch-pill .del{display:flex;color:inherit;opacity:.55;}
+  .cj-branch-pill .del svg{width:12px;height:12px;}
+  .cj-branch-pill .del:hover{opacity:1;}
+  .cj-branch-add{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px dashed var(--border-strong);background:transparent;color:var(--blue);}
+  .cj-branch-add svg{width:14px;height:14px;}
+  .cj-branch-add:hover{border-color:var(--blue);}
+  .cj-branch-del-confirm{position:absolute;top:calc(100% + 6px);left:0;z-index:80;width:240px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);box-shadow:var(--shadow);padding:var(--space-4);}
+  .cj-branch-del-confirm .txt{font-size:13px;color:var(--text);margin-bottom:var(--space-3);line-height:1.4;}
+  .cj-branch-del-confirm .row{display:flex;gap:var(--space-2);justify-content:flex-end;}
+
+  .cj-merge-compare{display:flex;align-items:stretch;gap:var(--space-3);margin-top:var(--space-5);}
+  .cj-merge-compare .col{flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4);}
+  .cj-merge-compare .col .hd{font-weight:700;font-size:13.5px;margin-bottom:var(--space-2);}
+  .cj-merge-compare .col .row{font-size:12.5px;color:var(--text-secondary);line-height:1.6;}
+  .cj-merge-compare .arrow{display:flex;align-items:center;color:var(--text-tertiary);flex:0 0 auto;}
+  .cj-merge-strategy{display:flex;flex-direction:column;gap:var(--space-3);}
+  .cj-merge-strategy-card{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:var(--space-4);cursor:pointer;}
+  .cj-merge-strategy-card .t{font-weight:700;font-size:13.5px;margin-bottom:4px;}
+  .cj-merge-strategy-card .d{font-size:12.5px;color:var(--text-secondary);line-height:1.45;}
+  .cj-merge-strategy-card.active{border-color:var(--yellow);background:var(--bg-alt);}
 
   .cj-matrix-wrap{flex:1;min-height:0;overflow:auto;padding:var(--space-5) var(--space-6);}
   /* CSS grid (not independent flex columns) so every row's height stays in sync across
@@ -3306,7 +3351,8 @@ const state = {
   cjView:"grid",
   cjFiltersOpen:false,
   cjFilters:{withGrafana:false, product:"", status:"", format:"", channel:"", type:""},
-  cjOpen:null,        // {cjId} when the CJ detail overlay is open
+  cjLibraryBranch:"main", // design/develop/main — which branch's composition the library grid reflects
+  cjOpen:null,        // {cjId, branch} when the CJ detail overlay is open
   cjMenuOpen:false,
   cjVersionsOpen:false,
   cjBpmnOpen:false,
@@ -3314,6 +3360,9 @@ const state = {
   cjCreatePanel:null, // {name,portrait,owner,tags,techOwners:[],bpmnFile:null,dragOver}
   cjExpanded:{},        // {["stageId:scenarioId"]: bool} — is a given scenario's source list expanded
   cjSourcePanel:null,   // {stageId, scenarioId, sourceId, editing, draft} — the source side sheet
+  cjBranchPanel:null,    // {name, parent} — create-branch side panel
+  cjMergePanel:null,     // {source, target, strategy} — merge side panel
+  cjBranchDeleteConfirm:null, // branch id pending delete confirmation
 
   appcat: defaultAppcatState(),
   graph: defaultGraphState(),
@@ -3410,12 +3459,25 @@ const CJ_SOURCE_META = {
   e2e:{label:"E2E", dot:"e2e", badgeClass:"pink"},
 };
 
-const CJ_DETAIL = {
-  id:"cj1",
-  title:"CJ по услуге «Кто звонит»",
-  subtitle:"Портрет пользователя",
-  status:"Черновик",
-  stages:[
+// Логический CJ (title/subtitle/status) — стабильный якорь, не зависит от ветки.
+// Состав (stages→scenarios→sources→calls) висит на ветке (CJ_BRANCHES), не на артефакте —
+// см. Vision "ветвление артефактов проектирования" §1, принцип 2.
+const CJ_META = {
+  cj1: { title:"CJ по услуге «Кто звонит»", subtitle:"Портрет пользователя", status:"Черновик" },
+};
+
+// Создание артефакта = создание трёх системных веток (design/develop/main), см. §3.1.
+// Пользователь клонирует именованные ветки от любого родителя (kind:"user"), системные
+// ветки (kind:"system") удалить нельзя (§4.3/§6.6).
+const CJ_BRANCH_META = {
+  cj1: [
+    {id:"main", kind:"system", parent:null, createdBy:null, createdAt:null},
+    {id:"develop", kind:"system", parent:null, createdBy:null, createdAt:null},
+    {id:"design", kind:"system", parent:null, createdBy:null, createdAt:null},
+  ],
+};
+
+const CJ_MAIN_STAGES = [
     {
       id:"st1", color:"c1", name:"Название этапа 1",
       biName:"Поиск услуги «Кто звонит»", biId:"BI 01.02.03.01",
@@ -3499,10 +3561,87 @@ const CJ_DETAIL = {
         ]},
       ],
     },
-  ],
+  ];
+
+// Ветка develop — архитектор параллельно дорабатывает этап 4: переформулировал существующий
+// (тот же branch-local id st4/sc1/m — конфликтует по содержимому с main) и добавил совсем
+// новый сценарий (sc2 — которого в main ещё нет). Это два разных исхода для demo merge:
+// "add" добавит sc2, но не тронет переформулировку sc1/m; "replace" заберёт всё как есть в develop.
+const CJ_DEVELOP_STAGES = deepClone(CJ_MAIN_STAGES);
+(function seedCjDevelop(){
+  const st4 = CJ_DEVELOP_STAGES.find(s=>s.id==="st4");
+  st4.scenarios[0].sources[0].calls[0].capability =
+    "Обработка SMS-команды STOP, отключение услуги и логирование причины отказа";
+  st4.scenarios.push({
+    id:"sc2", sources:[
+      {id:"m", type:"manual", label:"Ручная привязка", calls:[
+        {app:"IVR Gateway", capability:"Отключение услуги голосовой командой в IVR", endpoint:"POST /ivr/unsubscribe", iface:"REST"},
+      ]},
+    ],
+  });
+})();
+
+// Ветка design — ещё не начата, состав пуст (миграция существующих данных кладёт всё в
+// main; design/develop стартуют пустыми — см. §3.1).
+const CJ_DESIGN_STAGES = [];
+
+const CJ_BRANCHES = {
+  cj1: {
+    main: { stages: CJ_MAIN_STAGES },
+    develop: { stages: CJ_DEVELOP_STAGES },
+    design: { stages: CJ_DESIGN_STAGES },
+  },
 };
 
-function findCjStage(stageId){ return CJ_DETAIL.stages.find(s=>s.id===stageId); }
+function cjMeta(cjId){ return CJ_META[cjId] || {title:"CJ", subtitle:"", status:""}; }
+function cjBranchList(cjId){ return CJ_BRANCH_META[cjId] || []; }
+function cjBranchTree(cjId, branchId){
+  const b = CJ_BRANCHES[cjId] && CJ_BRANCHES[cjId][branchId];
+  return b ? b.stages : [];
+}
+// Библиотечные карточки без собственного CJ_BRANCHES (весь набор, кроме cj1, в этом
+// прототипе не интерактивен) трактуются так же, как того требует миграция из §3.1:
+// весь их состав считается лежащим в main, design/develop — пусты.
+function cjHasComposition(cjId, branchId){
+  if(CJ_BRANCHES[cjId]) return cjBranchTree(cjId, branchId).length>0;
+  return branchId==="main";
+}
+function activeCjStages(){
+  return state.cjOpen ? cjBranchTree(state.cjOpen.cjId, state.cjOpen.branch) : [];
+}
+function cjTreeStats(stages){
+  let scenarios=0, sources=0;
+  stages.forEach(s=>(s.scenarios||[]).forEach(sc=>{ scenarios++; sources += (sc.sources||[]).length; }));
+  return {stages: stages.length, scenarios, sources};
+}
+// Ветки полностью изолированы (§3.1) — merge на стороне staging, реализация здесь мутирует
+// CJ_BRANCHES[cjId][target] напрямую, как это делал бы Publisher после успешного merge (§4.1).
+function cjMergeExecute(cjId, source, target, strategy){
+  const srcStages = deepClone(cjBranchTree(cjId, source));
+  if(!CJ_BRANCHES[cjId]) CJ_BRANCHES[cjId] = {};
+  if(strategy==="replace"){
+    CJ_BRANCHES[cjId][target] = { stages: srcStages };
+    return;
+  }
+  // add: только заполняет пробелы по (branch, id) — существующие элементы цели не трогает.
+  if(!CJ_BRANCHES[cjId][target]) CJ_BRANCHES[cjId][target] = { stages: [] };
+  const targetStages = CJ_BRANCHES[cjId][target].stages;
+  srcStages.forEach(srcStage=>{
+    const tgtStage = targetStages.find(s=>s.id===srcStage.id);
+    if(!tgtStage){ targetStages.push(srcStage); return; }
+    if(!tgtStage.scenarios) tgtStage.scenarios = [];
+    (srcStage.scenarios||[]).forEach(srcSc=>{
+      const tgtSc = tgtStage.scenarios.find(sc=>sc.id===srcSc.id);
+      if(!tgtSc){ tgtStage.scenarios.push(srcSc); return; }
+      if(!tgtSc.sources) tgtSc.sources = [];
+      (srcSc.sources||[]).forEach(srcSrc=>{
+        if(!tgtSc.sources.some(s=>s.id===srcSrc.id)) tgtSc.sources.push(srcSrc);
+      });
+    });
+  });
+}
+
+function findCjStage(stageId){ return activeCjStages().find(s=>s.id===stageId); }
 function findCjScenario(stageId, scenarioId){
   const stage = findCjStage(stageId);
   return stage.scenarios.find(s=>s.id===scenarioId);
@@ -3566,12 +3705,23 @@ const ICONS = {
   zoomIn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6"/><path d="m21 21-4.3-4.3"/></svg>',
   zoomOut:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M8 11h6"/><path d="m21 21-4.3-4.3"/></svg>',
   minimize:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M16 3v3a2 2 0 0 0 2 2h3"/><path d="M8 21v-3a2 2 0 0 0-2-2H3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>',
+  gitBranch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>',
+  gitMerge:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
 };
 function icon(name){ return ICONS[name] || ""; }
 
 /* ============================= UTIL ============================= */
 function escapeHtml(s){
   return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
+function ruPlural(n, one, few, many){
+  const mod10 = Math.abs(n)%10, mod100 = Math.abs(n)%100;
+  if(mod100>10 && mod100<20) return many;
+  if(mod10>1 && mod10<5) return few;
+  if(mod10===1) return one;
+  return many;
 }
 function clampCell(text, cls){
   const t = escapeHtml(text);
@@ -5623,6 +5773,9 @@ function CjLibraryPage(){
       </div>
       <button class="btn btn-outline" data-action="cj-open-filters">${icon("layers")} Фильтры${activeCount?` <span class="badge blue" style="margin-left:4px;">${activeCount}</span>`:""}</button>
       ${hasReset ? `<span class="reset-link" data-action="cj-reset-search-all">Сбросить</span>` : ""}
+      <div class="branch-switch" title="Ветка, в которой показан состав библиотеки">
+        ${["design","develop","main"].map(b=>`<button class="branch-switch-btn ${state.cjLibraryBranch===b?"active":""}" data-action="cj-set-library-branch" data-branch="${b}">${b}</button>`).join("")}
+      </div>
       <div class="view-toggle">
         <button class="view-toggle-btn ${state.cjView==="grid"?"active":""}" data-action="cj-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
         <button class="view-toggle-btn ${state.cjView==="table"?"active":""}" data-action="cj-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
@@ -5734,8 +5887,14 @@ function CjFiltersPanel(){
 }
 
 function CjCard(c){
+  const branch = state.cjLibraryBranch;
+  const has = cjHasComposition(c.id, branch);
+  const knownCount = CJ_BRANCHES[c.id] ? cjBranchTree(c.id, branch).length : null;
+  const branchLine = knownCount!=null
+    ? (knownCount>0 ? `${knownCount} ${ruPlural(knownCount,"этап","этапа","этапов")} в ветке «${escapeHtml(branch)}»` : `Нет состава в ветке «${escapeHtml(branch)}»`)
+    : (has ? `Состав есть в ветке «${escapeHtml(branch)}»` : `Нет состава в ветке «${escapeHtml(branch)}»`);
   return `
-    <div class="card cj-card" data-action="open-cj" data-id="${c.id}" data-clickable="${c.clickable?1:0}">
+    <div class="card cj-card${has?"":" branch-empty"}" data-action="open-cj" data-id="${c.id}" data-clickable="${c.clickable?1:0}">
       <div class="cj-card-top">
         <div class="cj-card-badges">
           <span class="badge ${c.statusColor}">${escapeHtml(c.status)}</span>
@@ -5751,6 +5910,7 @@ function CjCard(c){
       <div class="cj-card-field">Каналы</div>
       <div class="cj-card-field-val">${escapeHtml(c.channels)}</div>
       ${c.tags.length ? `<div class="cj-card-tags">${c.tags.map(t=>`<span class="cj-tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
+      <div class="cj-card-branch-state${has?"":" empty"}">${icon("gitBranch")} ${branchLine}</div>
       <div class="cj-card-date">Дата изменения<br>${escapeHtml(c.date)}</div>
     </div>
   `;
@@ -5758,7 +5918,9 @@ function CjCard(c){
 
 /* ============================= CJ DETAIL OVERLAY ============================= */
 function CjOverlay(){
-  const cj = CJ_DETAIL;
+  const meta = cjMeta(state.cjOpen.cjId);
+  const stages = activeCjStages();
+  const cj = {title: meta.title, subtitle: meta.subtitle, status: meta.status, stages};
   return `
   <div class="cj-overlay">
     <div class="cj-head">
@@ -5787,13 +5949,16 @@ function CjOverlay(){
         <button class="btn btn-primary btn-sm" data-action="cj-noop">Опубликовать</button>
       </div>
     </div>
+    ${CjBranchBar(state.cjOpen.cjId)}
     <div class="cj-matrix-wrap" id="cjMatrixScroll">
-      ${CjMatrix(cj)}
+      ${stages.length ? CjMatrix(cj) : CjBranchEmptyState()}
     </div>
   </div>
   ${state.cjVersionsOpen ? CjVersionsPanel() : ""}
   ${state.cjSourcePanel ? CjSourcePanel() : ""}
   ${state.cjBpmnOpen ? CjBpmnOverlay() : ""}
+  ${state.cjBranchPanel ? CjBranchCreatePanel() : ""}
+  ${state.cjMergePanel ? CjMergePanel() : ""}
   `;
 }
 
@@ -6030,6 +6195,168 @@ function CjVersionsPanel(){
   </div>`;
 }
 
+/* ============================= CJ BRANCHES (design/develop/main + пользовательские) ============================= */
+function CjBranchBar(cjId){
+  const branches = cjBranchList(cjId);
+  const active = state.cjOpen.branch;
+  return `
+    <div class="cj-branch-bar">
+      <span class="cj-branch-bar-label">${icon("gitBranch")} Ветка</span>
+      <div class="cj-branch-pills">
+        ${branches.map(b=>{
+          const has = cjHasComposition(cjId, b.id);
+          return `
+          <div class="cj-branch-pill-wrap">
+            <div class="cj-branch-pill ${b.id===active?"active":""} ${b.kind==="user"?"user":""}" data-action="cj-switch-branch" data-branch="${b.id}">
+              <span class="name">${escapeHtml(b.id)}</span>
+              ${!has?`<span class="empty-dot" title="Нет состава в этой ветке"></span>`:""}
+              ${b.kind==="user" ? `<span class="del" data-action="cj-branch-delete-ask" data-branch="${b.id}" title="Удалить ветку">${icon("x")}</span>` : ""}
+            </div>
+            ${state.cjBranchDeleteConfirm===b.id ? CjBranchDeleteConfirm(b.id) : ""}
+          </div>`;
+        }).join("")}
+        <button class="cj-branch-add" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
+      </div>
+      <button class="btn btn-outline btn-sm" data-action="cj-open-merge" style="margin-left:auto;">${icon("gitMerge")} Слить ветки</button>
+    </div>
+  `;
+}
+
+function CjBranchDeleteConfirm(branchId){
+  return `
+    <div class="cj-branch-del-confirm">
+      <div class="txt">Удалить ветку «${escapeHtml(branchId)}»? Состав будет потерян без возможности восстановления.</div>
+      <div class="row">
+        <button class="btn btn-outline btn-sm" data-action="cj-branch-delete-cancel">Отмена</button>
+        <button class="btn btn-primary btn-sm" data-action="cj-branch-delete-do" data-branch="${escapeHtml(branchId)}">Удалить</button>
+      </div>
+    </div>
+  `;
+}
+
+function CjBranchEmptyState(){
+  const branch = state.cjOpen.branch;
+  return `
+    <div class="empty-state">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-5);color:var(--text-tertiary);">${icon("gitBranch")}</div>
+      <h3>В ветке «${escapeHtml(branch)}» пока нет состава</h3>
+      <div style="color:var(--text-secondary);max-width:420px;">Ветки полностью изолированы — состав не расшаривается автоматически. Наполните эту ветку вручную или создайте новую ветку-клон от «main»/«develop», чтобы продолжить проектирование от существующего состава.</div>
+    </div>
+  `;
+}
+
+function CjBranchCreatePanel(){
+  const p = state.cjBranchPanel;
+  const cjId = state.cjOpen.cjId;
+  const branches = cjBranchList(cjId);
+  const name = p.name.trim();
+  const reserved = ["design","develop","main"];
+  const existing = branches.map(b=>b.id.toLowerCase());
+  const taken = !!name && (reserved.includes(name.toLowerCase()) || existing.includes(name.toLowerCase()));
+  const canCreate = !!name && !taken;
+  return `
+    <div class="backdrop enter" data-action="cj-close-branch-create"></div>
+    <div class="side-panel enter">
+      <div class="side-head">
+        <h2>Новая ветка</h2>
+        <button class="wizard-close" data-action="cj-close-branch-create">${icon("x")}</button>
+      </div>
+      <div class="side-body">
+        <div class="field-block">
+          <label class="field-label">Название ветки*</label>
+          <input class="input${taken?" error":""}" id="cjBranchName" value="${escapeHtml(p.name)}" placeholder="Например, ivanov-fix-st4">
+          ${taken?`<div style="color:var(--red-text);font-size:12.5px;margin-top:4px;">Ветка с таким названием уже существует</div>`:""}
+        </div>
+        <div class="field-block">
+          <label class="field-label">Клонировать состав из ветки</label>
+          <select class="select" id="cjBranchParentSelect">
+            ${branches.map(b=>`<option value="${b.id}" ${p.parent===b.id?"selected":""}>${escapeHtml(b.id)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="readonly-note" style="align-items:flex-start;">
+          ${icon("info")}
+          <span>Новая ветка получит полную независимую копию состава выбранной ветки. Дальнейшие изменения в одной ветке не затронут другую.</span>
+        </div>
+      </div>
+      <div class="side-foot">
+        <button class="btn btn-outline" data-action="cj-close-branch-create">Отменить</button>
+        <button class="btn btn-primary" data-action="cj-branch-create-submit" ${canCreate?"":"disabled"}>Создать</button>
+      </div>
+    </div>
+  `;
+}
+
+function CjMergePanel(){
+  const p = state.cjMergePanel;
+  const cjId = state.cjOpen.cjId;
+  const branches = cjBranchList(cjId);
+  const srcStats = cjTreeStats(cjBranchTree(cjId, p.source));
+  const tgtStats = cjTreeStats(cjBranchTree(cjId, p.target));
+  const canMerge = !!p.source && !!p.target && p.source!==p.target;
+  return `
+    <div class="backdrop enter" data-action="cj-close-merge"></div>
+    <div class="side-panel enter">
+      <div class="side-head">
+        <h2>Слияние веток</h2>
+        <button class="wizard-close" data-action="cj-close-merge">${icon("x")}</button>
+      </div>
+      <div class="side-body">
+        <div class="field-block">
+          <label class="field-label">Откуда (source)</label>
+          <div class="cj-branch-pills">
+            ${branches.map(b=>`<div class="cj-branch-pill ${p.source===b.id?"active":""}" data-action="cj-merge-set-source" data-branch="${b.id}">${escapeHtml(b.id)}</div>`).join("")}
+          </div>
+        </div>
+        <div class="field-block">
+          <label class="field-label">Куда (target)</label>
+          <div class="cj-branch-pills">
+            ${branches.map(b=>b.id===p.source
+              ? `<div class="cj-branch-pill disabled" title="Совпадает с источником">${escapeHtml(b.id)}</div>`
+              : `<div class="cj-branch-pill ${p.target===b.id?"active":""}" data-action="cj-merge-set-target" data-branch="${b.id}">${escapeHtml(b.id)}</div>`
+            ).join("")}
+          </div>
+        </div>
+
+        <div class="cj-merge-compare">
+          <div class="col">
+            <div class="hd">${escapeHtml(p.source)}</div>
+            <div class="row">${srcStats.stages} ${ruPlural(srcStats.stages,"этап","этапа","этапов")}</div>
+            <div class="row">${srcStats.scenarios} ${ruPlural(srcStats.scenarios,"сценарий","сценария","сценариев")}</div>
+            <div class="row">${srcStats.sources} ${ruPlural(srcStats.sources,"источник","источника","источников")}</div>
+          </div>
+          <div class="arrow">${icon("chevronRight")}</div>
+          <div class="col">
+            <div class="hd">${escapeHtml(p.target)}</div>
+            <div class="row">${tgtStats.stages} ${ruPlural(tgtStats.stages,"этап","этапа","этапов")}</div>
+            <div class="row">${tgtStats.scenarios} ${ruPlural(tgtStats.scenarios,"сценарий","сценария","сценариев")}</div>
+            <div class="row">${tgtStats.sources} ${ruPlural(tgtStats.sources,"источник","источника","источников")}</div>
+          </div>
+        </div>
+
+        <div class="field-block" style="margin-top:var(--space-5);">
+          <label class="field-label">Стратегия слияния</label>
+          <div class="cj-merge-strategy">
+            <div class="cj-merge-strategy-card ${p.strategy==="add"?"active":""}" data-action="cj-merge-set-strategy" data-strategy="add">
+              <div class="t">Добавление (add)</div>
+              <div class="d">Элементы, которых нет в «${escapeHtml(p.target)}», будут добавлены. Существующие — не тронуты, без диффа и cherry-pick.</div>
+            </div>
+            <div class="cj-merge-strategy-card ${p.strategy==="replace"?"active":""}" data-action="cj-merge-set-strategy" data-strategy="replace">
+              <div class="t">Замена (replace)</div>
+              <div class="d">Весь состав «${escapeHtml(p.target)}» будет полностью заменён составом «${escapeHtml(p.source)}».</div>
+            </div>
+          </div>
+        </div>
+
+        ${p.target==="main" ? `<div class="readonly-note" style="align-items:flex-start;margin-top:var(--space-5);background:var(--blue-bg);color:var(--blue-text);">${icon("info")} Слияние в main обновляет канон сразу после подтверждения. Апрув вторым лицом в вижен-доке не зафиксирован (открытый вопрос).</div>` : ""}
+      </div>
+      <div class="side-foot">
+        <button class="btn btn-outline" data-action="cj-close-merge">Отменить</button>
+        <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"}>${icon("gitMerge")} Слить</button>
+      </div>
+    </div>
+  `;
+}
+
 /* ============================= CJ BPMN VIEW ============================= */
 function bpmnWrapLines(text, maxChars, maxLines){
   const words = text.split(" ");
@@ -6056,7 +6383,8 @@ function bpmnWrapLines(text, maxChars, maxLines){
 }
 
 function CjBpmnOverlay(){
-  const cj = CJ_DETAIL;
+  const meta = cjMeta(state.cjOpen.cjId);
+  const cj = {title: meta.title, stages: activeCjStages()};
   const stage = state.cjBpmnStage ? cj.stages.find(s=>s.id===state.cjBpmnStage) : null;
   return `
     <div class="wizard-overlay">
@@ -9247,6 +9575,9 @@ function bindGlobalEvents(){
   document.body.onkeydown = function(e){
     if(e.key === "Escape"){
       if(state.cjSourcePanel){ state.cjSourcePanel=null; render(); }
+      else if(state.cjMergePanel){ state.cjMergePanel=null; render(); }
+      else if(state.cjBranchPanel){ state.cjBranchPanel=null; render(); }
+      else if(state.cjBranchDeleteConfirm){ state.cjBranchDeleteConfirm=null; render(); }
       else if(state.cjBpmnOpen){ state.cjBpmnOpen=false; state.cjBpmnStage=null; render(); }
       else if(state.cjCreatePanel){ state.cjCreatePanel=null; render(); }
       else if(state.cjFiltersOpen){ state.cjFiltersOpen=false; render(); }
@@ -9386,6 +9717,7 @@ function handleInput(el){
   else if(el.id==="ucSteps"){ state.sidePanel.steps = el.value; render(); reFocus("ucSteps"); }
   else if(el.id==="cjSearchInput"){ state.cjSearch = el.value; render(); reFocus("cjSearchInput"); }
   else if(el.id==="cjCreateName"){ state.cjCreatePanel.name = el.value; render(); reFocus("cjCreateName"); }
+  else if(el.id==="cjBranchName"){ state.cjBranchPanel.name = el.value; render(); reFocus("cjBranchName"); }
   else if(el.id==="cjCreatePortrait"){ state.cjCreatePanel.portrait = el.value; render(); reFocus("cjCreatePortrait"); }
   else if(el.id==="cjCreateOwner"){ state.cjCreatePanel.owner = el.value; render(); reFocus("cjCreateOwner"); }
   else if(el.id==="cjCreateTags"){ state.cjCreatePanel.tags = el.value; render(); reFocus("cjCreateTags"); }
@@ -9436,6 +9768,7 @@ document.addEventListener("change", function(e){
     const part = state.ucWizard && state.ucWizard.data.parts.find(x=>x.id===e.target.dataset.id);
     if(part){ part[e.target.dataset.partField] = e.target.value; render(); }
   }
+  else if(e.target.id==="cjBranchParentSelect"){ state.cjBranchPanel.parent = e.target.value; render(); }
   else if(e.target.id==="cjFilterProductSelect"){ state.cjFilters.product = e.target.value; render(); }
   else if(e.target.id==="cjFilterStatusSelect"){ state.cjFilters.status = e.target.value; render(); }
   else if(e.target.id==="cjFilterFormatSelect"){ state.cjFilters.format = e.target.value; render(); }
@@ -9520,7 +9853,7 @@ function handleAction(action, el){
 
     case "open-cj":
       if(el.dataset.clickable!=="1"){ showToast("Показано в прототипе только для этого CJ"); break; }
-      state.cjOpen = {cjId: el.dataset.id};
+      state.cjOpen = {cjId: el.dataset.id, branch: state.cjLibraryBranch};
       state.cjExpanded = {};
       state.cjSourcePanel = null;
       state.cjMenuOpen = false;
@@ -9529,8 +9862,87 @@ function handleAction(action, el){
       break;
     case "close-cj":
       state.cjOpen = null; state.cjMenuOpen=false; state.cjVersionsOpen=false; state.cjSourcePanel=null;
+      state.cjBranchPanel=null; state.cjMergePanel=null; state.cjBranchDeleteConfirm=null;
       render();
       break;
+    case "cj-set-library-branch": state.cjLibraryBranch = el.dataset.branch; render(); break;
+    case "cj-switch-branch": {
+      state.cjOpen.branch = el.dataset.branch;
+      state.cjExpanded = {};
+      state.cjSourcePanel = null;
+      state.cjBranchDeleteConfirm = null;
+      render();
+      break;
+    }
+    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: state.cjOpen.branch}; render(); break;
+    case "cj-close-branch-create": state.cjBranchPanel = null; render(); break;
+    case "cj-branch-create-submit": {
+      const p = state.cjBranchPanel;
+      const cjId = state.cjOpen.cjId;
+      const name = p.name.trim();
+      const reserved = ["design","develop","main"];
+      const existing = cjBranchList(cjId).map(b=>b.id.toLowerCase());
+      if(!name || reserved.includes(name.toLowerCase()) || existing.includes(name.toLowerCase())) break;
+      if(!CJ_BRANCHES[cjId]) CJ_BRANCHES[cjId] = {};
+      CJ_BRANCHES[cjId][name] = { stages: deepClone(cjBranchTree(cjId, p.parent)) };
+      cjBranchList(cjId).push({id:name, kind:"user", parent:p.parent, createdBy:ARCHITECT, createdAt:NOW_DATE});
+      state.cjOpen.branch = name;
+      state.cjBranchPanel = null;
+      showToast(`Ветка «${name}» создана из «${p.parent}»`);
+      render();
+      break;
+    }
+    case "cj-branch-delete-ask": state.cjBranchDeleteConfirm = el.dataset.branch; render(); break;
+    case "cj-branch-delete-cancel": state.cjBranchDeleteConfirm = null; render(); break;
+    case "cj-branch-delete-do": {
+      const cjId = state.cjOpen.cjId;
+      const branchId = el.dataset.branch;
+      const list = cjBranchList(cjId);
+      const idx = list.findIndex(b=>b.id===branchId);
+      if(idx>=0) list.splice(idx,1);
+      if(CJ_BRANCHES[cjId]) delete CJ_BRANCHES[cjId][branchId];
+      if(state.cjOpen.branch===branchId) state.cjOpen.branch = "main";
+      state.cjBranchDeleteConfirm = null;
+      showToast(`Ветка «${branchId}» удалена`);
+      render();
+      break;
+    }
+    case "cj-open-merge": {
+      const cjId = state.cjOpen.cjId;
+      const branches = cjBranchList(cjId).map(b=>b.id);
+      const source = state.cjOpen.branch;
+      const target = branches.find(b=>b!==source) || source;
+      state.cjMergePanel = {source, target, strategy:"add"};
+      render();
+      break;
+    }
+    case "cj-close-merge": state.cjMergePanel = null; render(); break;
+    case "cj-merge-set-source": {
+      const p = state.cjMergePanel;
+      p.source = el.dataset.branch;
+      if(p.target===p.source){
+        const alt = cjBranchList(state.cjOpen.cjId).map(b=>b.id).find(b=>b!==p.source);
+        p.target = alt || p.source;
+      }
+      render();
+      break;
+    }
+    case "cj-merge-set-target": {
+      if(el.dataset.branch===state.cjMergePanel.source) break;
+      state.cjMergePanel.target = el.dataset.branch;
+      render();
+      break;
+    }
+    case "cj-merge-set-strategy": state.cjMergePanel.strategy = el.dataset.strategy; render(); break;
+    case "cj-merge-submit": {
+      const p = state.cjMergePanel;
+      if(!p.source || !p.target || p.source===p.target) break;
+      cjMergeExecute(state.cjOpen.cjId, p.source, p.target, p.strategy);
+      showToast(`Ветка «${p.source}» слита в «${p.target}» (${p.strategy==="replace"?"замена":"добавление"})`);
+      state.cjMergePanel = null;
+      render();
+      break;
+    }
     case "cj-toggle-menu": state.cjMenuOpen = !state.cjMenuOpen; render(); break;
     case "cj-noop": state.cjMenuOpen=false; showToast("Не входит в состав переданных макетов"); break;
     case "cj-show-versions": state.cjMenuOpen=false; state.cjVersionsOpen=true; render(); break;
