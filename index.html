@@ -6093,7 +6093,7 @@ function CjBpmnTopDiagram(cj){
   const totalW = endCx+18+padX;
   const totalH = padTop*2+boxH;
 
-  let s = `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="display:block;">`;
+  let s = `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="display:block;width:${totalW}px;height:${totalH}px;flex:none;">`;
   s += `<defs><marker id="bpmnArrowTop" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="var(--text-tertiary)"/></marker></defs>`;
   s += `<circle cx="${startCx}" cy="${startCy}" r="18" fill="var(--bg)" stroke="var(--text)" stroke-width="1.6"/>`;
   if(nodes.length) s += `<line x1="${startCx+18}" y1="${startCy}" x2="${nodes[0].x}" y2="${nodes[0].y+boxH/2}" stroke="var(--text-tertiary)" stroke-width="1.4" marker-end="url(#bpmnArrowTop)"/>`;
@@ -6143,7 +6143,7 @@ function CjBpmnStageDiagram(cj, stage){
   const totalW = endCx+18+padX;
   const totalH = laneY+laneH+40;
 
-  let s = `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="display:block;">`;
+  let s = `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="display:block;width:${totalW}px;height:${totalH}px;flex:none;">`;
   s += `<defs><marker id="bpmnArrowStage" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="var(--text-tertiary)"/></marker></defs>`;
 
   s += `<rect x="${padX-16}" y="${laneY}" width="${totalW-2*(padX-16)}" height="${laneH}" rx="10" fill="var(--bg-alt)" stroke="var(--border)"/>`;
