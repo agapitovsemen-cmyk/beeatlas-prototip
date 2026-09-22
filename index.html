@@ -3296,6 +3296,8 @@ const state = {
 
   cjSearch:"",
   cjView:"grid",
+  cjFiltersOpen:false,
+  cjFilters:{onlyPublished:false, status:"", type:"", channel:""},
   cjOpen:null,        // {cjId} when the CJ detail overlay is open
   cjMenuOpen:false,
   cjVersionsOpen:false,
@@ -5567,14 +5569,31 @@ function GraphAddRelOverlay(){
 }
 
 /* ============================= CJ LIBRARY PAGE ============================= */
+const CJ_FILTER_TYPE_OPTIONS = ["E2E","B2C"];
+function cjFilterChannelOptions(){
+  return [...new Set(CJ_LIBRARY.flatMap(c=>c.channels==="—"?[]:c.channels.split(", ")))];
+}
+function cjActiveFilterCount(){
+  const f = state.cjFilters;
+  return (f.onlyPublished?1:0) + (f.status?1:0) + (f.type?1:0) + (f.channel?1:0);
+}
 function filteredCjLibrary(){
   const q = state.cjSearch.trim().toLowerCase();
-  if(!q) return CJ_LIBRARY;
-  return CJ_LIBRARY.filter(c=>c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q));
+  const f = state.cjFilters;
+  return CJ_LIBRARY.filter(c=>{
+    if(q && !(c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q))) return false;
+    if(f.onlyPublished && c.status!=="Опубликован") return false;
+    if(f.status && c.status!==f.status) return false;
+    if(f.type && !c.tags.includes(f.type)) return false;
+    if(f.channel && !c.channels.includes(f.channel)) return false;
+    return true;
+  });
 }
 
 function CjLibraryPage(){
   const list = filteredCjLibrary();
+  const activeCount = cjActiveFilterCount();
+  const hasReset = state.cjSearch || activeCount>0;
   return `
     <div class="page-title-row">
       <h1>Библиотека CJ</h1>
@@ -5585,14 +5604,99 @@ function CjLibraryPage(){
         ${icon("search")}
         <input class="input" id="cjSearchInput" placeholder="Название или ID CJ" value="${escapeHtml(state.cjSearch)}">
       </div>
-      <button class="btn btn-outline" data-action="cj-noop">${icon("layers")} Фильтры</button>
-      ${state.cjSearch ? `<span class="reset-link" data-action="cj-reset-search">Сбросить</span>` : ""}
+      <button class="btn btn-outline" data-action="cj-open-filters">${icon("layers")} Фильтры${activeCount?` <span class="badge blue" style="margin-left:4px;">${activeCount}</span>`:""}</button>
+      ${hasReset ? `<span class="reset-link" data-action="cj-reset-search-all">Сбросить</span>` : ""}
       <div class="view-toggle">
         <button class="view-toggle-btn ${state.cjView==="grid"?"active":""}" data-action="cj-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
         <button class="view-toggle-btn ${state.cjView==="table"?"active":""}" data-action="cj-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
       </div>
     </div>
-    ${list.length ? `<div class="cj-card-grid">${list.map(CjCard).join("")}</div>` : `<p style="color:var(--text-secondary);">Ничего не найдено.</p>`}
+    ${list.length
+      ? (state.cjView==="table" ? CjTable(list) : `<div class="cj-card-grid">${list.map(CjCard).join("")}</div>`)
+      : CjLibraryEmptyState()}
+    ${state.cjFiltersOpen ? CjFiltersPanel() : ""}
+  `;
+}
+
+function CjLibraryEmptyState(){
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--space-10) 0;color:var(--text-secondary);">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-5);color:var(--text-tertiary);">${icon("search")}</div>
+      <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:var(--space-2);">Нет результатов, подходящих под параметры поиска</div>
+      <div style="font-size:14px;">Попробуйте изменить поисковый запрос или сбросить фильтры</div>
+    </div>
+  `;
+}
+
+function CjTable(list){
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Название</th><th>Приложение</th><th>Каналы</th><th>Тип</th><th>Статус</th><th>Дата изменения</th></tr></thead>
+        <tbody>${list.map(CjTableRow).join("")}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function CjTableRow(c){
+  return `
+    <tr data-action="open-cj" data-id="${c.id}" data-clickable="${c.clickable?1:0}" style="cursor:pointer;">
+      <td>
+        <div style="font-weight:600;">${escapeHtml(c.name)}</div>
+        <div style="color:var(--text-secondary);font-size:12.5px;">${escapeHtml(c.code)}</div>
+      </td>
+      <td>${escapeHtml(c.app)}</td>
+      <td>${escapeHtml(c.channels)}</td>
+      <td>${c.tags.filter(t=>CJ_FILTER_TYPE_OPTIONS.includes(t)).map(t=>`<span class="badge gray" style="margin-right:4px;">${escapeHtml(t)}</span>`).join("")||"—"}</td>
+      <td><span class="badge ${c.statusColor}">${escapeHtml(c.status)}</span></td>
+      <td>${escapeHtml(c.date)}</td>
+    </tr>
+  `;
+}
+
+function CjFiltersPanel(){
+  const f = state.cjFilters;
+  const channelOptions = cjFilterChannelOptions();
+  return `
+    <div class="backdrop enter" data-action="cj-close-filters"></div>
+    <div class="side-panel enter">
+      <div class="side-head">
+        <h2>Фильтры</h2>
+        <button class="wizard-close" data-action="cj-close-filters">${icon("x")}</button>
+      </div>
+      <div class="side-body">
+        <div class="toggle-wrap" style="margin-bottom:var(--space-6);">
+          <div class="toggle ${f.onlyPublished?"on":""}" data-action="cj-toggle-only-published"><div class="knob"></div></div>
+          <span>Только опубликованные CJ</span>
+        </div>
+        <div class="field-block">
+          <label class="field-label">Статус</label>
+          <select class="select" id="cjFilterStatusSelect">
+            <option value="">Все</option>
+            <option value="Опубликован" ${f.status==="Опубликован"?"selected":""}>Опубликован</option>
+            <option value="Черновик" ${f.status==="Черновик"?"selected":""}>Черновик</option>
+          </select>
+        </div>
+        <div class="field-block">
+          <label class="field-label">Тип</label>
+          <select class="select" id="cjFilterTypeSelect">
+            <option value="">Все</option>
+            ${CJ_FILTER_TYPE_OPTIONS.map(t=>`<option value="${t}" ${f.type===t?"selected":""}>${t}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field-block">
+          <label class="field-label">Канал</label>
+          <select class="select" id="cjFilterChannelSelect">
+            <option value="">Все</option>
+            ${channelOptions.map(c=>`<option value="${escapeHtml(c)}" ${f.channel===c?"selected":""}>${escapeHtml(c)}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <div class="side-foot">
+        <button class="btn btn-outline" data-action="cj-reset-filters">Сбросить</button>
+      </div>
+    </div>
   `;
 }
 
@@ -8886,6 +8990,7 @@ function bindGlobalEvents(){
   document.body.onkeydown = function(e){
     if(e.key === "Escape"){
       if(state.cjSourcePanel){ state.cjSourcePanel=null; render(); }
+      else if(state.cjFiltersOpen){ state.cjFiltersOpen=false; render(); }
       else if(state.cjVersionsOpen){ state.cjVersionsOpen=false; render(); }
       else if(state.cjOpen){ state.cjOpen=null; render(); }
       else if(state.sidePanel){ state.sidePanel=null; render(); }
@@ -9044,6 +9149,9 @@ document.addEventListener("change", function(e){
     const part = state.ucWizard && state.ucWizard.data.parts.find(x=>x.id===e.target.dataset.id);
     if(part){ part[e.target.dataset.partField] = e.target.value; render(); }
   }
+  else if(e.target.id==="cjFilterStatusSelect"){ state.cjFilters.status = e.target.value; render(); }
+  else if(e.target.id==="cjFilterTypeSelect"){ state.cjFilters.type = e.target.value; render(); }
+  else if(e.target.id==="cjFilterChannelSelect"){ state.cjFilters.channel = e.target.value; render(); }
   else if(e.target.id==="acTechStatusSelect"){ state.appcat.techStatusFilter = e.target.value; render(); }
   else if(e.target.id==="acPatternTypeSelect"){ state.appcat.patternTypeFilter = e.target.value; render(); }
   else if(e.target.id==="acNfrSourceSelect"){ state.appcat.nfrSourceFilter = e.target.value; render(); }
@@ -9075,7 +9183,19 @@ function handleAction(action, el){
     case "go-home": state.activeSidebar = "home"; go("home"); break;
 
     case "cj-reset-search": state.cjSearch=""; render(); break;
+    case "cj-reset-search-all":
+      state.cjSearch = "";
+      state.cjFilters = {onlyPublished:false, status:"", type:"", channel:""};
+      render();
+      break;
     case "cj-set-view": state.cjView = el.dataset.mode; render(); break;
+    case "cj-open-filters": state.cjFiltersOpen = true; render(); break;
+    case "cj-close-filters": state.cjFiltersOpen = false; render(); break;
+    case "cj-toggle-only-published": state.cjFilters.onlyPublished = !state.cjFilters.onlyPublished; render(); break;
+    case "cj-reset-filters":
+      state.cjFilters = {onlyPublished:false, status:"", type:"", channel:""};
+      render();
+      break;
     case "open-cj":
       if(el.dataset.clickable!=="1"){ showToast("Показано в прототипе только для этого CJ"); break; }
       state.cjOpen = {cjId: el.dataset.id};
