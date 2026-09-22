@@ -6245,12 +6245,20 @@ function CjBranchDeleteConfirm(branchId){
 }
 
 function CjBranchEmptyState(){
+  const cjId = state.cjOpen.cjId;
   const branch = state.cjOpen.branch;
+  // "клонируйте от X" честно указывает только на ветки, где реально есть состав —
+  // раньше тут был захардкожен «main»/«develop» независимо от того, какая ветка сейчас
+  // открыта (включая саму develop, если открыта была именно она — бессмысленный совет).
+  const donors = cjBranchList(cjId).filter(b=>b.id!==branch && cjHasComposition(cjId,b.id)).map(b=>b.id);
+  const hint = donors.length
+    ? `Наполните эту ветку вручную или создайте новую ветку-клон от «${donors.join("»/«")}», чтобы продолжить проектирование от существующего состава.`
+    : `Наполните эту ветку вручную — в других ветках этого CJ состава тоже пока нет.`;
   return `
     <div class="empty-state">
       <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-5);color:var(--text-tertiary);">${icon("gitBranch")}</div>
       <h3>В ветке «${escapeHtml(branch)}» пока нет состава</h3>
-      <div style="color:var(--text-secondary);max-width:420px;">Ветки полностью изолированы — состав не расшаривается автоматически. Наполните эту ветку вручную или создайте новую ветку-клон от «main»/«develop», чтобы продолжить проектирование от существующего состава.</div>
+      <div style="color:var(--text-secondary);max-width:420px;">Ветки полностью изолированы — состав не расшаривается автоматически. ${hint}</div>
     </div>
   `;
 }
