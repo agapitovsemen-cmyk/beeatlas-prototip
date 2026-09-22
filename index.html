@@ -45,12 +45,20 @@
     --space-8: 40px;
     --space-9: 64px;
     --space-10: 96px;
+    --stage-c1:#e3f5e8;
+    --stage-c2:#fbf3d4;
+    --stage-c3:#f8e3f5;
+    --stage-c4:#e0edfb;
   }
   [data-theme="dark"]{
     --bg:#141414;
     --bg-alt:#212121;
     --sidebar-bg:#0f0f0f;
     --border:rgba(255,255,255,.2);
+    --stage-c1:#1c3324;
+    --stage-c2:#3a3018;
+    --stage-c3:#38203a;
+    --stage-c4:#1c2c3f;
     --border-strong:rgba(255,255,255,.48);
     --text:rgba(255,255,255,.87);
     --text-secondary:rgba(255,255,255,.6);
@@ -3301,6 +3309,8 @@ const state = {
   cjOpen:null,        // {cjId} when the CJ detail overlay is open
   cjMenuOpen:false,
   cjVersionsOpen:false,
+  cjBpmnOpen:false,
+  cjBpmnStage:null,   // stage id when drilled into a stage's internal flow; null = top-level stage sequence
   cjExpanded:{},        // {["stageId:scenarioId"]: bool} — is a given scenario's source list expanded
   cjSourcePanel:null,   // {stageId, scenarioId, sourceId, editing, draft} — the source side sheet
 
@@ -5769,7 +5779,7 @@ function CjOverlay(){
       </div>
       <div class="cj-head-spacer"></div>
       <div class="cj-head-actions">
-        <button class="btn btn-outline btn-sm" data-action="cj-noop">CJ в BPMN</button>
+        <button class="btn btn-outline btn-sm" data-action="cj-open-bpmn">CJ в BPMN</button>
         <button class="btn btn-outline btn-sm" data-action="cj-noop" disabled>Дашборд в grafana</button>
         <button class="btn btn-outline btn-sm" data-action="cj-noop" disabled>Создать дашборд в grafana</button>
         <button class="btn btn-primary btn-sm" data-action="cj-noop">Опубликовать</button>
@@ -5781,6 +5791,7 @@ function CjOverlay(){
   </div>
   ${state.cjVersionsOpen ? CjVersionsPanel() : ""}
   ${state.cjSourcePanel ? CjSourcePanel() : ""}
+  ${state.cjBpmnOpen ? CjBpmnOverlay() : ""}
   `;
 }
 
@@ -6017,6 +6028,159 @@ function CjVersionsPanel(){
   </div>`;
 }
 
+/* ============================= CJ BPMN VIEW ============================= */
+function bpmnWrapLines(text, maxChars, maxLines){
+  const words = text.split(" ");
+  const lines = [];
+  let cur = "";
+  for(const w of words){
+    const test = cur ? cur+" "+w : w;
+    if(test.length > maxChars && cur){
+      lines.push(cur);
+      cur = w;
+      if(lines.length===maxLines) break;
+    } else {
+      cur = test;
+    }
+  }
+  if(lines.length<maxLines && cur) lines.push(cur);
+  const usedLen = lines.join(" ").length;
+  if(usedLen < text.length){
+    let last = lines[lines.length-1];
+    if(last.length>maxChars-1) last = last.slice(0,maxChars-1);
+    lines[lines.length-1] = last.replace(/\s+\S*$/,"") + "…";
+  }
+  return lines;
+}
+
+function CjBpmnOverlay(){
+  const cj = CJ_DETAIL;
+  const stage = state.cjBpmnStage ? cj.stages.find(s=>s.id===state.cjBpmnStage) : null;
+  return `
+    <div class="wizard-overlay">
+      <div class="wizard-head">
+        <div class="proj-link" style="display:flex;align-items:center;gap:var(--space-2);color:var(--text);font-weight:600;" data-action="${stage?"cj-bpmn-up":"cj-close-bpmn"}">${icon("chevronLeft")} ${stage?"Назад к процессу":"Назад"}</div>
+      </div>
+      <div class="wizard-body">
+       <div style="max-width:none;">
+        <h2 style="margin-bottom:var(--space-2);">${escapeHtml(cj.title)} — BPMN</h2>
+        <div style="color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-6);">
+          ${stage
+            ? `Процесс <a data-action="cj-bpmn-up" style="color:var(--blue);cursor:pointer;">${escapeHtml(cj.title)}</a> / ${escapeHtml(stage.name)}`
+            : `Автоматически построено по этапам CJ. Кликните по этапу, чтобы раскрыть его внутренний процесс.`}
+        </div>
+        <div style="overflow-x:auto;padding-bottom:var(--space-4);">
+          ${stage ? CjBpmnStageDiagram(cj, stage) : CjBpmnTopDiagram(cj)}
+        </div>
+       </div>
+      </div>
+    </div>
+  `;
+}
+
+function CjBpmnTopDiagram(cj){
+  const boxW=220, boxH=90, gapX=64, padX=48, padTop=48;
+  const laneCenterY = padTop+boxH/2;
+  let x = padX;
+  const startCx = x+18, startCy=laneCenterY;
+  x += 36+gapX;
+  const nodes = cj.stages.map(st=>{
+    const n = {stage:st, x, y:laneCenterY-boxH/2};
+    x += boxW+gapX;
+    return n;
+  });
+  const endCx = x+18, endCy=laneCenterY;
+  const totalW = endCx+18+padX;
+  const totalH = padTop*2+boxH;
+
+  let s = `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="display:block;">`;
+  s += `<defs><marker id="bpmnArrowTop" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="var(--text-tertiary)"/></marker></defs>`;
+  s += `<circle cx="${startCx}" cy="${startCy}" r="18" fill="var(--bg)" stroke="var(--text)" stroke-width="1.6"/>`;
+  if(nodes.length) s += `<line x1="${startCx+18}" y1="${startCy}" x2="${nodes[0].x}" y2="${nodes[0].y+boxH/2}" stroke="var(--text-tertiary)" stroke-width="1.4" marker-end="url(#bpmnArrowTop)"/>`;
+  nodes.forEach((n,i)=>{
+    s += `<g data-action="cj-bpmn-drill" data-stage="${n.stage.id}" style="cursor:pointer;">
+      <title>${escapeHtml(n.stage.name)} — открыть внутренний процесс</title>
+      <rect x="${n.x}" y="${n.y}" width="${boxW}" height="${boxH}" rx="10" fill="var(--stage-${n.stage.color})" stroke="var(--border-strong)" stroke-width="1.3"/>
+      <text x="${n.x+boxW/2}" y="${n.y+boxH/2-2}" text-anchor="middle" font-size="13.5" font-weight="600" fill="var(--text)">${escapeHtml(n.stage.name)}</text>
+      <text x="${n.x+boxW/2}" y="${n.y+boxH/2+16}" text-anchor="middle" font-size="11.5" fill="var(--text-secondary)">${escapeHtml(n.stage.biName||"")}</text>
+      <rect x="${n.x+boxW/2-8}" y="${n.y+boxH-8}" width="16" height="16" rx="3" fill="var(--bg)" stroke="var(--border-strong)" stroke-width="1.2"/>
+      <line x1="${n.x+boxW/2-4}" y1="${n.y+boxH}" x2="${n.x+boxW/2+4}" y2="${n.y+boxH}" stroke="var(--text-secondary)" stroke-width="1.3"/>
+      <line x1="${n.x+boxW/2}" y1="${n.y+boxH-4}" x2="${n.x+boxW/2}" y2="${n.y+boxH+4}" stroke="var(--text-secondary)" stroke-width="1.3"/>
+    </g>`;
+    if(i<nodes.length-1){
+      const next = nodes[i+1];
+      s += `<line x1="${n.x+boxW}" y1="${n.y+boxH/2}" x2="${next.x}" y2="${next.y+boxH/2}" stroke="var(--text-tertiary)" stroke-width="1.4" marker-end="url(#bpmnArrowTop)"/>`;
+    }
+  });
+  if(nodes.length){
+    const last = nodes[nodes.length-1];
+    s += `<line x1="${last.x+boxW}" y1="${last.y+boxH/2}" x2="${endCx-18}" y2="${endCy}" stroke="var(--text-tertiary)" stroke-width="1.4" marker-end="url(#bpmnArrowTop)"/>`;
+  }
+  s += `<circle cx="${endCx}" cy="${endCy}" r="18" fill="var(--bg)" stroke="var(--text)" stroke-width="3"/>`;
+  s += `</svg>`;
+  return s;
+}
+
+function CjBpmnStageDiagram(cj, stage){
+  const boxW=180, boxH=80, gapX=48, padX=48, bandPad=16, laneH=180, bandLabelH=28, padTop=32;
+  const biW=200;
+  const laneY = padTop+bandLabelH;
+  const laneCenterY = laneY+laneH/2;
+
+  let x = padX;
+  const startCx = x+18, startCy=laneCenterY;
+  x += 36+gapX;
+  const biX = x;
+  x += biW+gapX;
+
+  const steps = (stage.scenario||[]).map(t=>t.replace(/^\d+\.\s*/,""));
+  const nodes = steps.map(text=>{
+    const n = {text, x, y:laneCenterY-boxH/2};
+    x += boxW+gapX;
+    return n;
+  });
+  const endCx = x+18, endCy=laneCenterY;
+  const totalW = endCx+18+padX;
+  const totalH = laneY+laneH+40;
+
+  let s = `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="display:block;">`;
+  s += `<defs><marker id="bpmnArrowStage" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="var(--text-tertiary)"/></marker></defs>`;
+
+  s += `<rect x="${padX-16}" y="${laneY}" width="${totalW-2*(padX-16)}" height="${laneH}" rx="10" fill="var(--bg-alt)" stroke="var(--border)"/>`;
+  s += `<text x="${padX-6}" y="${laneY-10}" font-size="12" font-weight="700" fill="var(--text-tertiary)" style="text-transform:uppercase;">Клиент</text>`;
+
+  s += `<rect x="${biX-bandPad}" y="${laneY+10}" width="${biW+bandPad*2}" height="${laneH-20}" rx="10" fill="var(--stage-${stage.color})" opacity=".55"/>`;
+  s += `<text x="${biX-bandPad+10}" y="${laneY+26}" font-size="12" font-weight="700" fill="var(--text)">${escapeHtml(stage.name)}</text>`;
+
+  s += `<circle cx="${startCx}" cy="${startCy}" r="18" fill="var(--bg)" stroke="var(--text)" stroke-width="1.6"/>`;
+  s += `<line x1="${startCx+18}" y1="${startCy}" x2="${biX}" y2="${laneCenterY}" stroke="var(--text-tertiary)" stroke-width="1.4" marker-end="url(#bpmnArrowStage)"/>`;
+
+  s += `<g><title>${escapeHtml(stage.biName||"")} (${escapeHtml(stage.biId||"")})</title>
+    <rect x="${biX}" y="${laneCenterY-boxH/2}" width="${biW}" height="${boxH}" rx="10" fill="var(--bg)" stroke="var(--blue)" stroke-width="2"/>
+    <text x="${biX+biW/2}" y="${laneCenterY-6}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--blue)">BI</text>
+    ${bpmnWrapLines(stage.biName||"",22,2).map((l,li)=>`<text x="${biX+biW/2}" y="${laneCenterY+10+li*14}" text-anchor="middle" font-size="12" fill="var(--text)">${escapeHtml(l)}</text>`).join("")}
+  </g>`;
+
+  if(nodes.length){
+    s += `<line x1="${biX+biW}" y1="${laneCenterY}" x2="${nodes[0].x}" y2="${nodes[0].y+boxH/2}" stroke="var(--text-tertiary)" stroke-width="1.4" marker-end="url(#bpmnArrowStage)"/>`;
+  }
+  nodes.forEach((n,i)=>{
+    const lines = bpmnWrapLines(n.text, 24, 3);
+    s += `<g><title>${escapeHtml(n.text)}</title>
+      <rect x="${n.x}" y="${n.y}" width="${boxW}" height="${boxH}" rx="10" fill="var(--bg)" stroke="var(--border-strong)" stroke-width="1.3"/>
+      ${lines.map((l,li)=>`<text x="${n.x+boxW/2}" y="${n.y+boxH/2 - (lines.length-1)*8 + li*16 + 5}" text-anchor="middle" font-size="12.5" fill="var(--text)">${escapeHtml(l)}</text>`).join("")}
+    </g>`;
+    if(i<nodes.length-1){
+      const next = nodes[i+1];
+      s += `<line x1="${n.x+boxW}" y1="${n.y+boxH/2}" x2="${next.x}" y2="${next.y+boxH/2}" stroke="var(--text-tertiary)" stroke-width="1.4" marker-end="url(#bpmnArrowStage)"/>`;
+    }
+  });
+  const lastRightX = nodes.length ? nodes[nodes.length-1].x+boxW : biX+biW;
+  s += `<line x1="${lastRightX}" y1="${laneCenterY}" x2="${endCx-18}" y2="${endCy}" stroke="var(--text-tertiary)" stroke-width="1.4" marker-end="url(#bpmnArrowStage)"/>`;
+  s += `<circle cx="${endCx}" cy="${endCy}" r="18" fill="var(--bg)" stroke="var(--text)" stroke-width="3"/>`;
+  s += `</svg>`;
+  return s;
+}
 
 /* ============================= PROJECTS LIST ============================= */
 function filteredProjects(){
@@ -9011,6 +9175,7 @@ function bindGlobalEvents(){
   document.body.onkeydown = function(e){
     if(e.key === "Escape"){
       if(state.cjSourcePanel){ state.cjSourcePanel=null; render(); }
+      else if(state.cjBpmnOpen){ state.cjBpmnOpen=false; state.cjBpmnStage=null; render(); }
       else if(state.cjFiltersOpen){ state.cjFiltersOpen=false; render(); }
       else if(state.cjVersionsOpen){ state.cjVersionsOpen=false; render(); }
       else if(state.cjOpen){ state.cjOpen=null; render(); }
@@ -9236,6 +9401,10 @@ function handleAction(action, el){
     case "cj-noop": state.cjMenuOpen=false; showToast("Не входит в состав переданных макетов"); break;
     case "cj-show-versions": state.cjMenuOpen=false; state.cjVersionsOpen=true; render(); break;
     case "cj-close-versions": state.cjVersionsOpen=false; render(); break;
+    case "cj-open-bpmn": state.cjMenuOpen=false; state.cjBpmnOpen=true; state.cjBpmnStage=null; render(); break;
+    case "cj-close-bpmn": state.cjBpmnOpen=false; state.cjBpmnStage=null; render(); break;
+    case "cj-bpmn-drill": state.cjBpmnStage = el.dataset.stage; render(); break;
+    case "cj-bpmn-up": state.cjBpmnStage = null; render(); break;
     case "cj-toggle-expand": {
       const key = el.dataset.key;
       state.cjExpanded[key] = !state.cjExpanded[key];
