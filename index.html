@@ -597,15 +597,11 @@
   .cj-card-tags{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-4);}
   .cj-tag{background:var(--gray-bg);color:var(--gray-text);border-radius:20px;padding:2px var(--space-3);font-size:12px;font-weight:600;}
   .cj-card-date{margin-top:auto;padding-top:var(--space-3);border-top:1px solid var(--border);font-size:12px;color:var(--text-tertiary);}
-  .cj-card-branch-state{margin-top:var(--space-2);font-size:12px;display:flex;align-items:center;gap:6px;color:var(--text-secondary);}
-  .cj-card-branch-state svg{width:13px;height:13px;flex:0 0 auto;}
-  .cj-card-branch-state.empty{color:var(--text-tertiary);font-style:italic;}
-  .cj-card.branch-empty{border-style:dashed;}
-  .cj-card.branch-empty .cj-card-title,.cj-card.branch-empty .cj-card-desc,.cj-card.branch-empty .cj-card-field-val{opacity:.55;}
 
   /* branch-context switch — sits below search/filters, since search/filters run across
-     all branches at once; the chips only narrow which branch's composition state shows
-     on each card. Reuses .cj-branch-pill (same chip look as the CJ_DETAIL branch bar). */
+     all branches at once; the chips only set which branch a card opens into (inherited
+     by CJ_DETAIL on click), they don't filter the list itself. Reuses .cj-branch-pill
+     (same chip look as the CJ_DETAIL branch bar). */
   .cj-library-branch-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);}
 
   /* ---------- CJ detail overlay ---------- */
@@ -3430,33 +3426,33 @@ const CJ_LIBRARY = [
     desc:"Клиент, который ценит свое время и хочет избегать нежелательных звонков. Он часто сталкивается с незнакомыми номерами…",
     app:"Блокировка удаленного доступа сотрудникам \"ВымпелКом\" и Amdocs",
     channels:"Web site, Мобильное приложение, Офисы продаж (мультибренд)",
-    tags:["E2E","B2C","Кто звонит","Голос"], date:"20.01.2025", clickable:true},
+    tags:["E2E","B2C","Кто звонит","Голос"], date:"20.01.2025"},
   {id:"cj2", status:"Опубликован", statusColor:"green",
     extraBadges:[{t:"GRAFANA",c:"green"},{t:"BPMN",c:"orange"}],
     name:"Название артефакта", code:"CJ.00.00.00.98",
     desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории. Максимум 3 строки…",
     app:"Блокировка удаленного доступа сотрудникам \"ВымпелКом\" и Amdocs",
     channels:"Web site, Мобильное приложение, Офисы продаж (мультибренд)",
-    tags:["E2E","B2C","Tag","Tag","Tag","Tag"], date:"20.01.2025", clickable:false},
+    tags:["E2E","B2C","Tag","Tag","Tag","Tag"], date:"20.01.2025"},
   {id:"cj3", status:"Опубликован", statusColor:"green",
     extraBadges:[{t:"GRAFANA",c:"green"},{t:"BPMN",c:"orange"}],
     name:"Название артефакта", code:"CJ.00.00.00.98",
     desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории. Максимум 3 строки…",
     app:"Блокировка удаленного доступа сотрудникам \"ВымпелКом\" и Amdocs",
     channels:"Web site, Мобильное приложение, Офисы продаж (мультибренд)",
-    tags:["E2E","B2C","Tag","Tag","Tag","Tag"], date:"20.01.2025", clickable:false},
+    tags:["E2E","B2C","Tag","Tag","Tag","Tag"], date:"20.01.2025"},
   {id:"cj4", status:"Черновик", statusColor:"gray", extraBadges:[{t:"Beeatlas",c:"blue"}],
     name:"Название артефакта", code:"CJ.00.00.00.98",
     desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории.",
-    app:"—", channels:"—", tags:[], date:"18.01.2025", clickable:false},
+    app:"—", channels:"—", tags:[], date:"18.01.2025"},
   {id:"cj5", status:"Черновик", statusColor:"gray", extraBadges:[{t:"Beeatlas",c:"blue"}],
     name:"Название артефакта", code:"CJ.00.00.00.98",
     desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории.",
-    app:"—", channels:"—", tags:[], date:"18.01.2025", clickable:false},
+    app:"—", channels:"—", tags:[], date:"18.01.2025"},
   {id:"cj6", status:"Черновик", statusColor:"gray", extraBadges:[{t:"Beeatlas",c:"blue"}],
     name:"Название артефакта", code:"CJ.00.00.00.98",
     desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории.",
-    app:"—", channels:"—", tags:[], date:"18.01.2025", clickable:false},
+    app:"—", channels:"—", tags:[], date:"18.01.2025"},
 ];
 
 const CJ_SOURCE_META = {
@@ -3601,20 +3597,30 @@ const CJ_BRANCHES = {
   },
 };
 
-function cjMeta(cjId){ return CJ_META[cjId] || {title:"CJ", subtitle:"", status:""}; }
+// Для CJ без явной записи в CJ_META (весь набор, кроме cj1, где нет отдельно
+// заданных title/subtitle) название берётся прямо из карточки библиотеки — не дублируем
+// его в CJ_META только чтобы открыть страницу.
+function cjMeta(cjId){
+  if(CJ_META[cjId]) return CJ_META[cjId];
+  const c = CJ_LIBRARY.find(x=>x.id===cjId);
+  return c ? {title:c.name, subtitle:"", status:c.status} : {title:"CJ", subtitle:"", status:""};
+}
 function cjBranchList(cjId){ return CJ_BRANCH_META[cjId] || []; }
 function cjBranchTree(cjId, branchId){
   const b = CJ_BRANCHES[cjId] && CJ_BRANCHES[cjId][branchId];
   return b ? b.stages : [];
 }
-// Библиотечные карточки без собственного CJ_BRANCHES (весь набор, кроме cj1, в этом
-// прототипе не интерактивен) трактуются так же, как того требует миграция из §3.1:
-// весь их состав считается лежащим в main, design/develop — пусты.
-function cjHasComposition(cjId, branchId){
-  if(CJ_BRANCHES[cjId]) return cjBranchTree(cjId, branchId).length>0;
-  // design никогда не бывает пустой (самая первая ветка жизненного цикла) — та же
-  // договорённость действует и для карточек без собственного CJ_BRANCHES.
-  return branchId==="main" || branchId==="design";
+function cjHasComposition(cjId, branchId){ return cjBranchTree(cjId, branchId).length>0; }
+// Любой CJ можно открыть; у кого ветки ещё не заведены (весь набор, кроме cj1, где они
+// реально смоделированы) — заводим три системных ветки на лету, все с пустым составом.
+function ensureCjBranches(cjId){
+  if(CJ_BRANCH_META[cjId]) return;
+  CJ_BRANCH_META[cjId] = [
+    {id:"design", kind:"system", parent:null, createdBy:null, createdAt:null},
+    {id:"develop", kind:"system", parent:null, createdBy:null, createdAt:null},
+    {id:"main", kind:"system", parent:null, createdBy:null, createdAt:null},
+  ];
+  CJ_BRANCHES[cjId] = { design:{stages:[]}, develop:{stages:[]}, main:{stages:[]} };
 }
 function activeCjStages(){
   return state.cjOpen ? cjBranchTree(state.cjOpen.cjId, state.cjOpen.branch) : [];
@@ -5824,7 +5830,7 @@ function CjTable(list){
 
 function CjTableRow(c){
   return `
-    <tr data-action="open-cj" data-id="${c.id}" data-clickable="${c.clickable?1:0}" style="cursor:pointer;">
+    <tr data-action="open-cj" data-id="${c.id}" style="cursor:pointer;">
       <td>
         <div style="font-weight:600;">${escapeHtml(c.name)}</div>
         <div style="color:var(--text-secondary);font-size:12.5px;">${escapeHtml(c.code)}</div>
@@ -5899,14 +5905,8 @@ function CjFiltersPanel(){
 }
 
 function CjCard(c){
-  const branch = state.cjLibraryBranch;
-  const has = cjHasComposition(c.id, branch);
-  const knownCount = CJ_BRANCHES[c.id] ? cjBranchTree(c.id, branch).length : null;
-  const branchLine = knownCount!=null
-    ? (knownCount>0 ? `${knownCount} ${ruPlural(knownCount,"этап","этапа","этапов")} в ветке «${escapeHtml(branch)}»` : `Нет состава в ветке «${escapeHtml(branch)}»`)
-    : (has ? `Состав есть в ветке «${escapeHtml(branch)}»` : `Нет состава в ветке «${escapeHtml(branch)}»`);
   return `
-    <div class="card cj-card${has?"":" branch-empty"}" data-action="open-cj" data-id="${c.id}" data-clickable="${c.clickable?1:0}">
+    <div class="card cj-card" data-action="open-cj" data-id="${c.id}">
       <div class="cj-card-top">
         <div class="cj-card-badges">
           <span class="badge ${c.statusColor}">${escapeHtml(c.status)}</span>
@@ -5922,7 +5922,6 @@ function CjCard(c){
       <div class="cj-card-field">Каналы</div>
       <div class="cj-card-field-val">${escapeHtml(c.channels)}</div>
       ${c.tags.length ? `<div class="cj-card-tags">${c.tags.map(t=>`<span class="cj-tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
-      <div class="cj-card-branch-state${has?"":" empty"}">${icon("gitBranch")} ${branchLine}</div>
       <div class="cj-card-date">Дата изменения<br>${escapeHtml(c.date)}</div>
     </div>
   `;
@@ -9880,7 +9879,7 @@ function handleAction(action, el){
         app:"Beeatlas",
         channels:"—",
         tags: cp.tags.split(",").map(t=>t.trim()).filter(Boolean),
-        date: NOW_DATE, clickable:false,
+        date: NOW_DATE,
       });
       state.cjCreatePanel = null;
       showToast("CJ создан из файла BPMN");
@@ -9889,7 +9888,7 @@ function handleAction(action, el){
     }
 
     case "open-cj":
-      if(el.dataset.clickable!=="1"){ showToast("Показано в прототипе только для этого CJ"); break; }
+      ensureCjBranches(el.dataset.id);
       state.cjOpen = {cjId: el.dataset.id, branch: state.cjLibraryBranch};
       state.cjExpanded = {};
       state.cjSourcePanel = null;
@@ -10688,8 +10687,9 @@ function handleAction(action, el){
     if(loc.cj){
       if(loc.cj.libraryBranch) state.cjLibraryBranch = loc.cj.libraryBranch;
       const o = loc.cj.open;
-      if(o && cjBranchList(o.cjId).some(b=>b.id===o.branch)){
-        state.cjOpen = {cjId: o.cjId, branch: o.branch};
+      if(o){
+        ensureCjBranches(o.cjId);
+        if(cjBranchList(o.cjId).some(b=>b.id===o.branch)) state.cjOpen = {cjId: o.cjId, branch: o.branch};
       }
     }
   }
