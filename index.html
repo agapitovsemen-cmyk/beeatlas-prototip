@@ -4029,7 +4029,6 @@ function defaultGraphState(){
     zoom:1,
     exportMenuOpen:false,
     typeKind:"node",           // "node" | "relationship" — which dictionary list is shown
-    typeGroupFilter:"USER",    // "USER" | "PRODUCT" | "COMMUNAL"
     typeEditor:null,           // {kind, editingCode, draft:{...}}
     addNode:null,              // {attachTo, draft:{typeCode,name,attributes}}
     addRel:null,               // {anchorId, draft:{typeCode,anchorRole,otherId,attributes}}
@@ -5281,18 +5280,10 @@ function GraphCustomNodeCard(inst){
 
 function GraphTypesPage(){
   const g = state.graph;
-  const groups = [
-    {id:"USER", label:"Личные"},
-    {id:"PRODUCT", label:"Команда"},
-    {id:"COMMUNAL", label:"Общие"},
-  ];
-  const nodeTypes = visibleNodeTypes().filter(t=>t.ownerKind===g.typeGroupFilter);
-  const relTypes = visibleRelTypes().filter(t=>t.ownerKind===g.typeGroupFilter);
+  const nodeTypes = visibleNodeTypes();
+  const relTypes = visibleRelTypes();
   const list = g.typeKind==="node" ? nodeTypes : relTypes;
   return `
-    <div class="view-toggle" style="display:inline-flex;margin-bottom:var(--space-4);">
-      ${groups.map(gr=>`<button class="view-toggle-btn ${g.typeGroupFilter===gr.id?"active":""}" data-action="graph-set-type-group" data-group="${gr.id}" style="width:auto;padding:0 var(--space-4);font-size:13.5px;font-weight:600;">${escapeHtml(gr.label)}</button>`).join("")}
-    </div>
     <div class="filters-row">
       <div style="display:flex;gap:var(--space-2);">
         <div class="home-chip ${g.typeKind==="node"?"active":""}" data-action="graph-set-type-kind" data-kind="node">Типы нод</div>
@@ -9646,7 +9637,6 @@ function handleAction(action, el){
     }
 
     case "graph-set-type-kind": state.graph.typeKind = el.dataset.kind; render(); break;
-    case "graph-set-type-group": state.graph.typeGroupFilter = el.dataset.group; render(); break;
     case "graph-new-type":
       state.graph.typeEditor = {
         kind: state.graph.typeKind, editingCode: null,
