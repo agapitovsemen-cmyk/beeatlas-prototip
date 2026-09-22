@@ -3933,27 +3933,13 @@ function fitnessBadge(pct){
 /* ============================= COMPANY ARCHITECTURE GRAPH (custom nodes/relationships) ============================= */
 /* Based on VISION.md (architect-graph-service, 2026-09-21): canon C4 graph in Neo4j stays untouched;
    custom node/relationship TYPES live in a Postgres-style dictionary (CUSTOM_NODE_TYPES/CUSTOM_RELATIONSHIP_TYPES),
-   custom INSTANCES are layered on top of the canon graph (CUSTOM_NODE_INSTANCES/CUSTOM_REL_INSTANCES).
-   Ownership (USER/PRODUCT/COMMUNAL) gates visibility — see graphOwnerVisible(). */
+   custom INSTANCES are layered on top of the canon graph (CUSTOM_NODE_INSTANCES/CUSTOM_REL_INSTANCES). */
 
 const GRAPH_VIEWERS = [
-  {id:"ivan", label:"Иван Петров — пользователь (не в командах)", userId:"ivan", products:[], touz:false},
-  {id:"maria", label:"Мария Кузнецова — команда продукта cart", userId:"maria", products:["cart"], touz:false},
-  {id:"touz_cart", label:"ТУЗ продукта cart", userId:"touz_cart", products:["cart"], touz:true},
+  {id:"ivan", label:"Иван Петров"},
+  {id:"maria", label:"Мария Кузнецова"},
 ];
 function graphViewer(){ return GRAPH_VIEWERS.find(v=>v.id===state.graph.viewer) || GRAPH_VIEWERS[0]; }
-function graphOwnerVisible(ownerKind, ownerRef){
-  const v = graphViewer();
-  if(ownerKind==="COMMUNAL") return true;
-  if(ownerKind==="USER") return !v.touz && ownerRef===v.userId;
-  if(ownerKind==="PRODUCT") return v.products.includes(ownerRef);
-  return false;
-}
-function ownerBadge(ownerKind, ownerRef){
-  if(ownerKind==="COMMUNAL") return `<span class="badge green">Общий</span>`;
-  if(ownerKind==="PRODUCT") return `<span class="badge blue">Команда «${escapeHtml(ownerRef||"")}»</span>`;
-  return `<span class="badge pink">Личный</span>`;
-}
 
 const GRAPH_CANON_NODES = [
   {id:"cj-cart", label:"CJ.00.12 Оформление заказа", type:"CJ"},
@@ -3983,74 +3969,74 @@ const CUSTOM_NODE_TYPES = [
   {code:"risk", name:"Риск", description:"Риск, который команда вешает на элемент архитектуры",
     attributes:{severity:"Критичность (low / medium / high)", mitigation:"Как закрываем"},
     linkableNodes:["SoftwareSystem","Container"], relationshipType:"HAS_RISK", relationshipDirection:"TO_CUSTOM",
-    ownerKind:"PRODUCT", ownerRef:"cart", createdBy:"Мария Кузнецова", createdAt:"10.09.2026"},
+    createdBy:"Мария Кузнецова", createdAt:"10.09.2026"},
   {code:"note", name:"Личная заметка", description:"Заметка архитектора для себя, не видна другим",
     attributes:{text:"Текст заметки"},
     linkableNodes:["SoftwareSystem","Container","CJ"], relationshipType:"HAS_NOTE", relationshipDirection:"TO_CUSTOM",
-    ownerKind:"USER", ownerRef:"ivan", createdBy:"Иван Петров", createdAt:"15.09.2026"},
+    createdBy:"Иван Петров", createdAt:"15.09.2026"},
   {code:"compliance_flag", name:"Комплаенс-флаг", description:"Публичная отметка требования комплаенса на систему",
     attributes:{regulation:"Нормативный акт", deadline:"Срок исполнения"},
     linkableNodes:["SoftwareSystem"], relationshipType:"FLAGGED_BY", relationshipDirection:"FROM_CUSTOM",
-    ownerKind:"COMMUNAL", ownerRef:null, createdBy:"Архитектурный комитет", createdAt:"20.08.2026"},
+    createdBy:"Архитектурный комитет", createdAt:"20.08.2026"},
   {code:"kpi", name:"Бизнес-KPI", description:"Метрика бизнес-эффекта, которую продукт отслеживает на системе",
     attributes:{metric:"Название метрики", target:"Целевое значение"},
     linkableNodes:["SoftwareSystem","CJ"], relationshipType:"MEASURED_BY", relationshipDirection:"FROM_CUSTOM",
-    ownerKind:"PRODUCT", ownerRef:"cart", createdBy:"Мария Кузнецова", createdAt:"05.09.2026"},
+    createdBy:"Мария Кузнецова", createdAt:"05.09.2026"},
   {code:"tech_debt", name:"Технический долг", description:"Известная проблема архитектуры, требующая рефакторинга",
     attributes:{impact:"Влияние (low / medium / high)", plan:"План устранения"},
     linkableNodes:["SoftwareSystem","Container"], relationshipType:"HAS_DEBT", relationshipDirection:"TO_CUSTOM",
-    ownerKind:"COMMUNAL", ownerRef:null, createdBy:"Архитектурный комитет", createdAt:"01.09.2026"},
+    createdBy:"Архитектурный комитет", createdAt:"01.09.2026"},
   {code:"owner_contact", name:"Контакт владельца", description:"Ответственный за систему со стороны бизнеса",
     attributes:{contact:"ФИО / чат", role:"Роль"},
     linkableNodes:["SoftwareSystem"], relationshipType:"OWNED_BY", relationshipDirection:"FROM_CUSTOM",
-    ownerKind:"COMMUNAL", ownerRef:null, createdBy:"Архитектурный комитет", createdAt:"18.08.2026"},
+    createdBy:"Архитектурный комитет", createdAt:"18.08.2026"},
   {code:"sla", name:"SLA", description:"Соглашение об уровне доступности сервиса",
     attributes:{availability:"Доступность, %", window:"Окно обслуживания"},
     linkableNodes:["SoftwareSystem"], relationshipType:"HAS_SLA", relationshipDirection:"TO_CUSTOM",
-    ownerKind:"PRODUCT", ownerRef:"cart", createdBy:"Мария Кузнецова", createdAt:"22.09.2026"},
+    createdBy:"Мария Кузнецова", createdAt:"22.09.2026"},
   {code:"roadmap_item", name:"Пункт роадмапа", description:"Плановое изменение системы, привязанное к CJ",
     attributes:{quarter:"Квартал", status:"Статус"},
     linkableNodes:["CJ","SoftwareSystem"], relationshipType:"PLANNED_FOR", relationshipDirection:"TO_CUSTOM",
-    ownerKind:"USER", ownerRef:"maria", createdBy:"Мария Кузнецова", createdAt:"12.09.2026"},
+    createdBy:"Мария Кузнецова", createdAt:"12.09.2026"},
 ];
 const CUSTOM_RELATIONSHIP_TYPES = [
   {code:"RELIES_ON", name:"Опирается на", description:"Зависимость, которой нет в каноне C4",
     attributes:{weight:"Сила зависимости"},
     nodePairs:[{from:"SoftwareSystem",to:"Container"},{from:"CJ",to:"SoftwareSystem"}],
-    ownerKind:"PRODUCT", ownerRef:"cart", createdBy:"Мария Кузнецова", createdAt:"11.09.2026"},
+    createdBy:"Мария Кузнецова", createdAt:"11.09.2026"},
   {code:"DEPENDS_ON_VENDOR", name:"Зависит от вендора", description:"Внешняя зависимость от стороннего поставщика",
     attributes:{vendor:"Название вендора", criticality:"Критичность"},
     nodePairs:[{from:"SoftwareSystem",to:"Container"}],
-    ownerKind:"COMMUNAL", ownerRef:null, createdBy:"Архитектурный комитет", createdAt:"14.09.2026"},
+    createdBy:"Архитектурный комитет", createdAt:"14.09.2026"},
   {code:"DUPLICATES", name:"Дублирует функциональность", description:"Отмечает пересечение зон ответственности двух систем",
     attributes:{note:"Комментарий"},
     nodePairs:[{from:"SoftwareSystem",to:"SoftwareSystem"}],
-    ownerKind:"COMMUNAL", ownerRef:null, createdBy:"Архитектурный комитет", createdAt:"02.09.2026"},
+    createdBy:"Архитектурный комитет", createdAt:"02.09.2026"},
   {code:"MONITORED_BY", name:"Мониторится сервисом", description:"Связь системы с внешним инструментом наблюдаемости",
     attributes:{tool:"Инструмент", dashboard:"Ссылка на дашборд"},
     nodePairs:[{from:"Container",to:"SoftwareSystem"}],
-    ownerKind:"PRODUCT", ownerRef:"cart", createdBy:"Мария Кузнецова", createdAt:"19.09.2026"},
+    createdBy:"Мария Кузнецова", createdAt:"19.09.2026"},
   {code:"BLOCKS", name:"Блокирует", description:"Личная пометка о блокирующей зависимости перед релизом",
     attributes:{reason:"Причина блокировки"},
     nodePairs:[{from:"CJ",to:"SoftwareSystem"}],
-    ownerKind:"USER", ownerRef:"maria", createdBy:"Мария Кузнецова", createdAt:"20.09.2026"},
+    createdBy:"Мария Кузнецова", createdAt:"20.09.2026"},
 ];
 function findNodeType(code){ return CUSTOM_NODE_TYPES.find(t=>t.code===code); }
 function findRelType(code){ return CUSTOM_RELATIONSHIP_TYPES.find(t=>t.code===code); }
-function visibleNodeTypes(){ return CUSTOM_NODE_TYPES.filter(t=>graphOwnerVisible(t.ownerKind,t.ownerRef)); }
-function visibleRelTypes(){ return CUSTOM_RELATIONSHIP_TYPES.filter(t=>graphOwnerVisible(t.ownerKind,t.ownerRef)); }
+function visibleNodeTypes(){ return CUSTOM_NODE_TYPES; }
+function visibleRelTypes(){ return CUSTOM_RELATIONSHIP_TYPES; }
 
 const CUSTOM_NODE_INSTANCES = [
-  {instanceId:"risk-1", type:"risk", name:"Риск потери корзины", ownerKind:"PRODUCT", ownerRef:"cart",
+  {instanceId:"risk-1", type:"risk", name:"Риск потери корзины",
     attributes:{severity:"high", mitigation:"Дублировать сессию в Redis"}, attachTo:"sys-cart"},
-  {instanceId:"note-1", type:"note", name:"Проверить SLA перед релизом", ownerKind:"USER", ownerRef:"ivan",
+  {instanceId:"note-1", type:"note", name:"Проверить SLA перед релизом",
     attributes:{text:"Уточнить SLA у команды CRM перед релизом"}, attachTo:"sys-crm"},
 ];
 const CUSTOM_REL_INSTANCES = [
-  {id:"rel-1", type:"RELIES_ON", ownerKind:"PRODUCT", ownerRef:"cart", attributes:{weight:"high"}, from:"cnt-cart-api", to:"sys-payments"},
+  {id:"rel-1", type:"RELIES_ON", attributes:{weight:"high"}, from:"cnt-cart-api", to:"sys-payments"},
 ];
-function visibleNodeInstances(){ return CUSTOM_NODE_INSTANCES.filter(i=>graphOwnerVisible(i.ownerKind,i.ownerRef)); }
-function visibleRelInstances(){ return CUSTOM_REL_INSTANCES.filter(i=>graphOwnerVisible(i.ownerKind,i.ownerRef)); }
+function visibleNodeInstances(){ return CUSTOM_NODE_INSTANCES; }
+function visibleRelInstances(){ return CUSTOM_REL_INSTANCES; }
 
 function defaultGraphState(){
   return {
@@ -5139,11 +5125,10 @@ function graphCanonNodeSvg(n, box, selected, dim){
 
 function graphCustomNodeSvg(inst, box, dim){
   const t = findNodeType(inst.type);
-  const ownerColor = inst.ownerKind==="COMMUNAL" ? "var(--green-text)" : inst.ownerKind==="PRODUCT" ? "var(--blue-text)" : "var(--pink-text)";
   return `
     <g class="graph-node-g ${dim?"dim":""}" data-action="graph-select-node" data-id="${inst.attachTo}">
       <title>${escapeHtml(inst.name)} · ${escapeHtml(t?t.name:inst.type)}</title>
-      <rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="9" fill="var(--bg)" stroke="${ownerColor}" stroke-width="1.4" stroke-dasharray="4 3"/>
+      <rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="9" fill="var(--bg)" stroke="var(--blue-text)" stroke-width="1.4" stroke-dasharray="4 3"/>
       <text x="${box.x+box.w/2}" y="${box.y+19}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text)">${escapeHtml(graphTrunc(inst.name,17))}</text>
       <text x="${box.x+box.w/2}" y="${box.y+35}" text-anchor="middle" font-size="10" fill="var(--text-secondary)">${escapeHtml(graphTrunc(t?t.name:inst.type,20))}</text>
     </g>
@@ -5272,7 +5257,7 @@ function GraphNodeDetail(node){
         ${customRels.length ? `
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Тип</th><th>От</th><th>К</th><th>Атрибуты</th><th>Принадлежность</th></tr></thead>
+              <thead><tr><th>Тип</th><th>От</th><th>К</th><th>Атрибуты</th></tr></thead>
               <tbody>
                 ${customRels.map(r=>{
                   const t = findRelType(r.type);
@@ -5282,7 +5267,6 @@ function GraphNodeDetail(node){
                     <td>${escapeHtml(fromNode?fromNode.label:r.from)}</td>
                     <td>${escapeHtml(toNode?toNode.label:r.to)}</td>
                     <td>${Object.entries(r.attributes).map(([k,v])=>`${escapeHtml((t&&t.attributes[k])||k)}: ${escapeHtml(String(v))}`).join(", ")||"—"}</td>
-                    <td>${ownerBadge(r.ownerKind, r.ownerRef)}</td>
                   </tr>`;
                 }).join("")}
               </tbody>
@@ -5298,13 +5282,8 @@ function GraphCustomNodeCard(inst){
   const t = findNodeType(inst.type);
   return `
     <div class="graph-custom-node-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-3);">
-        <div>
-          <div style="font-weight:600;">${escapeHtml(inst.name)}</div>
-          <div style="color:var(--text-secondary);font-size:13px;">${escapeHtml(t?t.name:inst.type)}</div>
-        </div>
-        ${ownerBadge(inst.ownerKind, inst.ownerRef)}
-      </div>
+      <div style="font-weight:600;">${escapeHtml(inst.name)}</div>
+      <div style="color:var(--text-secondary);font-size:13px;">${escapeHtml(t?t.name:inst.type)}</div>
       <div class="ac-kv" style="margin-top:var(--space-3);">
         ${Object.entries(inst.attributes).map(([k,v])=>`
           <div class="ac-kv-row"><div class="k">${escapeHtml((t&&t.attributes[k])||k)}</div><div class="v">${escapeHtml(String(v))}</div></div>
@@ -5332,13 +5311,13 @@ function GraphTypesPage(){
       <table>
         <thead>
           ${g.typeKind==="node"
-            ? `<tr><th>Имя</th><th>Код</th><th>Описание</th><th>Соседи</th><th>Связь</th><th>Принадлежность</th><th></th></tr>`
-            : `<tr><th>Имя</th><th>Код</th><th>Описание</th><th>Пары нод</th><th>Принадлежность</th><th></th></tr>`}
+            ? `<tr><th>Имя</th><th>Код</th><th>Описание</th><th>Соседи</th><th>Связь</th><th></th></tr>`
+            : `<tr><th>Имя</th><th>Код</th><th>Описание</th><th>Пары нод</th><th></th></tr>`}
         </thead>
         <tbody>
           ${list.length
             ? (g.typeKind==="node" ? nodeTypes.map(GraphNodeTypeRow).join("") : relTypes.map(GraphRelTypeRow).join(""))
-            : `<tr><td colspan="${g.typeKind==="node"?7:6}" style="text-align:center;color:var(--text-secondary);">Нет типов в этой группе.</td></tr>`}
+            : `<tr><td colspan="${g.typeKind==="node"?6:5}" style="text-align:center;color:var(--text-secondary);">Нет типов в этой группе.</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -5353,7 +5332,6 @@ function GraphNodeTypeRow(t){
       <td>${escapeHtml(t.description)}</td>
       <td>${t.linkableNodes.map(n=>`<span class="badge gray" style="margin-right:4px;">${escapeHtml(n)}</span>`).join("")}</td>
       <td><code>${escapeHtml(t.relationshipType)}</code> <span style="color:var(--text-secondary);font-size:12px;">(${t.relationshipDirection==="TO_CUSTOM"?"→ к ноде":"← от ноды"})</span></td>
-      <td>${ownerBadge(t.ownerKind, t.ownerRef)}</td>
       <td style="white-space:nowrap;">
         <button class="icon-btn" data-action="graph-edit-type" data-kind="node" data-code="${t.code}" title="Редактировать">${icon("pencil")}</button>
         <button class="icon-btn" data-action="graph-delete-type" data-kind="node" data-code="${t.code}" title="Удалить">${icon("x")}</button>
@@ -5369,7 +5347,6 @@ function GraphRelTypeRow(t){
       <td><code>${escapeHtml(t.code)}</code></td>
       <td>${escapeHtml(t.description)}</td>
       <td>${t.nodePairs.map(p=>`<span class="badge gray" style="margin-right:4px;">${escapeHtml(p.from)} → ${escapeHtml(p.to)}</span>`).join("")}</td>
-      <td>${ownerBadge(t.ownerKind, t.ownerRef)}</td>
       <td style="white-space:nowrap;">
         <button class="icon-btn" data-action="graph-edit-type" data-kind="relationship" data-code="${t.code}" title="Редактировать">${icon("pencil")}</button>
         <button class="icon-btn" data-action="graph-delete-type" data-kind="relationship" data-code="${t.code}" title="Удалить">${icon("x")}</button>
@@ -5444,20 +5421,6 @@ function GraphTypeEditorOverlay(){
           <button class="btn btn-outline btn-sm" style="margin-bottom:var(--space-6);" data-action="graph-add-pair">${icon("plus")} Добавить пару</button>
         `}
 
-        <div style="font-weight:600;margin-bottom:var(--space-3);">Принадлежность</div>
-        ${ed.editingCode ? `
-          <div style="margin-bottom:var(--space-5);">
-            ${ownerBadge(d.ownerKind, d.ownerRef)}
-            <div style="color:var(--text-secondary);font-size:12px;margin-top:4px;">Принадлежность нельзя изменить после создания типа.</div>
-          </div>
-        ` : `
-          <div class="ac-radio-group" style="margin-bottom:var(--space-5);">
-            ${[["USER","Личная"],["PRODUCT","Команда/продукт"],["COMMUNAL","Общая (коммунальная)"]].map(([k,l])=>`
-              <div class="ac-radio ${d.ownerKind===k?"checked":""}" data-action="graph-set-owner-kind" data-kind="${k}"><div class="dot"></div>${l}</div>
-            `).join("")}
-          </div>
-          ${d.ownerKind==="PRODUCT" ? `<div class="field-block"><label class="field-label">Продукт (alias)</label><input class="input" id="gteOwnerRef" value="${escapeHtml(d.ownerRef||"")}" placeholder="cart"/></div>` : ""}
-        `}
        </div>
       </div>
       <div class="wizard-foot">
@@ -5497,7 +5460,6 @@ function GraphAddNodeOverlay(){
         ${type ? Object.entries(type.attributes).map(([k,label])=>`
           <div class="field-block"><label class="field-label">${escapeHtml(label)}</label><input class="input" id="ganAttr-${escapeHtml(k)}" data-gan-attr="${escapeHtml(k)}" value="${escapeHtml(st.draft.attributes[k]||"")}"/></div>
         `).join("") : ""}
-        ${type ? `<div style="color:var(--text-secondary);font-size:13px;">${ownerBadge(type.ownerKind, type.ownerRef)} — принадлежность определяется типом</div>` : ""}
        </div>
       </div>
       <div class="wizard-foot">
@@ -5560,7 +5522,6 @@ function GraphAddRelOverlay(){
         ${type ? Object.entries(type.attributes).map(([k,label])=>`
           <div class="field-block"><label class="field-label">${escapeHtml(label)}</label><input class="input" id="garAttr-${escapeHtml(k)}" data-gar-attr="${escapeHtml(k)}" value="${escapeHtml(st.draft.attributes[k]||"")}"/></div>
         `).join("") : ""}
-        ${type ? `<div style="color:var(--text-secondary);font-size:13px;">${ownerBadge(type.ownerKind, type.ownerRef)} — принадлежность определяется типом</div>` : ""}
        </div>
       </div>
       <div class="wizard-foot">
@@ -9027,7 +8988,6 @@ function handleInput(el){
   else if(el.id==="gteCode"){ state.graph.typeEditor.draft.code = el.value; render(); reFocus("gteCode"); }
   else if(el.id==="gteDesc"){ state.graph.typeEditor.draft.description = el.value; render(); reFocus("gteDesc"); }
   else if(el.id==="gteRelType"){ state.graph.typeEditor.draft.relationshipType = el.value; render(); reFocus("gteRelType"); }
-  else if(el.id==="gteOwnerRef"){ state.graph.typeEditor.draft.ownerRef = el.value; render(); reFocus("gteOwnerRef"); }
   else if(el.dataset.attrIdx!==undefined){ state.graph.typeEditor.draft.attributes[+el.dataset.attrIdx][el.dataset.attrField] = el.value; render(); reFocus(el.id); }
   else if(el.id==="ganName"){ state.graph.addNode.draft.name = el.value; render(); reFocus("ganName"); }
   else if(el.dataset.ganAttr!==undefined){ state.graph.addNode.draft.attributes[el.dataset.ganAttr] = el.value; render(); reFocus(el.id); }
@@ -9640,7 +9600,6 @@ function handleAction(action, el){
       if(!t || !st.draft.name.trim()) break;
       CUSTOM_NODE_INSTANCES.push({
         instanceId: uid(t.code), type:t.code, name: st.draft.name.trim(),
-        ownerKind:t.ownerKind, ownerRef:t.ownerRef,
         attributes: Object.assign({}, st.draft.attributes),
         attachTo: st.attachTo,
       });
@@ -9662,7 +9621,7 @@ function handleAction(action, el){
       const from = st.draft.anchorRole==="from" ? st.anchorId : st.draft.otherId;
       const to = st.draft.anchorRole==="from" ? st.draft.otherId : st.anchorId;
       CUSTOM_REL_INSTANCES.push({
-        id: uid(t.code.toLowerCase()), type:t.code, ownerKind:t.ownerKind, ownerRef:t.ownerRef,
+        id: uid(t.code.toLowerCase()), type:t.code,
         attributes: Object.assign({}, st.draft.attributes),
         from, to,
       });
@@ -9679,7 +9638,7 @@ function handleAction(action, el){
         draft: {
           name:"", code:"", description:"", attributes:[],
           linkableNodes:[], relationshipType:"", relationshipDirection:"TO_CUSTOM",
-          nodePairs:[], ownerKind:"USER", ownerRef: graphViewer().userId,
+          nodePairs:[],
         },
       };
       render();
@@ -9697,7 +9656,6 @@ function handleAction(action, el){
           relationshipType: kind==="node" ? t.relationshipType : "",
           relationshipDirection: kind==="node" ? t.relationshipDirection : "TO_CUSTOM",
           nodePairs: kind==="relationship" ? t.nodePairs.map(p=>({from:p.from,to:p.to})) : [],
-          ownerKind: t.ownerKind, ownerRef: t.ownerRef,
         },
       };
       render();
@@ -9709,13 +9667,6 @@ function handleAction(action, el){
     case "graph-add-pair": state.graph.typeEditor.draft.nodePairs.push({from:"SoftwareSystem",to:"Container"}); render(); break;
     case "graph-remove-pair": state.graph.typeEditor.draft.nodePairs.splice(+el.dataset.idx,1); render(); break;
     case "graph-set-direction": state.graph.typeEditor.draft.relationshipDirection = el.dataset.dir; render(); break;
-    case "graph-set-owner-kind": {
-      const d = state.graph.typeEditor.draft;
-      d.ownerKind = el.dataset.kind;
-      d.ownerRef = d.ownerKind==="PRODUCT" ? (graphViewer().products[0]||"") : (d.ownerKind==="USER" ? graphViewer().userId : null);
-      render();
-      break;
-    }
     case "graph-toggle-linkable": {
       const d = state.graph.typeEditor.draft;
       const v = el.dataset.value;
@@ -9740,13 +9691,12 @@ function handleAction(action, el){
         const obj = {
           code:d.code.trim(), name:d.name.trim(), description:d.description.trim(), attributes,
           linkableNodes:[...d.linkableNodes], relationshipType:d.relationshipType.trim(),
-          relationshipDirection:d.relationshipDirection, ownerKind:d.ownerKind,
-          ownerRef: d.ownerKind==="COMMUNAL" ? null : (d.ownerRef||"").trim(),
+          relationshipDirection:d.relationshipDirection,
           createdBy: graphViewer().label, createdAt: NOW_DATE,
         };
         if(ed.editingCode){
           const i = CUSTOM_NODE_TYPES.findIndex(t=>t.code===ed.editingCode);
-          if(i>-1) CUSTOM_NODE_TYPES[i] = Object.assign({}, CUSTOM_NODE_TYPES[i], obj, {ownerKind:CUSTOM_NODE_TYPES[i].ownerKind, ownerRef:CUSTOM_NODE_TYPES[i].ownerRef});
+          if(i>-1) CUSTOM_NODE_TYPES[i] = Object.assign({}, CUSTOM_NODE_TYPES[i], obj);
         } else {
           CUSTOM_NODE_TYPES.push(obj);
         }
@@ -9756,12 +9706,11 @@ function handleAction(action, el){
         const obj = {
           code:d.code.trim(), name:d.name.trim(), description:d.description.trim(), attributes,
           nodePairs:d.nodePairs.map(p=>({from:p.from,to:p.to})),
-          ownerKind:d.ownerKind, ownerRef: d.ownerKind==="PRODUCT" ? (d.ownerRef||"").trim() : null,
           createdBy: graphViewer().label, createdAt: NOW_DATE,
         };
         if(ed.editingCode){
           const i = CUSTOM_RELATIONSHIP_TYPES.findIndex(t=>t.code===ed.editingCode);
-          if(i>-1) CUSTOM_RELATIONSHIP_TYPES[i] = Object.assign({}, CUSTOM_RELATIONSHIP_TYPES[i], obj, {ownerKind:CUSTOM_RELATIONSHIP_TYPES[i].ownerKind, ownerRef:CUSTOM_RELATIONSHIP_TYPES[i].ownerRef});
+          if(i>-1) CUSTOM_RELATIONSHIP_TYPES[i] = Object.assign({}, CUSTOM_RELATIONSHIP_TYPES[i], obj);
         } else {
           CUSTOM_RELATIONSHIP_TYPES.push(obj);
         }
