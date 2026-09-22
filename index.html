@@ -3311,6 +3311,7 @@ const state = {
   cjVersionsOpen:false,
   cjBpmnOpen:false,
   cjBpmnStage:null,   // stage id when drilled into a stage's internal flow; null = top-level stage sequence
+  cjCreatePanel:null, // {name,portrait,owner,tags,techOwners:[],bpmnFile:null,dragOver}
   cjExpanded:{},        // {["stageId:scenarioId"]: bool} — is a given scenario's source list expanded
   cjSourcePanel:null,   // {stageId, scenarioId, sourceId, editing, draft} — the source side sheet
 
@@ -5613,7 +5614,7 @@ function CjLibraryPage(){
   return `
     <div class="page-title-row">
       <h1>Библиотека CJ</h1>
-      <div class="actions"><button class="btn btn-primary" data-action="cj-noop">${icon("plus")} Создать CJ</button></div>
+      <div class="actions"><button class="btn btn-primary" data-action="cj-open-create">${icon("plus")} Создать CJ</button></div>
     </div>
     <div class="cj-toolbar">
       <div class="search-wrap field-with-icon">
@@ -5631,6 +5632,7 @@ function CjLibraryPage(){
       ? (state.cjView==="table" ? CjTable(list) : `<div class="cj-card-grid">${list.map(CjCard).join("")}</div>`)
       : CjLibraryEmptyState()}
     ${state.cjFiltersOpen ? CjFiltersPanel() : ""}
+    ${state.cjCreatePanel ? CjCreateOverlay() : ""}
   `;
 }
 
@@ -6180,6 +6182,76 @@ function CjBpmnStageDiagram(cj, stage){
   s += `<circle cx="${endCx}" cy="${endCy}" r="18" fill="var(--bg)" stroke="var(--text)" stroke-width="3"/>`;
   s += `</svg>`;
   return s;
+}
+
+/* ============================= CJ CREATE (bpmn upload) ============================= */
+function CjCreateOverlay(){
+  const cp = state.cjCreatePanel;
+  const canCreate = cp.name.trim() && cp.owner.trim() && cp.bpmnFile;
+  return `
+    <div class="wizard-overlay">
+      <div class="wizard-head">
+        <div class="proj-link" style="display:flex;align-items:center;gap:var(--space-2);color:var(--text);font-weight:600;" data-action="cj-close-create">${icon("chevronLeft")} Назад</div>
+      </div>
+      <div class="wizard-body">
+       <div style="max-width:640px;margin:0 auto;">
+        <h2 style="margin-bottom:var(--space-5);">Создание CJ</h2>
+        <div class="readonly-note" style="align-items:flex-start;margin-bottom:var(--space-6);background:var(--blue-bg);color:var(--blue-text);border-radius:var(--radius-sm);padding:var(--space-4);">
+          ${icon("info")}
+          <span>Нельзя менять структуру CJ, добавленного с помощью нотации BPMN, можно менять только расположение атрибутов BI и этапов. Нельзя импортировать CJ из BPMN в ранее собранный CJ в формате Beeatlas.</span>
+        </div>
+
+        <div style="font-weight:600;margin-bottom:var(--space-3);">Добавить CJ в bpmn формате</div>
+        ${cp.bpmnFile ? `
+          <div class="search-result-card" style="margin-bottom:var(--space-6);">
+            ${icon("doc")}
+            <div style="flex:1;">
+              <div class="name">${escapeHtml(cp.bpmnFile)}</div>
+              <div class="code">bpmn</div>
+            </div>
+            <button class="icon-btn" data-action="cj-remove-bpmn" title="Удалить">${icon("x")}</button>
+          </div>
+        ` : `
+          <div data-action="cj-browse-bpmn" data-dropzone="bpmn" style="border:1.5px dashed var(--border-strong);border-radius:var(--radius);padding:var(--space-7);text-align:center;margin-bottom:var(--space-6);cursor:pointer;${cp.dragOver?"background:var(--bg-alt);border-color:var(--blue);":""}">
+            <div style="font-size:14px;">Перетащите сюда файлы или <span style="color:var(--blue);">загрузите документы</span></div>
+            <div style="color:var(--text-tertiary);font-size:12.5px;margin-top:4px;">bpmn до 200 кб</div>
+          </div>
+          <input type="file" id="cjBpmnFileInput" accept=".bpmn,.xml" style="display:none;">
+        `}
+
+        <div class="field-block"><label class="field-label">Название*</label><input class="input" id="cjCreateName" value="${escapeHtml(cp.name)}" placeholder="Название CJ"/></div>
+        <div class="field-block"><label class="field-label">Портрет пользователя</label><input class="input" id="cjCreatePortrait" value="${escapeHtml(cp.portrait)}"/></div>
+        <div class="field-block"><label class="field-label">Владелец сценария*</label><input class="input" id="cjCreateOwner" value="${escapeHtml(cp.owner)}"/></div>
+        <div class="field-block"><label class="field-label">Приложение</label><input class="input" value="Beeatlas" disabled/></div>
+        <div class="field-block"><label class="field-label">Теги</label><input class="input" id="cjCreateTags" value="${escapeHtml(cp.tags)}" placeholder="Через запятую"/></div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3);">
+          <div style="font-weight:600;">Технический ответственный</div>
+          <button class="btn btn-outline btn-sm" data-action="cj-add-tech-owner">${icon("plus")} Добавить</button>
+        </div>
+        ${cp.techOwners.map((t,i)=>`
+          <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-2);">
+            <input class="input" id="cjTechOwner-${i}" data-tech-idx="${i}" value="${escapeHtml(t)}" placeholder="ФИО"/>
+            <button class="icon-btn" data-action="cj-remove-tech-owner" data-idx="${i}" title="Удалить">${icon("x")}</button>
+          </div>
+        `).join("")}
+
+        <div style="color:var(--text-secondary);font-size:12.5px;margin-top:var(--space-7);border-top:1px solid var(--border);padding-top:var(--space-5);">
+          <div style="font-weight:600;color:var(--text);margin-bottom:4px;">Обязательные поля для заполнения:</div>
+          <div>• Название CJ</div>
+          <div>• Владелец сценария</div>
+          <div>• Файл в формате bpmn</div>
+        </div>
+       </div>
+      </div>
+      <div class="wizard-foot">
+        <div style="max-width:640px;width:100%;margin:0 auto;display:flex;gap:var(--space-3);justify-content:flex-end;">
+          <button class="btn btn-outline" data-action="cj-close-create">Отмена</button>
+          <button class="btn btn-primary" data-action="cj-submit-create" ${canCreate?"":"disabled"}>Создать</button>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 /* ============================= PROJECTS LIST ============================= */
@@ -9176,6 +9248,7 @@ function bindGlobalEvents(){
     if(e.key === "Escape"){
       if(state.cjSourcePanel){ state.cjSourcePanel=null; render(); }
       else if(state.cjBpmnOpen){ state.cjBpmnOpen=false; state.cjBpmnStage=null; render(); }
+      else if(state.cjCreatePanel){ state.cjCreatePanel=null; render(); }
       else if(state.cjFiltersOpen){ state.cjFiltersOpen=false; render(); }
       else if(state.cjVersionsOpen){ state.cjVersionsOpen=false; render(); }
       else if(state.cjOpen){ state.cjOpen=null; render(); }
@@ -9184,6 +9257,29 @@ function bindGlobalEvents(){
       else if(state.wizard){ /* keep wizard open on escape to avoid accidental loss */ }
     }
   };
+
+  document.body.addEventListener("dragover", function(e){
+    if(e.target.closest && e.target.closest('[data-dropzone="bpmn"]')){
+      e.preventDefault();
+      if(state.cjCreatePanel && !state.cjCreatePanel.dragOver){ state.cjCreatePanel.dragOver = true; render(); }
+    }
+  });
+  document.body.addEventListener("dragleave", function(e){
+    if(e.target.closest && e.target.closest('[data-dropzone="bpmn"]')){
+      if(state.cjCreatePanel && state.cjCreatePanel.dragOver){ state.cjCreatePanel.dragOver = false; render(); }
+    }
+  });
+  document.body.addEventListener("drop", function(e){
+    if(e.target.closest && e.target.closest('[data-dropzone="bpmn"]')){
+      e.preventDefault();
+      if(state.cjCreatePanel){
+        state.cjCreatePanel.dragOver = false;
+        const f = e.dataTransfer.files && e.dataTransfer.files[0];
+        if(f) state.cjCreatePanel.bpmnFile = f.name;
+        render();
+      }
+    }
+  });
 
   const searchInput = document.getElementById("searchInput");
   if(searchInput){
@@ -9289,6 +9385,11 @@ function handleInput(el){
   else if(el.id==="ucName"){ state.sidePanel.name = el.value; render(); reFocus("ucName"); }
   else if(el.id==="ucSteps"){ state.sidePanel.steps = el.value; render(); reFocus("ucSteps"); }
   else if(el.id==="cjSearchInput"){ state.cjSearch = el.value; render(); reFocus("cjSearchInput"); }
+  else if(el.id==="cjCreateName"){ state.cjCreatePanel.name = el.value; render(); reFocus("cjCreateName"); }
+  else if(el.id==="cjCreatePortrait"){ state.cjCreatePanel.portrait = el.value; render(); reFocus("cjCreatePortrait"); }
+  else if(el.id==="cjCreateOwner"){ state.cjCreatePanel.owner = el.value; render(); reFocus("cjCreateOwner"); }
+  else if(el.id==="cjCreateTags"){ state.cjCreatePanel.tags = el.value; render(); reFocus("cjCreateTags"); }
+  else if(el.dataset.techIdx!==undefined){ state.cjCreatePanel.techOwners[+el.dataset.techIdx] = el.value; render(); reFocus("cjTechOwner-"+el.dataset.techIdx); }
   else if(el.dataset.callField){
     state.cjSourcePanel.draft.calls[+el.dataset.callIdx][el.dataset.callField] = el.value;
     render(); reFocus(el.id);
@@ -9340,6 +9441,10 @@ document.addEventListener("change", function(e){
   else if(e.target.id==="cjFilterFormatSelect"){ state.cjFilters.format = e.target.value; render(); }
   else if(e.target.id==="cjFilterTypeSelect"){ state.cjFilters.type = e.target.value; render(); }
   else if(e.target.id==="cjFilterChannelSelect"){ state.cjFilters.channel = e.target.value; render(); }
+  else if(e.target.id==="cjBpmnFileInput"){
+    const f = e.target.files && e.target.files[0];
+    if(f && state.cjCreatePanel){ state.cjCreatePanel.bpmnFile = f.name; render(); }
+  }
   else if(e.target.id==="acTechStatusSelect"){ state.appcat.techStatusFilter = e.target.value; render(); }
   else if(e.target.id==="acPatternTypeSelect"){ state.appcat.patternTypeFilter = e.target.value; render(); }
   else if(e.target.id==="acNfrSourceSelect"){ state.appcat.nfrSourceFilter = e.target.value; render(); }
@@ -9384,6 +9489,35 @@ function handleAction(action, el){
       state.cjFilters = {withGrafana:false, product:"", status:"", format:"", channel:"", type:""};
       render();
       break;
+
+    case "cj-open-create":
+      state.cjCreatePanel = {name:"", portrait:"", owner:"", tags:"", techOwners:[""], bpmnFile:null, dragOver:false};
+      render();
+      break;
+    case "cj-close-create": state.cjCreatePanel = null; render(); break;
+    case "cj-browse-bpmn": document.getElementById("cjBpmnFileInput")?.click(); break;
+    case "cj-remove-bpmn": state.cjCreatePanel.bpmnFile = null; render(); break;
+    case "cj-add-tech-owner": state.cjCreatePanel.techOwners.push(""); render(); break;
+    case "cj-remove-tech-owner": state.cjCreatePanel.techOwners.splice(+el.dataset.idx,1); render(); break;
+    case "cj-submit-create": {
+      const cp = state.cjCreatePanel;
+      if(!cp.name.trim() || !cp.owner.trim() || !cp.bpmnFile) break;
+      CJ_LIBRARY.unshift({
+        id: uid("cj"), status:"Черновик", statusColor:"gray",
+        extraBadges:[{t:"BPMN",c:"orange"}],
+        name: cp.name.trim(), code:"CJ.00.00.00.00",
+        desc:"Создан из файла " + cp.bpmnFile,
+        app:"Beeatlas",
+        channels:"—",
+        tags: cp.tags.split(",").map(t=>t.trim()).filter(Boolean),
+        date: NOW_DATE, clickable:false,
+      });
+      state.cjCreatePanel = null;
+      showToast("CJ создан из файла BPMN");
+      render();
+      break;
+    }
+
     case "open-cj":
       if(el.dataset.clickable!=="1"){ showToast("Показано в прототипе только для этого CJ"); break; }
       state.cjOpen = {cjId: el.dataset.id};
