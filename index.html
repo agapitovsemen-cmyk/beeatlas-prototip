@@ -4021,6 +4021,11 @@ const CUSTOM_RELATIONSHIP_TYPES = [
     nodePairs:[{from:"CJ",to:"SoftwareSystem"}],
     createdBy:"Мария Кузнецова", createdAt:"20.09.2026"},
 ];
+const GRAPH_TYPE_TREE_ROOTS = [
+  {id:"CJ", label:"CJ"},
+  {id:"SoftwareSystem", label:"SoftwareSystem"},
+  {id:"Container", label:"Container"},
+];
 function findNodeType(code){ return CUSTOM_NODE_TYPES.find(t=>t.code===code); }
 function findRelType(code){ return CUSTOM_RELATIONSHIP_TYPES.find(t=>t.code===code); }
 function visibleNodeTypes(){ return CUSTOM_NODE_TYPES; }
@@ -4051,6 +4056,7 @@ function defaultGraphState(){
     zoom:1,
     exportMenuOpen:false,
     typeKind:"node",           // "node" | "relationship" — which dictionary list is shown
+    typeTreeExpanded:{CJ:true, SoftwareSystem:true, Container:true, __other__:true},
     typeEditor:null,           // {kind, editingCode, draft:{...}}
     addNode:null,              // {attachTo, draft:{typeCode,name,attributes}}
     addRel:null,               // {anchorId, draft:{typeCode,anchorRole,otherId,attributes}}
@@ -5295,30 +5301,56 @@ function GraphCustomNodeCard(inst){
 
 function GraphTypesPage(){
   const g = state.graph;
-  const nodeTypes = visibleNodeTypes();
-  const relTypes = visibleRelTypes();
-  const list = g.typeKind==="node" ? nodeTypes : relTypes;
+  const isNode = g.typeKind==="node";
+  const list = isNode ? visibleNodeTypes() : visibleRelTypes();
+  const buckets = GRAPH_TYPE_TREE_ROOTS.map(root => ({
+    root,
+    items: isNode
+      ? list.filter(t=>t.linkableNodes.includes(root.id))
+      : list.filter(t=>t.nodePairs.some(p=>p.from===root.id)),
+  }));
+  const bucketed = new Set();
+  buckets.forEach(b=>b.items.forEach(t=>bucketed.add(t.code)));
+  const orphans = list.filter(t=>!bucketed.has(t.code));
   return `
     <div class="filters-row">
       <div style="display:flex;gap:var(--space-2);">
-        <div class="home-chip ${g.typeKind==="node"?"active":""}" data-action="graph-set-type-kind" data-kind="node">Типы нод</div>
-        <div class="home-chip ${g.typeKind==="relationship"?"active":""}" data-action="graph-set-type-kind" data-kind="relationship">Типы связей</div>
+        <div class="home-chip ${isNode?"active":""}" data-action="graph-set-type-kind" data-kind="node">Типы нод</div>
+        <div class="home-chip ${!isNode?"active":""}" data-action="graph-set-type-kind" data-kind="relationship">Типы связей</div>
       </div>
       <div style="flex:1;"></div>
-      <button class="btn btn-primary" data-action="graph-new-type">${icon("plus")} ${g.typeKind==="node"?"Новый тип ноды":"Новый тип связи"}</button>
+      <button class="btn btn-primary" data-action="graph-new-type">${icon("plus")} ${isNode?"Новый тип ноды":"Новый тип связи"}</button>
     </div>
+    ${list.length ? `
+      <div class="ac-tree">
+        ${buckets.map(b=>GraphTypeTreeRoot(b.root, b.items, isNode)).join("")}
+        ${orphans.length ? GraphTypeTreeRoot({id:"__other__", label:"Другое"}, orphans, isNode) : ""}
+      </div>
+    ` : `<p style="color:var(--text-secondary);">Нет типов в этой группе.</p>`}
+  `;
+}
+
+function GraphTypeTreeRoot(root, items, isNode){
+  const open = !!state.graph.typeTreeExpanded[root.id];
+  return `
+    <div class="ac-tree-row lvl-1" data-action="graph-toggle-type-tree" data-id="${root.id}">
+      <span class="chev ${open?"open":""}">${icon("chevronRight")}</span><span>${escapeHtml(root.label)}</span>
+      <span class="badge gray" style="margin-left:auto;">${items.length}</span>
+    </div>
+    ${open ? `<div class="ac-tree-body">${items.length ? GraphTypeTreeTable(items, isNode) : `<p style="color:var(--text-secondary);padding:var(--space-4) var(--space-5);margin:0;">Нет типов, связанных с «${escapeHtml(root.label)}».</p>`}</div>` : ""}
+  `;
+}
+
+function GraphTypeTreeTable(items, isNode){
+  return `
     <div class="table-wrap">
       <table>
         <thead>
-          ${g.typeKind==="node"
+          ${isNode
             ? `<tr><th>Имя</th><th>Код</th><th>Описание</th><th>Соседи</th><th>Связь</th><th></th></tr>`
             : `<tr><th>Имя</th><th>Код</th><th>Описание</th><th>Пары нод</th><th></th></tr>`}
         </thead>
-        <tbody>
-          ${list.length
-            ? (g.typeKind==="node" ? nodeTypes.map(GraphNodeTypeRow).join("") : relTypes.map(GraphRelTypeRow).join(""))
-            : `<tr><td colspan="${g.typeKind==="node"?6:5}" style="text-align:center;color:var(--text-secondary);">Нет типов в этой группе.</td></tr>`}
-        </tbody>
+        <tbody>${items.map(isNode?GraphNodeTypeRow:GraphRelTypeRow).join("")}</tbody>
       </table>
     </div>
   `;
@@ -9632,6 +9664,7 @@ function handleAction(action, el){
     }
 
     case "graph-set-type-kind": state.graph.typeKind = el.dataset.kind; render(); break;
+    case "graph-toggle-type-tree": state.graph.typeTreeExpanded[el.dataset.id] = !state.graph.typeTreeExpanded[el.dataset.id]; render(); break;
     case "graph-new-type":
       state.graph.typeEditor = {
         kind: state.graph.typeKind, editingCode: null,
