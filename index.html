@@ -9554,6 +9554,13 @@ function saveLocation(){
         ifaceMode: state.appcat.ifaceMode,
         techDetail: state.appcat.techDetail,
       },
+      // CJ_LIBRARY ids are fixed string literals (unlike Проекты's uid()-regenerated
+      // project ids), so — unlike the projects deep route above — it's safe to remember
+      // exactly which CJ/branch was open, not just the section.
+      cj: {
+        libraryBranch: state.cjLibraryBranch,
+        open: state.cjOpen ? {cjId: state.cjOpen.cjId, branch: state.cjOpen.branch} : null,
+      },
     };
     sessionStorage.setItem(LOCATION_KEY, JSON.stringify(snapshot));
   } catch(e){}
@@ -10678,6 +10685,13 @@ function handleAction(action, el){
     if(loc.activeSidebar) state.activeSidebar = loc.activeSidebar;
     if(loc.route) state.route = loc.route;
     if(loc.appcat) Object.assign(state.appcat, loc.appcat);
+    if(loc.cj){
+      if(loc.cj.libraryBranch) state.cjLibraryBranch = loc.cj.libraryBranch;
+      const o = loc.cj.open;
+      if(o && cjBranchList(o.cjId).some(b=>b.id===o.branch)){
+        state.cjOpen = {cjId: o.cjId, branch: o.branch};
+      }
+    }
   }
 })();
 render();
