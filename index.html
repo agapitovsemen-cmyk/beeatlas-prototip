@@ -684,6 +684,10 @@
   .cj-stage-cell{display:flex;align-items:center;padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-size:13.5px;line-height:1.45;}
   .cj-stage-cell.empty{color:var(--text-tertiary);}
   .cj-stage-cell.wrap{align-items:flex-start;}
+  .cj-stage-unfilled{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-4);padding:var(--space-8) var(--space-5);border-right:1px solid var(--border);color:var(--text-tertiary);font-size:13.5px;}
+  .cj-stage-unfilled-add{width:36px;height:36px;border-radius:50%;border:1px solid var(--border-strong);background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);}
+  .cj-stage-unfilled-add svg{width:17px;height:17px;}
+  .cj-stage-unfilled-add:hover{background:var(--bg-alt);}
   .cj-below-links{position:sticky;left:0;background:var(--bg);z-index:6;padding:var(--space-4) 0 0 0;display:flex;gap:var(--space-5);font-size:14px;}
   .cj-below-links a{color:var(--blue);}
 
@@ -3429,30 +3433,30 @@ const CJ_LIBRARY = [
     tags:["E2E","B2C","Кто звонит","Голос"], date:"20.01.2025"},
   {id:"cj2", status:"Опубликован", statusColor:"green",
     extraBadges:[{t:"GRAFANA",c:"green"},{t:"BPMN",c:"orange"}],
-    name:"Название артефакта", code:"CJ.00.00.00.98",
-    desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории. Максимум 3 строки…",
+    name:"CJ по услуге «Перевод остатка баланса»", code:"CJ.01.05.02.00",
+    desc:"Клиент, у которого на счету остались неиспользованные средства и который хочет поделиться ими с другим абонентом, не выходя из приложения…",
     app:"Блокировка удаленного доступа сотрудникам \"ВымпелКом\" и Amdocs",
-    channels:"Web site, Мобильное приложение, Офисы продаж (мультибренд)",
-    tags:["E2E","B2C","Tag","Tag","Tag","Tag"], date:"20.01.2025"},
+    channels:"Мобильное приложение, USSD",
+    tags:["B2C","Баланс"], date:"20.01.2025"},
   {id:"cj3", status:"Опубликован", statusColor:"green",
     extraBadges:[{t:"GRAFANA",c:"green"},{t:"BPMN",c:"orange"}],
-    name:"Название артефакта", code:"CJ.00.00.00.98",
-    desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории. Максимум 3 строки…",
+    name:"CJ по услуге «Автоплатёж»", code:"CJ.01.03.04.00",
+    desc:"Клиент, который не хочет следить за балансом вручную и предпочитает, чтобы счёт пополнялся автоматически при снижении ниже порога…",
     app:"Блокировка удаленного доступа сотрудникам \"ВымпелКом\" и Amdocs",
-    channels:"Web site, Мобильное приложение, Офисы продаж (мультибренд)",
-    tags:["E2E","B2C","Tag","Tag","Tag","Tag"], date:"20.01.2025"},
+    channels:"Мобильное приложение",
+    tags:["B2C","Платежи"], date:"20.01.2025"},
   {id:"cj4", status:"Черновик", statusColor:"gray", extraBadges:[{t:"Beeatlas",c:"blue"}],
-    name:"Название артефакта", code:"CJ.00.00.00.98",
-    desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории.",
-    app:"—", channels:"—", tags:[], date:"18.01.2025"},
+    name:"CJ по услуге «Роуминг»", code:"CJ.01.07.01.00",
+    desc:"Клиент, который собирается в поездку за границу и хочет заранее подключить выгодный пакет связи для использования там.",
+    app:"—", channels:"Мобильное приложение, Личный кабинет", tags:["B2C","Роуминг"], date:"18.01.2025"},
   {id:"cj5", status:"Черновик", statusColor:"gray", extraBadges:[{t:"Beeatlas",c:"blue"}],
-    name:"Название артефакта", code:"CJ.00.00.00.98",
-    desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории.",
-    app:"—", channels:"—", tags:[], date:"18.01.2025"},
+    name:"CJ по услуге «Перенос номера (MNP)»", code:"CJ.01.09.03.00",
+    desc:"Абонент другого оператора, который хочет перенести свой привычный номер в билайн, не теряя его при смене оператора.",
+    app:"—", channels:"Салоны продаж, Личный кабинет", tags:["B2C","MNP"], date:"18.01.2025"},
   {id:"cj6", status:"Черновик", statusColor:"gray", extraBadges:[{t:"Beeatlas",c:"blue"}],
-    name:"Название артефакта", code:"CJ.00.00.00.98",
-    desc:"Описание артефакта (для BI), для CJ — описание портрета пользователя или целевой аудитории.",
-    app:"—", channels:"—", tags:[], date:"18.01.2025"},
+    name:"CJ по услуге «Детализация звонков»", code:"CJ.01.02.09.00",
+    desc:"Клиент, которому нужна подробная детализация звонков и трафика за период — например, для контроля расходов или отчётности.",
+    app:"—", channels:"Личный кабинет, Email", tags:["B2C","Биллинг"], date:"18.01.2025"},
 ];
 
 const CJ_SOURCE_META = {
@@ -3589,12 +3593,160 @@ const CJ_DEVELOP_STAGES = deepClone(CJ_MAIN_STAGES);
 // заводится здесь ещё до develop/main (только первые 2 этапа продуманы, остальное впереди).
 const CJ_DESIGN_STAGES = deepClone(CJ_MAIN_STAGES.slice(0,2));
 
+// Реальный "незаполненный" CJ — не нулевая матрица, а один пустой этап-заготовка (см.
+// мокап продукта: колонка "Название этапа 1" с единственным блоком "Добавьте BI в этап").
+// Если CJ в ветке создан — он либо заполнен, либо пустой в этом смысле; ветка, где CJ
+// вовсе не заводили, отдельный (более редкий) случай — см. CjBranchEmptyState.
+function cjUnfilledStage(){ return {id:"st-unfilled", color:"c1", name:"Название этапа 1", unfilled:true}; }
+
+// cj2..cj6 — раньше были карточками-заглушками без состава; наполнены мок-данными по
+// образцу cj1 (2 этапа, по одному сценарию с ручной привязкой), чтобы каждый CJ в
+// библиотеке было можно реально открыть и посмотреть. design/develop у них — черновик
+// (незаполненный этап-заготовка), main — заполнен.
+const CJ2_STAGES = [
+  {
+    id:"st1", color:"c1", name:"Название этапа 1",
+    biName:"Поиск услуги «Перевод остатка»", biId:"BI 01.05.02.01",
+    description:"Я, как клиент билайна, хочу найти способ передать часть баланса другому абоненту",
+    characteristic:{t:"Целевой", c:"pink"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Пользователь открывает раздел «Баланс» в приложении.","2. Выбирает пункт «Перевести остаток»."],
+    channels:"Мобильное приложение, USSD", tags:["B2C","Баланс"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"Beeatlas", capability:"Получение доступных способов перевода остатка", endpoint:"GET /balance/transfer-options", iface:"REST"},
+    ]}]}],
+  },
+  {
+    id:"st2", color:"c2", name:"Название этапа 2",
+    biName:"Перевод остатка на другой номер", biId:"BI 01.05.02.02",
+    description:"Я, как клиент билайна, хочу перевести часть своего баланса на номер другого абонента",
+    characteristic:{t:"Целевой", c:"pink"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Пользователь вводит номер получателя и сумму.","2. Подтверждает операцию кодом из SMS.","3. Средства списываются и зачисляются получателю."],
+    channels:"Мобильное приложение, USSD", tags:["B2C","Баланс"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"Billing", capability:"Списание и зачисление суммы перевода между лицевыми счетами", endpoint:"POST /billing/balance-transfer", iface:"REST"},
+      {app:"SMS Gateway", capability:"Отправка кода подтверждения перевода", endpoint:"POST /sms/otp", iface:"REST"},
+    ]}]}],
+  },
+];
+const CJ3_STAGES = [
+  {
+    id:"st1", color:"c1", name:"Название этапа 1",
+    biName:"Настройка автоплатежа", biId:"BI 01.03.04.01",
+    description:"Я, как клиент билайна, хочу настроить автоматическое пополнение баланса с банковской карты",
+    characteristic:{t:"Целевой", c:"pink"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Пользователь привязывает банковскую карту.","2. Задаёт порог и сумму автоплатежа."],
+    channels:"Мобильное приложение", tags:["B2C","Платежи"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"Payment Gateway", capability:"Привязка банковской карты для автосписаний", endpoint:"POST /payments/cards/bind", iface:"REST"},
+    ]}]}],
+  },
+  {
+    id:"st2", color:"c2", name:"Название этапа 2",
+    biName:"Автоматическое списание при снижении баланса", biId:"BI 01.03.04.02",
+    description:"Я, как клиент билайна, хочу, чтобы баланс пополнялся автоматически, когда опускается ниже порога",
+    characteristic:{t:"Фактический", c:"blue"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Баланс опускается ниже заданного порога.","2. Система списывает средства с привязанной карты.","3. Приходит уведомление о пополнении."],
+    channels:"Мобильное приложение", tags:["B2C","Платежи"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"Payment Gateway", capability:"Списание средств с привязанной карты", endpoint:"POST /payments/charge", iface:"REST"},
+      {app:"Notification Service", capability:"Отправка push-уведомления об автопополнении", endpoint:"POST /notifications/push", iface:"REST"},
+    ]}]}],
+  },
+];
+const CJ4_STAGES = [
+  {
+    id:"st1", color:"c1", name:"Название этапа 1",
+    biName:"Подключение пакета роуминга", biId:"BI 01.07.01.01",
+    description:"Я, как клиент билайна, хочу подключить пакет услуг перед поездкой за границу",
+    characteristic:{t:"Целевой", c:"pink"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Пользователь выбирает страну поездки.","2. Подключает подходящий пакет роуминга."],
+    channels:"Мобильное приложение, Личный кабинет", tags:["B2C","Роуминг"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"Roaming Service", capability:"Подключение пакета роуминга по выбранной стране", endpoint:"POST /roaming/packages/activate", iface:"REST"},
+    ]}]}],
+  },
+  {
+    id:"st2", color:"c2", name:"Название этапа 2",
+    biName:"Списание трафика и минут в роуминге", biId:"BI 01.07.01.02",
+    description:"Я, как клиент билайна, хочу пользоваться связью за границей в рамках подключённого пакета",
+    characteristic:{t:"Фактический", c:"blue"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Пользователь совершает звонки и использует интернет за границей.","2. Система списывает расход в рамках пакета."],
+    channels:"Мобильное приложение, Личный кабинет", tags:["B2C","Роуминг"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"Roaming Service", capability:"Учёт расхода трафика и минут в рамках пакета роуминга", endpoint:"POST /roaming/usage", iface:"REST"},
+    ]}]}],
+  },
+];
+const CJ5_STAGES = [
+  {
+    id:"st1", color:"c1", name:"Название этапа 1",
+    biName:"Оформление заявки MNP", biId:"BI 01.09.03.01",
+    description:"Я, как абонент другого оператора, хочу перенести свой номер к билайну",
+    characteristic:{t:"Целевой", c:"pink"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Пользователь подаёт заявку на перенос номера.","2. Указывает данные текущего оператора."],
+    channels:"Салоны продаж, Личный кабинет", tags:["B2C","MNP"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"MNP Service", capability:"Регистрация заявки на перенос номера", endpoint:"POST /mnp/requests", iface:"REST"},
+    ]}]}],
+  },
+  {
+    id:"st2", color:"c2", name:"Название этапа 2",
+    biName:"Активация номера у нового оператора", biId:"BI 01.09.03.02",
+    description:"Я, как клиент билайна, хочу, чтобы перенесённый номер заработал в оговорённый срок",
+    characteristic:{t:"Фактический", c:"blue"}, lifecycle:{t:"Не в эксплуатации", c:"orange"},
+    scenario:["1. Оператор-донор подтверждает перенос.","2. Номер активируется в сети билайн."],
+    channels:"Салоны продаж, Личный кабинет", tags:["B2C","MNP"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"MNP Service", capability:"Активация перенесённого номера в сети", endpoint:"POST /mnp/activate", iface:"REST"},
+    ]}]}],
+  },
+];
+const CJ6_STAGES = [
+  {
+    id:"st1", color:"c1", name:"Название этапа 1",
+    biName:"Запрос детализации звонков", biId:"BI 01.02.09.01",
+    description:"Я, как клиент билайна, хочу заказать детализацию своих звонков и трафика за период",
+    characteristic:{t:"Целевой", c:"pink"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Пользователь выбирает период в личном кабинете.","2. Заказывает детализацию."],
+    channels:"Личный кабинет, Email", tags:["B2C","Биллинг"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"Billing", capability:"Формирование запроса детализации за выбранный период", endpoint:"POST /billing/details/request", iface:"REST"},
+    ]}]}],
+  },
+  {
+    id:"st2", color:"c2", name:"Название этапа 2",
+    biName:"Выгрузка детализации", biId:"BI 01.02.09.02",
+    description:"Я, как клиент билайна, хочу получить готовую детализацию звонков в удобном формате",
+    characteristic:{t:"Фактический", c:"blue"}, lifecycle:{t:"В эксплуатации", c:"green"},
+    scenario:["1. Система формирует файл детализации.","2. Пользователь скачивает файл или получает его на почту."],
+    channels:"Личный кабинет, Email", tags:["B2C","Биллинг"], docs:"Ссылка", metrics:"Текстовое описание метрик",
+    scenarios:[{id:"sc1", sources:[{id:"m", type:"manual", label:"Ручная привязка", calls:[
+      {app:"Billing", capability:"Формирование файла детализации в PDF/CSV", endpoint:"GET /billing/details/export", iface:"REST"},
+      {app:"Notification Service", capability:"Отправка готовой детализации на email", endpoint:"POST /notifications/email", iface:"REST"},
+    ]}]}],
+  },
+];
+
+function cjSystemBranchMeta(){
+  return [
+    {id:"design", kind:"system", parent:null, createdBy:null, createdAt:null},
+    {id:"develop", kind:"system", parent:null, createdBy:null, createdAt:null},
+    {id:"main", kind:"system", parent:null, createdBy:null, createdAt:null},
+  ];
+}
+["cj2","cj3","cj4","cj5","cj6"].forEach(id=>{ CJ_BRANCH_META[id] = cjSystemBranchMeta(); });
+
 const CJ_BRANCHES = {
   cj1: {
     design: { stages: CJ_DESIGN_STAGES },
     develop: { stages: CJ_DEVELOP_STAGES },
     main: { stages: CJ_MAIN_STAGES },
   },
+  cj2: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ2_STAGES} },
+  cj3: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ3_STAGES} },
+  cj4: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ4_STAGES} },
+  cj5: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ5_STAGES} },
+  cj6: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ6_STAGES} },
 };
 
 // Для CJ без явной записи в CJ_META (весь набор, кроме cj1, где нет отдельно
@@ -3615,12 +3767,14 @@ function cjHasComposition(cjId, branchId){ return cjBranchTree(cjId, branchId).l
 // реально смоделированы) — заводим три системных ветки на лету, все с пустым составом.
 function ensureCjBranches(cjId){
   if(CJ_BRANCH_META[cjId]) return;
-  CJ_BRANCH_META[cjId] = [
-    {id:"design", kind:"system", parent:null, createdBy:null, createdAt:null},
-    {id:"develop", kind:"system", parent:null, createdBy:null, createdAt:null},
-    {id:"main", kind:"system", parent:null, createdBy:null, createdAt:null},
-  ];
-  CJ_BRANCHES[cjId] = { design:{stages:[]}, develop:{stages:[]}, main:{stages:[]} };
+  CJ_BRANCH_META[cjId] = cjSystemBranchMeta();
+  // только что созданный CJ — во всех трёх ветках есть черновик-заготовка (незаполненный
+  // этап), а не буквально пустая матрица; см. cjUnfilledStage.
+  CJ_BRANCHES[cjId] = {
+    design:{stages:[cjUnfilledStage()]},
+    develop:{stages:[cjUnfilledStage()]},
+    main:{stages:[cjUnfilledStage()]},
+  };
 }
 function activeCjStages(){
   return state.cjOpen ? cjBranchTree(state.cjOpen.cjId, state.cjOpen.branch) : [];
@@ -6003,13 +6157,29 @@ function CjMatrix(cj){
 
       ${CJ_FIELD_ROWS.map(f=>`
         <div class="cj-field-row">${escapeHtml(f.label)}</div>
-        ${stages.map(s=>CjStageFieldCell(s,f.key)).join("")}
+        ${stages.map(s=>s.unfilled ? "" : CjStageFieldCell(s,f.key)).join("")}
       `).join("")}
+
+      ${stages.map((s,i)=>s.unfilled ? CjUnfilledStageCell(i) : "").join("")}
 
       <div class="cj-below-links">
         <a data-action="cj-noop">Показать скрытые</a>
         <a data-action="cj-noop">Свернуть CJ</a>
       </div>
+    </div>
+  `;
+}
+
+// Незаполненный этап (см. cjUnfilledStage) не расписывается по строкам — вместо этого
+// одна ячейка перекрывает всю колонку целиком (явное grid-column/grid-row, в обход
+// построчной раскладки остальных ячеек), как в реальном продукте: только приглашение
+// добавить BI, без 11 пустых строк под него.
+function CjUnfilledStageCell(stageIndex){
+  const col = stageIndex + 2; // 1 = колонка подписей, дальше по одной на этап
+  return `
+    <div class="cj-stage-unfilled" style="grid-column:${col};grid-row:2 / span ${CJ_FIELD_ROWS.length};" data-action="cj-noop">
+      <div class="txt">Добавьте BI в этап</div>
+      <button class="cj-stage-unfilled-add" data-action="cj-noop">${icon("plus")}</button>
     </div>
   `;
 }
@@ -6244,20 +6414,21 @@ function CjBranchDeleteConfirm(branchId){
   `;
 }
 
+// Ноль этапов — это не "CJ пустой" (пустой CJ, если он создан в ветке, всегда имеет
+// хотя бы один незаполненный этап-заготовку, см. cjUnfilledStage/CjUnfilledStageCell) —
+// это значит, что CJ в этой ветке вообще не заводили. Более редкий случай, отдельная
+// формулировка, чтобы не путать с обычным "ещё не заполнен".
 function CjBranchEmptyState(){
   const cjId = state.cjOpen.cjId;
   const branch = state.cjOpen.branch;
-  // "клонируйте от X" честно указывает только на ветки, где реально есть состав —
-  // раньше тут был захардкожен «main»/«develop» независимо от того, какая ветка сейчас
-  // открыта (включая саму develop, если открыта была именно она — бессмысленный совет).
   const donors = cjBranchList(cjId).filter(b=>b.id!==branch && cjHasComposition(cjId,b.id)).map(b=>b.id);
   const hint = donors.length
-    ? `Наполните эту ветку вручную или создайте новую ветку-клон от «${donors.join("»/«")}», чтобы продолжить проектирование от существующего состава.`
-    : `Наполните эту ветку вручную — в других ветках этого CJ состава тоже пока нет.`;
+    ? `Создайте ветку-клон от «${donors.join("»/«")}», чтобы перенести сюда состав, либо начните с нуля.`
+    : `В других ветках этого CJ его тоже пока нет — начните с нуля.`;
   return `
     <div class="empty-state">
       <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-5);color:var(--text-tertiary);">${icon("gitBranch")}</div>
-      <h3>В ветке «${escapeHtml(branch)}» пока нет состава</h3>
+      <h3>Этот CJ не создан в ветке «${escapeHtml(branch)}»</h3>
       <div style="color:var(--text-secondary);max-width:420px;">Ветки полностью изолированы — состав не расшаривается автоматически. ${hint}</div>
     </div>
   `;
@@ -6384,7 +6555,7 @@ function CjMergePanel(){
           </div>
         </div>
 
-        ${p.target==="main" ? `<div class="readonly-note" style="align-items:flex-start;margin-top:var(--space-5);background:var(--blue-bg);color:var(--blue-text);">${icon("info")} Объединение с main обновляет канон сразу после подтверждения. Апрув вторым лицом в вижен-доке не зафиксирован (открытый вопрос).</div>` : ""}
+        ${p.target==="main" ? `<div class="readonly-note" style="align-items:flex-start;margin-top:var(--space-5);background:var(--blue-bg);color:var(--blue-text);">${icon("info")} Объединение с main обновит канон сразу после подтверждения — действие необратимо.</div>` : ""}
       </div>
       <div class="side-foot">
         <button class="btn btn-outline" data-action="cj-close-merge">Отменить</button>
