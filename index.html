@@ -257,9 +257,9 @@
   .char-counter{font-size:12px;color:var(--text-tertiary);text-align:right;margin-top:var(--space-2);}
   .field-block{margin-bottom:var(--space-5);}
   .field-with-icon{position:relative;}
-  .field-with-icon svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-tertiary);}
+  .field-with-icon svg{position:absolute;left:var(--space-4);top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-tertiary);}
   .field-with-icon .input{padding-left:var(--space-8);}
-  .field-with-icon .clear-x{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text-tertiary);width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+  .field-with-icon .clear-x{position:absolute;right:var(--space-4);top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text-tertiary);width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
 
   /* floating-label field (used in Архитектор filter, create/publish panels) */
   .ffield{position:relative;}
@@ -279,7 +279,7 @@
   .filters-row .arch-input{width:230px;}
   .select-wrap{position:relative;width:180px;}
   .select-wrap select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-top:var(--space-6);padding-bottom:var(--space-2);padding-right:var(--space-8);}
-  .select-wrap svg{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;pointer-events:none;color:var(--text-secondary);}
+  .select-wrap svg{position:absolute;right:var(--space-4);top:50%;transform:translateY(-50%);width:16px;height:16px;pointer-events:none;color:var(--text-secondary);}
   .select-wrap .ffield-label{top:15px;font-size:12px;color:var(--text-secondary);transform:none;}
   .archsuggest-item{padding:var(--space-3) var(--space-5);cursor:pointer;}
   .archsuggest-item:hover{background:var(--bg-alt);}
@@ -419,10 +419,16 @@
   .req-name{color:var(--text);font-weight:600;}
   .req-list-cell div{margin-bottom:var(--space-1);font-size:13.5px;}
 
-  .view-toggle{display:flex;gap:2px;background:var(--gray-bg);border-radius:10px;padding:3px;flex:0 0 auto;}
-  .view-toggle-btn{width:32px;height:28px;border:none;background:transparent;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);}
-  .view-toggle-btn svg{width:16px;height:16px;}
-  .view-toggle-btn.active{background:var(--bg);color:var(--text);box-shadow:var(--shadow-sm);}
+  /* sized to match .btn-outline's rendered height (43px: space-3 padding + 1px border
+     each side + content row) so it sits flush with adjacent toolbar buttons like
+     "Фильтры" — was previously two conflicting same-named rules (one here, one
+     duplicated further down for the CJ toolbar) whose leftover properties merged into
+     an oversized, inconsistent control; consolidated into this single definition. */
+  .view-toggle{display:flex;align-items:stretch;height:43px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);overflow:hidden;flex:0 0 auto;}
+  .view-toggle-btn{width:43px;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);}
+  .view-toggle-btn svg{width:17px;height:17px;}
+  .view-toggle-btn:not(:last-child){border-right:1px solid var(--border-strong);}
+  .view-toggle-btn.active{background:var(--bg-alt);color:var(--text);}
   .view-toggle-btn:hover:not(.active){color:var(--text);}
 
   .req-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);}
@@ -577,12 +583,11 @@
 
   /* ---------- CJ library ---------- */
   .cj-toolbar{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);flex-wrap:wrap;}
-  .cj-toolbar .search-wrap{flex:1;min-width:260px;position:relative;}
-  .view-toggle{display:flex;border:1px solid var(--border-strong);border-radius:11px;overflow:hidden;flex:0 0 auto;}
-  .view-toggle-btn{width:44px;height:44px;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);}
-  .view-toggle-btn:not(:last-child){border-right:1px solid var(--border-strong);}
-  .view-toggle-btn.active{background:var(--bg-alt);color:var(--text);}
-  .cj-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-5);}
+  .cj-toolbar .search-wrap{width:648px;flex:0 0 auto;position:relative;}
+  /* 12-column fluid grid — each card spans 4 of 12 columns, so 3 cards per row at any
+     container width (was auto-fill/minmax, which happened to fit 4 narrower cards). */
+  .cj-card-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--space-5);}
+  .cj-card-grid .cj-card{grid-column:span 4;}
   .cj-card{cursor:pointer;display:flex;flex-direction:column;}
   .cj-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-sm);}
   .cj-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-2);margin-bottom:var(--space-4);}
