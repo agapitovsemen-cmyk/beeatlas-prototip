@@ -655,9 +655,6 @@
   .cj-select-item .check{color:var(--text);flex:0 0 auto;display:flex;}
   .cj-select-item .check svg{width:16px;height:16px;}
 
-  .cj-branch-add{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px dashed var(--border-strong);background:transparent;color:var(--blue);}
-  .cj-branch-add svg{width:14px;height:14px;}
-  .cj-branch-add:hover{border-color:var(--blue);}
   .cj-branch-del-confirm{background:var(--bg-alt);border:1px solid var(--border-strong);border-radius:8px;padding:var(--space-3);margin:2px 0;}
   .cj-branch-del-confirm .txt{font-size:12.5px;color:var(--text);margin-bottom:var(--space-2);line-height:1.4;}
   .cj-branch-del-confirm .row{display:flex;gap:var(--space-2);justify-content:flex-end;}
@@ -6478,10 +6475,10 @@ function CjBranchBar(cjId){
     <div class="cj-branch-bar">
       ${CjSelectField({id:"cj-branch-switch", branches, activeId:active, action:"cj-switch-branch"})}
       ${activeMeta && activeMeta.kind==="user" ? `<button class="icon-btn" data-action="cj-branch-delete-ask" data-branch="${active}" title="Удалить ветку">${icon("trash")}</button>` : ""}
-      <button class="cj-branch-add" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
-      ${cjBranchLocked(cjId, active) ? `<span class="cj-branch-lock-badge"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
-      ${runningHere ? `<span class="cj-merge-running-banner"><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>` : ""}
-      <button class="btn btn-outline btn-sm" data-action="cj-open-merge" style="margin-left:auto;" ${running?"disabled":""} title="${running?"Дождитесь завершения текущего объединения":""}">Объединить ветки</button>
+      <button class="btn btn-outline btn-sm" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
+      <button class="btn btn-outline btn-sm" data-action="cj-open-merge" ${running?"disabled":""} title="${running?"Дождитесь завершения текущего объединения":""}">Объединить ветки</button>
+      ${cjBranchLocked(cjId, active) ? `<span class="cj-branch-lock-badge" style="margin-left:auto;"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
+      ${runningHere ? `<span class="cj-merge-running-banner"${cjBranchLocked(cjId, active)?"":' style="margin-left:auto;"'}><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>` : ""}
     </div>
     ${state.cjBranchDeleteConfirm===active ? `<div style="padding:0 var(--space-6) var(--space-3);">${CjBranchDeleteConfirm(active)}</div>` : ""}
   `;
