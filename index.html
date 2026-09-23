@@ -702,8 +702,8 @@
      trigger horizontal scroll (via .cj-matrix-wrap's overflow:auto) once there are more
      stages than fit at their minimum width, instead of pinning to content width always. */
   .cj-matrix{display:grid;grid-auto-rows:minmax(52px,auto);align-items:stretch;width:100%;min-width:min-content;}
-  .cj-field-col-head{position:sticky;left:0;background:var(--bg);z-index:6;height:52px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-secondary);gap:var(--space-2);}
-  .cj-field-row{position:sticky;left:0;background:var(--bg);z-index:6;display:flex;align-items:center;font-size:13.5px;color:var(--text-secondary);padding:var(--space-3) var(--space-4) var(--space-3) 0;border-bottom:1px solid var(--border);}
+  .cj-field-col-head{position:sticky;left:0;background:var(--bg);z-index:6;height:52px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-secondary);gap:var(--space-2);padding-left:var(--space-4);}
+  .cj-field-row{position:sticky;left:0;background:var(--bg);z-index:6;display:flex;align-items:center;font-size:13.5px;color:var(--text-secondary);padding:var(--space-3) var(--space-4) var(--space-3) var(--space-4);border-bottom:1px solid var(--border);}
   .cj-stage-head{height:52px;display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:0 var(--space-4);font-weight:700;font-size:14px;border-radius:10px 10px 0 0;color:var(--text);border-right:1px solid var(--border);}
   .cj-stage-head.c1{background:#e3f5e8;}
   .cj-stage-head.c2{background:#fbf3d4;}
@@ -720,7 +720,7 @@
   .cj-stage-unfilled-add{width:36px;height:36px;border-radius:50%;border:1px solid var(--border-strong);background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);}
   .cj-stage-unfilled-add svg{width:17px;height:17px;}
   .cj-stage-unfilled-add:hover{background:var(--bg-alt);}
-  .cj-below-links{position:sticky;left:0;background:var(--bg);z-index:6;padding:var(--space-4) 0 0 0;display:flex;gap:var(--space-5);font-size:14px;}
+  .cj-below-links{position:sticky;left:0;background:var(--bg);z-index:6;padding:var(--space-4) 0 0 var(--space-4);display:flex;gap:var(--space-5);font-size:14px;}
   .cj-below-links a{color:var(--blue);}
 
   .cj-scenario-cell{flex-direction:column;align-items:stretch;gap:var(--space-3);padding:var(--space-3) var(--space-4);}
