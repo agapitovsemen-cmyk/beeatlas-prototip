@@ -598,12 +598,6 @@
   .cj-tag{background:var(--gray-bg);color:var(--gray-text);border-radius:20px;padding:2px var(--space-3);font-size:12px;font-weight:600;}
   .cj-card-date{margin-top:auto;padding-top:var(--space-3);border-top:1px solid var(--border);font-size:12px;color:var(--text-tertiary);}
 
-  /* branch-context switch — sits below search/filters, since search/filters run across
-     all branches at once; the chips only set which branch a card opens into (inherited
-     by CJ_DETAIL on click), they don't filter the list itself. Reuses .cj-branch-pill
-     (same chip look as the CJ_DETAIL branch bar). */
-  .cj-library-branch-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);}
-
   /* ---------- CJ detail overlay ---------- */
   .cj-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
   .cj-head{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4) var(--space-6);border-bottom:1px solid var(--border);}
@@ -622,18 +616,7 @@
 
   /* ---------- CJ branches (design/develop/main + user) ---------- */
   .cj-branch-bar{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border);background:var(--bg-alt);flex-wrap:wrap;}
-  .cj-branch-pills{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
-  .cj-branch-pill-wrap{position:relative;}
-  .cj-branch-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg);border:1px solid var(--border-strong);color:var(--text-secondary);}
-  .cj-branch-pill:hover{border-color:var(--text-tertiary);}
-  .cj-branch-pill.active{background:var(--yellow);border-color:var(--yellow);color:#1a1a1a;}
-  .cj-branch-pill.user{border-style:dashed;}
-  .cj-branch-pill.disabled{opacity:.4;cursor:not-allowed;border-style:dashed;}
-  .cj-branch-pill .empty-dot{width:6px;height:6px;border-radius:50%;background:var(--text-tertiary);flex:0 0 auto;}
-  .cj-branch-pill.active .empty-dot{background:#1a1a1a;opacity:.5;}
-  .cj-branch-pill .del{display:flex;color:inherit;opacity:.55;}
-  .cj-branch-pill .del svg{width:12px;height:12px;}
-  .cj-branch-pill .del:hover{opacity:1;}
+  .cj-branch-select{width:auto;min-width:160px;flex:0 0 auto;}
   .cj-branch-add{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px dashed var(--border-strong);background:transparent;color:var(--blue);}
   .cj-branch-add svg{width:14px;height:14px;}
   .cj-branch-add:hover{border-color:var(--blue);}
@@ -664,26 +647,6 @@
   .cj-merge-conflict-box .t{display:flex;align-items:flex-start;gap:var(--space-2);font-weight:600;font-size:13.5px;color:var(--red-text);}
   .cj-merge-conflict-box ul{margin:var(--space-3) 0 0;padding-left:34px;font-size:12.5px;color:var(--text);line-height:1.6;}
   .cj-merge-conflict-box .hint{margin-top:var(--space-3);padding-left:34px;font-size:12.5px;color:var(--text-secondary);}
-
-  /* branch dropdown — replaces a flat pill row once there can be many (user) branches;
-     reused by CjBranchBar and both merge-panel source/target pickers */
-  .cj-branch-dd-wrap{position:relative;display:inline-block;}
-  .cj-branch-dd-trigger{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:var(--yellow);border:1px solid var(--yellow);color:#1a1a1a;}
-  .cj-branch-dd-trigger svg{width:14px;height:14px;}
-  .cj-branch-dd-popover{top:calc(100% + 6px);left:0;right:auto;width:240px;padding:var(--space-3);}
-  .cj-branch-dd-search{margin-bottom:var(--space-2);}
-  .cj-branch-dd-list{max-height:220px;overflow-y:auto;}
-  .cj-branch-dd-item{display:flex;align-items:center;gap:6px;padding:var(--space-2) var(--space-2);border-radius:8px;font-size:13.5px;cursor:pointer;}
-  .cj-branch-dd-item:hover{background:var(--bg-alt);}
-  .cj-branch-dd-item.active{background:var(--bg-alt);font-weight:600;}
-  .cj-branch-dd-item .name{flex:1;}
-  .cj-branch-dd-item.user .name{font-style:italic;}
-  .cj-branch-dd-item .tag{font-size:10.5px;color:var(--text-tertiary);border:1px solid var(--border);border-radius:6px;padding:1px 6px;}
-  .cj-branch-dd-item .del{display:flex;color:var(--text-tertiary);opacity:.6;}
-  .cj-branch-dd-item .del svg{width:12px;height:12px;}
-  .cj-branch-dd-item .del:hover{opacity:1;color:var(--red-text);}
-  .cj-branch-dd-item.disabled{opacity:.4;cursor:not-allowed;}
-  .cj-branch-dd-empty{padding:var(--space-3) var(--space-2);font-size:13px;color:var(--text-tertiary);}
 
   .mini-spinner{width:13px;height:13px;border-radius:50%;border:2px solid var(--gray-bg);border-top-color:var(--yellow);animation:spin .8s linear infinite;flex:0 0 auto;}
   .cj-branch-lock-badge,.cj-merge-running-banner{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary);}
@@ -3385,7 +3348,6 @@ const state = {
   cjView:"grid",
   cjFiltersOpen:false,
   cjFilters:{withGrafana:false, product:"", status:"", format:"", channel:"", type:""},
-  cjLibraryBranch:"main", // design/develop/main — which branch's composition the library grid reflects
   cjOpen:null,        // {cjId, branch} when the CJ detail overlay is open
   cjMenuOpen:false,
   cjVersionsOpen:false,
@@ -3395,9 +3357,8 @@ const state = {
   cjExpanded:{},        // {["stageId:scenarioId"]: bool} — is a given scenario's source list expanded
   cjSourcePanel:null,   // {stageId, scenarioId, sourceId, editing, draft} — the source side sheet
   cjBranchPanel:null,    // {name, parent} — create-branch side panel
-  cjMergePanel:null,     // {source, target, strategy, description, conflicts, sourceQuery, targetQuery} — merge side panel
+  cjMergePanel:null,     // {source, target, strategy, description, conflicts} — merge side panel
   cjBranchDeleteConfirm:null, // branch id pending delete confirmation
-  cjBranchSwitchQuery:"",     // search text inside the CJ_DETAIL branch-switch dropdown
   cjMergeRunning:null,    // {cjId, source, target, strategy, description} while a merge is being processed (global — only one at a time)
 
   appcat: defaultAppcatState(),
@@ -3834,18 +3795,15 @@ function cjBranchLocked(cjId, branchId){
   return !!(r && r.cjId===cjId && r.target===branchId);
 }
 // 2026-09-23 (Александр): opening a CJ should default to main if it's actually filled
-// there, then fall back to any other branch that is — not just whatever branch the
-// library toolbar happened to be set to.
+// there, then fall back to any other branch that is.
 function cjBranchHasRealContent(cjId, branchId){
   const stages = cjBranchTree(cjId, branchId);
   return stages.length>0 && !(stages.length===1 && stages[0].unfilled);
 }
 function cjDefaultOpenBranch(cjId){
-  const lib = state.cjLibraryBranch;
-  if(cjBranchHasRealContent(cjId, lib)) return lib;
   if(cjBranchHasRealContent(cjId, "main")) return "main";
   const anyReal = cjBranchList(cjId).find(b=>cjBranchHasRealContent(cjId,b.id));
-  return anyReal ? anyReal.id : lib;
+  return anyReal ? anyReal.id : "main";
 }
 
 // Для CJ без явной записи в CJ_META (весь набор, кроме cj1, где нет отдельно
@@ -6042,11 +6000,6 @@ function CjLibraryPage(){
         <button class="view-toggle-btn ${state.cjView==="table"?"active":""}" data-action="cj-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
       </div>
     </div>
-    <div class="cj-library-branch-row">
-      <div class="cj-branch-pills">
-        ${["design","develop","main"].map(b=>`<div class="cj-branch-pill ${state.cjLibraryBranch===b?"active":""}" data-action="cj-set-library-branch" data-branch="${b}">${b}</div>`).join("")}
-      </div>
-    </div>
     ${list.length
       ? (state.cjView==="table" ? CjTable(list) : `<div class="cj-card-grid">${list.map(CjCard).join("")}</div>`)
       : CjLibraryEmptyState()}
@@ -6471,69 +6424,39 @@ function CjVersionsPanel(){
 }
 
 /* ============================= CJ BRANCHES (design/develop/main + пользовательские) ============================= */
-// 2026-09-23 walkthrough (Владислав): a flat pill row doesn't scale once user branches
-// pile up ("веток там много будет"). Replaced with a dropdown + type-to-filter search,
-// same pattern as the merge panel's source/target pickers (see CjBranchDropdown).
+// 2026-09-23: branch pickers are plain <select> fields (was a chip-dropdown-with-search,
+// then simplified further to a native form field per direct request).
 function CjBranchBar(cjId){
   const branches = cjBranchList(cjId);
   const active = state.cjOpen.branch;
+  const activeMeta = branches.find(b=>b.id===active);
   const running = state.cjMergeRunning;
   const runningHere = running && running.cjId===cjId;
-  const mergeLockedElsewhere = running && !runningHere;
   return `
     <div class="cj-branch-bar">
-      ${CjBranchDropdown({
-        popoverId:"cj-branch-switch", queryField:"cjBranchSwitchQuery", branches, activeId:active,
-        selectAction:"cj-switch-branch", showDelete:true,
-      })}
+      ${CjBranchSelectField({id:"cjBranchSwitchSelect", branches, activeId:active})}
+      ${activeMeta && activeMeta.kind==="user" ? `<button class="icon-btn" data-action="cj-branch-delete-ask" data-branch="${active}" title="Удалить ветку">${icon("trash")}</button>` : ""}
       <button class="cj-branch-add" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
       ${cjBranchLocked(cjId, active) ? `<span class="cj-branch-lock-badge"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
       ${runningHere ? `<span class="cj-merge-running-banner"><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>` : ""}
       <button class="btn btn-outline btn-sm" data-action="cj-open-merge" style="margin-left:auto;" ${running?"disabled":""} title="${running?"Дождитесь завершения текущего объединения":""}">Объединить ветки</button>
     </div>
+    ${state.cjBranchDeleteConfirm===active ? `<div style="padding:0 var(--space-6) var(--space-3);">${CjBranchDeleteConfirm(active)}</div>` : ""}
   `;
 }
 
-// Shared dropdown used both for the branch switcher above and the merge panel's
-// source/target pickers — trigger button (current selection) + popover with a search
-// input and the filtered branch list. Reuses the app's existing single-popover mechanism
-// (state.popover) rather than inventing a second one.
-function CjBranchDropdown({popoverId, queryField, branches, activeId, selectAction, showDelete, excludeId, disabledId, disabledTitle}){
-  const active = branches.find(b=>b.id===activeId);
-  const open = state.popover===popoverId;
-  const query = (queryField.includes(".") ? queryField.split(".").reduce((o,k)=>o&&o[k], state) : state[queryField]) || "";
-  const list = branches.filter(b=>b.id!==excludeId && b.id.toLowerCase().includes(query.toLowerCase()));
+// Plain <select> — one option per branch, user branches flagged in their label.
+// `excludeId`/`disabledId` let the merge panel keep its "target can't equal source" rule.
+// `wide` (merge panel: fills its field-block) vs auto-width (branch bar: sits inline with buttons).
+function CjBranchSelectField({id, branches, activeId, excludeId, disabledId, wide}){
+  const opts = branches.filter(b=>b.id!==excludeId);
   return `
-    <div class="cj-branch-dd-wrap">
-      <button class="cj-branch-dd-trigger" data-action="toggle-popover" data-popover="${popoverId}">
-        <span class="name">${escapeHtml(activeId||"—")}</span>${icon("chevronDown")}
-      </button>
-      ${open ? `
-        <div class="popover cj-branch-dd-popover">
-          <div class="cj-branch-dd-search field-with-icon">
-            ${icon("search")}
-            <input class="input" id="dd-search-${popoverId}" data-dd-search="${popoverId}" placeholder="Поиск ветки" value="${escapeHtml(query)}" autocomplete="off">
-          </div>
-          <div class="cj-branch-dd-list">
-            ${list.length ? list.map(b=>{
-              const isDisabled = b.id===disabledId;
-              if(showDelete && state.cjBranchDeleteConfirm===b.id) return CjBranchDeleteConfirm(b.id);
-              return `
-              <div class="cj-branch-dd-item ${b.id===activeId?"active":""} ${b.kind==="user"?"user":""} ${isDisabled?"disabled":""}" ${isDisabled?`title="${escapeHtml(disabledTitle||"")}"`:`data-action="${selectAction}" data-branch="${b.id}"`}>
-                <span class="name">${escapeHtml(b.id)}</span>
-                ${b.kind==="user"?`<span class="tag">своя</span>`:""}
-                ${showDelete && b.kind==="user" ? `<span class="del" data-action="cj-branch-delete-ask" data-branch="${b.id}" title="Удалить ветку">${icon("x")}</span>` : ""}
-              </div>`;
-            }).join("") : `<div class="cj-branch-dd-empty">Ничего не найдено</div>`}
-          </div>
-        </div>` : ""}
-    </div>
+    <select class="select${wide?"":" cj-branch-select"}" id="${id}">
+      ${opts.map(b=>`<option value="${escapeHtml(b.id)}" ${b.id===activeId?"selected":""} ${b.id===disabledId?"disabled":""}>${escapeHtml(b.id)}${b.kind==="user"?" (своя)":""}</option>`).join("")}
+    </select>
   `;
 }
 
-// Inline row (not a floating popover) — the branch dropdown's list scrolls
-// (.cj-branch-dd-list{overflow-y:auto}), which would clip an absolutely-positioned
-// confirm box; a normal-flow row has no such problem.
 function CjBranchDeleteConfirm(branchId){
   return `
     <div class="cj-branch-del-confirm">
@@ -6608,7 +6531,7 @@ function CjBranchCreatePanel(){
 }
 
 // 2026-09-23 walkthrough correction round:
-// - откуда/куда pill rows → dropdowns (branches can pile up, see CjBranchDropdown)
+// - откуда/куда pill rows → plain <select> fields (see CjBranchSelectField)
 // - the schematic "откуда→куда" compare cards with stage/scenario/source counts were
 //   called excessive and unhelpful — replaced with a plain description+date per branch
 // - added an optional merge-description field (no "commit" entity exists otherwise, so
@@ -6657,11 +6580,11 @@ function CjMergePanel(){
         <div style="display:flex;gap:var(--space-4);">
           <div class="field-block" style="flex:1;">
             <label class="field-label">Откуда</label>
-            ${CjBranchDropdown({popoverId:"cj-merge-source", queryField:"cjMergePanel.sourceQuery", branches, activeId:p.source, selectAction:"cj-merge-set-source"})}
+            ${CjBranchSelectField({id:"cjMergeSourceSelect", branches, activeId:p.source, wide:true})}
           </div>
           <div class="field-block" style="flex:1;">
             <label class="field-label">Куда</label>
-            ${CjBranchDropdown({popoverId:"cj-merge-target", queryField:"cjMergePanel.targetQuery", branches, activeId:p.target, selectAction:"cj-merge-set-target", disabledId:p.source, disabledTitle:"Совпадает с источником"})}
+            ${CjBranchSelectField({id:"cjMergeTargetSelect", branches, activeId:p.target, disabledId:p.source, wide:true})}
           </div>
         </div>
 
@@ -9883,7 +9806,6 @@ function saveLocation(){
       // project ids), so — unlike the projects deep route above — it's safe to remember
       // exactly which CJ/branch was open, not just the section.
       cj: {
-        libraryBranch: state.cjLibraryBranch,
         open: state.cjOpen ? {cjId: state.cjOpen.cjId, branch: state.cjOpen.branch} : null,
       },
     };
@@ -10082,9 +10004,9 @@ function handleInput(el){
   else if(el.id==="cjSearchInput"){ state.cjSearch = el.value; render(); reFocus("cjSearchInput"); }
   else if(el.id==="cjCreateName"){ state.cjCreatePanel.name = el.value; render(); reFocus("cjCreateName"); }
   else if(el.id==="cjBranchName"){ state.cjBranchPanel.name = el.value; render(); reFocus("cjBranchName"); }
-  else if(el.dataset.ddSearch==="cj-branch-switch"){ state.cjBranchSwitchQuery = el.value; render(); reFocus(el.id); }
-  else if(el.dataset.ddSearch==="cj-merge-source"){ state.cjMergePanel.sourceQuery = el.value; render(); reFocus(el.id); }
-  else if(el.dataset.ddSearch==="cj-merge-target"){ state.cjMergePanel.targetQuery = el.value; render(); reFocus(el.id); }
+  else if(el.id==="cjBranchSwitchSelect"){ el.dataset.branch = el.value; handleAction("cj-switch-branch", el); }
+  else if(el.id==="cjMergeSourceSelect"){ el.dataset.branch = el.value; handleAction("cj-merge-set-source", el); }
+  else if(el.id==="cjMergeTargetSelect"){ el.dataset.branch = el.value; handleAction("cj-merge-set-target", el); }
   else if(el.id==="cjMergeDescInput"){ state.cjMergePanel.description = el.value; render(); reFocus("cjMergeDescInput"); }
   else if(el.id==="cjCreatePortrait"){ state.cjCreatePanel.portrait = el.value; render(); reFocus("cjCreatePortrait"); }
   else if(el.id==="cjCreateOwner"){ state.cjCreatePanel.owner = el.value; render(); reFocus("cjCreateOwner"); }
@@ -10234,18 +10156,15 @@ function handleAction(action, el){
       state.popover=null;
       render();
       break;
-    case "cj-set-library-branch": state.cjLibraryBranch = el.dataset.branch; render(); break;
     case "cj-switch-branch": {
       state.cjOpen.branch = el.dataset.branch;
       state.cjExpanded = {};
       state.cjSourcePanel = null;
       state.cjBranchDeleteConfirm = null;
-      state.cjBranchSwitchQuery = "";
-      state.popover = null;
       render();
       break;
     }
-    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: state.cjOpen.branch}; state.popover=null; render(); break;
+    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: state.cjOpen.branch}; render(); break;
     case "cj-close-branch-create": state.cjBranchPanel = null; render(); break;
     case "cj-branch-create-submit": {
       const p = state.cjBranchPanel;
@@ -10285,12 +10204,11 @@ function handleAction(action, el){
       const branches = cjBranchList(cjId).map(b=>b.id);
       const source = state.cjOpen.branch;
       const target = branches.find(b=>b!==source) || source;
-      state.cjMergePanel = {source, target, strategy:"add", description:"", conflicts:null, sourceQuery:"", targetQuery:""};
-      state.popover = null;
+      state.cjMergePanel = {source, target, strategy:"add", description:"", conflicts:null};
       render();
       break;
     }
-    case "cj-close-merge": state.cjMergePanel = null; state.popover=null; render(); break;
+    case "cj-close-merge": state.cjMergePanel = null; render(); break;
     case "cj-merge-set-source": {
       const p = state.cjMergePanel;
       p.source = el.dataset.branch;
@@ -10299,8 +10217,6 @@ function handleAction(action, el){
         p.target = alt || p.source;
       }
       p.conflicts = null;
-      p.sourceQuery = ""; p.targetQuery = "";
-      state.popover = null;
       render();
       break;
     }
@@ -10309,8 +10225,6 @@ function handleAction(action, el){
       if(el.dataset.branch===p.source) break;
       p.target = el.dataset.branch;
       p.conflicts = null;
-      p.sourceQuery = ""; p.targetQuery = "";
-      state.popover = null;
       render();
       break;
     }
@@ -11061,7 +10975,6 @@ function handleAction(action, el){
     if(loc.route) state.route = loc.route;
     if(loc.appcat) Object.assign(state.appcat, loc.appcat);
     if(loc.cj){
-      if(loc.cj.libraryBranch) state.cjLibraryBranch = loc.cj.libraryBranch;
       const o = loc.cj.open;
       if(o){
         ensureCjBranches(o.cjId);
