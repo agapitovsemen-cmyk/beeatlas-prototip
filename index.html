@@ -621,7 +621,32 @@
 
   /* ---------- CJ branches (design/develop/main + user) ---------- */
   .cj-branch-bar{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border);background:var(--bg-alt);flex-wrap:wrap;}
-  .cj-branch-select{width:auto;min-width:160px;flex:0 0 auto;}
+
+  /* field-styled custom select — trigger looks exactly like .input/.select (16px inset for
+     both the text and the chevron); menu is absolutely positioned below the trigger so it
+     never depends on the browser's native <select> placement. */
+  .cj-select-field{position:relative;display:inline-block;flex:0 0 auto;}
+  .cj-select-field.wide{display:block;width:100%;}
+  .cj-select-trigger{
+    display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);width:100%;min-width:160px;
+    border:1px solid transparent;background:var(--input-bg);border-radius:var(--radius-sm);
+    padding:var(--space-3) var(--space-4);font-size:15px;color:var(--text);text-align:left;
+  }
+  .cj-select-trigger svg{width:16px;height:16px;color:var(--text-secondary);flex:0 0 auto;transition:transform .12s ease;}
+  .cj-select-trigger.open svg{transform:rotate(180deg);}
+  .cj-select-menu{
+    position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:320px;
+    background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);
+    padding:var(--space-2);z-index:60;max-height:260px;overflow-y:auto;
+  }
+  .cj-select-field.wide .cj-select-menu{width:100%;max-width:none;}
+  .cj-select-item{display:flex;align-items:center;gap:6px;padding:var(--space-3) var(--space-4);border-radius:8px;font-size:14.5px;cursor:pointer;}
+  .cj-select-item:hover{background:var(--bg-alt);}
+  .cj-select-item.active{font-weight:600;background:var(--bg-alt);}
+  .cj-select-item.disabled{opacity:.4;cursor:not-allowed;}
+  .cj-select-item .name{flex:1;}
+  .cj-select-item .tag{font-size:10.5px;color:var(--text-tertiary);border:1px solid var(--border);border-radius:6px;padding:1px 6px;}
+
   .cj-branch-add{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px dashed var(--border-strong);background:transparent;color:var(--blue);}
   .cj-branch-add svg{width:14px;height:14px;}
   .cj-branch-add:hover{border-color:var(--blue);}
@@ -6429,8 +6454,12 @@ function CjVersionsPanel(){
 }
 
 /* ============================= CJ BRANCHES (design/develop/main + пользовательские) ============================= */
-// 2026-09-23: branch pickers are plain <select> fields (was a chip-dropdown-with-search,
-// then simplified further to a native form field per direct request).
+// 2026-09-23: a native <select> can't guarantee its option list opens below the field —
+// Chrome/macOS positions it centered on the selected item, so it can hover over the
+// trigger itself, and its built-in arrow can't be pinned to an exact 16px inset either.
+// Replaced with a field-styled custom trigger + an absolutely-positioned menu anchored
+// to `top:calc(100% + 4px)` (always below) — same field look (.input/.select box,
+// radius, 16px padding) but fully controlled positioning.
 function CjBranchBar(cjId){
   const branches = cjBranchList(cjId);
   const active = state.cjOpen.branch;
@@ -6439,7 +6468,7 @@ function CjBranchBar(cjId){
   const runningHere = running && running.cjId===cjId;
   return `
     <div class="cj-branch-bar">
-      ${CjBranchSelectField({id:"cjBranchSwitchSelect", branches, activeId:active})}
+      ${CjSelectField({id:"cj-branch-switch", branches, activeId:active, action:"cj-switch-branch"})}
       ${activeMeta && activeMeta.kind==="user" ? `<button class="icon-btn" data-action="cj-branch-delete-ask" data-branch="${active}" title="Удалить ветку">${icon("trash")}</button>` : ""}
       <button class="cj-branch-add" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
       ${cjBranchLocked(cjId, active) ? `<span class="cj-branch-lock-badge"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
@@ -6450,15 +6479,28 @@ function CjBranchBar(cjId){
   `;
 }
 
-// Plain <select> — one option per branch, user branches flagged in their label.
-// `excludeId`/`disabledId` let the merge panel keep its "target can't equal source" rule.
-// `wide` (merge panel: fills its field-block) vs auto-width (branch bar: sits inline with buttons).
-function CjBranchSelectField({id, branches, activeId, excludeId, disabledId, wide}){
+// `id` doubles as the popover id (reuses the app's single-popover mechanism — see
+// state.popover). `excludeId`/`disabledId` let the merge panel keep its "target can't
+// equal source" rule. `wide` (merge panel: fills its field-block) vs auto-width
+// (branch bar: sits inline with buttons, sized to its longest option).
+function CjSelectField({id, branches, activeId, action, excludeId, disabledId, disabledTitle, wide}){
   const opts = branches.filter(b=>b.id!==excludeId);
+  const open = state.popover===id;
   return `
-    <select class="select${wide?"":" cj-branch-select"}" id="${id}">
-      ${opts.map(b=>`<option value="${escapeHtml(b.id)}" ${b.id===activeId?"selected":""} ${b.id===disabledId?"disabled":""}>${escapeHtml(b.id)}${b.kind==="user"?" (своя)":""}</option>`).join("")}
-    </select>
+    <div class="cj-select-field${wide?" wide":""}">
+      <button class="cj-select-trigger${open?" open":""}" data-action="toggle-popover" data-popover="${id}">
+        <span class="name">${escapeHtml(activeId||"—")}</span>${icon("chevronDown")}
+      </button>
+      ${open ? `
+        <div class="cj-select-menu">
+          ${opts.map(b=>{
+            const isDisabled = b.id===disabledId;
+            return `<div class="cj-select-item ${b.id===activeId?"active":""} ${isDisabled?"disabled":""}" ${isDisabled?`title="${escapeHtml(disabledTitle||"")}"`:`data-action="${action}" data-branch="${b.id}"`}>
+              <span class="name">${escapeHtml(b.id)}</span>${b.kind==="user"?`<span class="tag">своя</span>`:""}
+            </div>`;
+          }).join("")}
+        </div>` : ""}
+    </div>
   `;
 }
 
@@ -6536,7 +6578,7 @@ function CjBranchCreatePanel(){
 }
 
 // 2026-09-23 walkthrough correction round:
-// - откуда/куда pill rows → plain <select> fields (see CjBranchSelectField)
+// - откуда/куда pill rows → field-styled custom selects (see CjSelectField)
 // - the schematic "откуда→куда" compare cards with stage/scenario/source counts were
 //   called excessive and unhelpful — replaced with a plain description+date per branch
 // - added an optional merge-description field (no "commit" entity exists otherwise, so
@@ -6585,11 +6627,11 @@ function CjMergePanel(){
         <div style="display:flex;gap:var(--space-4);">
           <div class="field-block" style="flex:1;">
             <label class="field-label">Откуда</label>
-            ${CjBranchSelectField({id:"cjMergeSourceSelect", branches, activeId:p.source, wide:true})}
+            ${CjSelectField({id:"cj-merge-source", branches, activeId:p.source, action:"cj-merge-set-source", wide:true})}
           </div>
           <div class="field-block" style="flex:1;">
             <label class="field-label">Куда</label>
-            ${CjBranchSelectField({id:"cjMergeTargetSelect", branches, activeId:p.target, disabledId:p.source, wide:true})}
+            ${CjSelectField({id:"cj-merge-target", branches, activeId:p.target, action:"cj-merge-set-target", disabledId:p.source, disabledTitle:"Совпадает с источником", wide:true})}
           </div>
         </div>
 
@@ -10009,9 +10051,6 @@ function handleInput(el){
   else if(el.id==="cjSearchInput"){ state.cjSearch = el.value; render(); reFocus("cjSearchInput"); }
   else if(el.id==="cjCreateName"){ state.cjCreatePanel.name = el.value; render(); reFocus("cjCreateName"); }
   else if(el.id==="cjBranchName"){ state.cjBranchPanel.name = el.value; render(); reFocus("cjBranchName"); }
-  else if(el.id==="cjBranchSwitchSelect"){ el.dataset.branch = el.value; handleAction("cj-switch-branch", el); }
-  else if(el.id==="cjMergeSourceSelect"){ el.dataset.branch = el.value; handleAction("cj-merge-set-source", el); }
-  else if(el.id==="cjMergeTargetSelect"){ el.dataset.branch = el.value; handleAction("cj-merge-set-target", el); }
   else if(el.id==="cjMergeDescInput"){ state.cjMergePanel.description = el.value; render(); reFocus("cjMergeDescInput"); }
   else if(el.id==="cjCreatePortrait"){ state.cjCreatePanel.portrait = el.value; render(); reFocus("cjCreatePortrait"); }
   else if(el.id==="cjCreateOwner"){ state.cjCreatePanel.owner = el.value; render(); reFocus("cjCreateOwner"); }
@@ -10166,10 +10205,11 @@ function handleAction(action, el){
       state.cjExpanded = {};
       state.cjSourcePanel = null;
       state.cjBranchDeleteConfirm = null;
+      state.popover = null;
       render();
       break;
     }
-    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: state.cjOpen.branch}; render(); break;
+    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: state.cjOpen.branch}; state.popover = null; render(); break;
     case "cj-close-branch-create": state.cjBranchPanel = null; render(); break;
     case "cj-branch-create-submit": {
       const p = state.cjBranchPanel;
@@ -10210,10 +10250,11 @@ function handleAction(action, el){
       const source = state.cjOpen.branch;
       const target = branches.find(b=>b!==source) || source;
       state.cjMergePanel = {source, target, strategy:"add", description:"", conflicts:null};
+      state.popover = null;
       render();
       break;
     }
-    case "cj-close-merge": state.cjMergePanel = null; render(); break;
+    case "cj-close-merge": state.cjMergePanel = null; state.popover = null; render(); break;
     case "cj-merge-set-source": {
       const p = state.cjMergePanel;
       p.source = el.dataset.branch;
@@ -10222,6 +10263,7 @@ function handleAction(action, el){
         p.target = alt || p.source;
       }
       p.conflicts = null;
+      state.popover = null;
       render();
       break;
     }
@@ -10230,6 +10272,7 @@ function handleAction(action, el){
       if(el.dataset.branch===p.source) break;
       p.target = el.dataset.branch;
       p.conflicts = null;
+      state.popover = null;
       render();
       break;
     }
