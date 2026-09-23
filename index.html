@@ -637,8 +637,8 @@
   .cj-branch-add{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px dashed var(--border-strong);background:transparent;color:var(--blue);}
   .cj-branch-add svg{width:14px;height:14px;}
   .cj-branch-add:hover{border-color:var(--blue);}
-  .cj-branch-del-confirm{position:absolute;top:calc(100% + 6px);left:0;z-index:80;width:240px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);box-shadow:var(--shadow);padding:var(--space-4);}
-  .cj-branch-del-confirm .txt{font-size:13px;color:var(--text);margin-bottom:var(--space-3);line-height:1.4;}
+  .cj-branch-del-confirm{background:var(--bg-alt);border:1px solid var(--border-strong);border-radius:8px;padding:var(--space-3);margin:2px 0;}
+  .cj-branch-del-confirm .txt{font-size:12.5px;color:var(--text);margin-bottom:var(--space-2);line-height:1.4;}
   .cj-branch-del-confirm .row{display:flex;gap:var(--space-2);justify-content:flex-end;}
 
   .cj-merge-title-wrap{position:relative;display:flex;align-items:center;gap:6px;}
@@ -649,17 +649,45 @@
   .cj-merge-help-list li{margin-bottom:var(--space-2);}
   .cj-merge-help-list li:last-child{margin-bottom:0;}
 
-  .cj-merge-compare{display:flex;align-items:stretch;gap:var(--space-3);margin-top:var(--space-5);}
-  .cj-merge-compare .col{flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4);}
-  .cj-merge-compare .col .hd{font-weight:700;font-size:13.5px;}
-  .cj-merge-compare .col .sub{font-size:11.5px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.03em;margin-bottom:var(--space-2);}
-  .cj-merge-compare .col .row{font-size:12.5px;color:var(--text-secondary);line-height:1.6;}
-  .cj-merge-compare .arrow{display:flex;align-items:center;color:var(--text-tertiary);flex:0 0 auto;}
+  .cj-merge-info-cards{display:flex;align-items:stretch;gap:var(--space-3);margin-top:var(--space-5);}
+  .cj-merge-info-card{flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4);}
+  .cj-merge-info-card .hd{font-weight:700;font-size:13.5px;display:flex;align-items:baseline;gap:6px;}
+  .cj-merge-info-card .hd .sub{font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.03em;}
+  .cj-merge-info-card .upd{font-size:12.5px;color:var(--text-secondary);margin-top:var(--space-2);}
+  .cj-merge-info-card .desc{font-size:12.5px;color:var(--text-tertiary);margin-top:4px;line-height:1.45;}
   .cj-merge-strategy{display:flex;flex-direction:column;gap:var(--space-3);}
   .cj-merge-strategy-card{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:var(--space-4);cursor:pointer;}
   .cj-merge-strategy-card .t{font-weight:700;font-size:13.5px;margin-bottom:4px;}
   .cj-merge-strategy-card .d{font-size:12.5px;color:var(--text-secondary);line-height:1.45;}
   .cj-merge-strategy-card.active{border-color:var(--yellow);background:var(--bg-alt);}
+  .cj-merge-conflict-box{margin-top:var(--space-5);border:1px solid var(--red-text);background:var(--red-bg);border-radius:var(--radius-sm);padding:var(--space-4);}
+  .cj-merge-conflict-box .t{display:flex;align-items:flex-start;gap:var(--space-2);font-weight:600;font-size:13.5px;color:var(--red-text);}
+  .cj-merge-conflict-box ul{margin:var(--space-3) 0 0;padding-left:34px;font-size:12.5px;color:var(--text);line-height:1.6;}
+  .cj-merge-conflict-box .hint{margin-top:var(--space-3);padding-left:34px;font-size:12.5px;color:var(--text-secondary);}
+
+  /* branch dropdown — replaces a flat pill row once there can be many (user) branches;
+     reused by CjBranchBar and both merge-panel source/target pickers */
+  .cj-branch-dd-wrap{position:relative;display:inline-block;}
+  .cj-branch-dd-trigger{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:var(--yellow);border:1px solid var(--yellow);color:#1a1a1a;}
+  .cj-branch-dd-trigger svg{width:14px;height:14px;}
+  .cj-branch-dd-popover{top:calc(100% + 6px);left:0;right:auto;width:240px;padding:var(--space-3);}
+  .cj-branch-dd-search{margin-bottom:var(--space-2);}
+  .cj-branch-dd-list{max-height:220px;overflow-y:auto;}
+  .cj-branch-dd-item{display:flex;align-items:center;gap:6px;padding:var(--space-2) var(--space-2);border-radius:8px;font-size:13.5px;cursor:pointer;}
+  .cj-branch-dd-item:hover{background:var(--bg-alt);}
+  .cj-branch-dd-item.active{background:var(--bg-alt);font-weight:600;}
+  .cj-branch-dd-item .name{flex:1;}
+  .cj-branch-dd-item.user .name{font-style:italic;}
+  .cj-branch-dd-item .tag{font-size:10.5px;color:var(--text-tertiary);border:1px solid var(--border);border-radius:6px;padding:1px 6px;}
+  .cj-branch-dd-item .del{display:flex;color:var(--text-tertiary);opacity:.6;}
+  .cj-branch-dd-item .del svg{width:12px;height:12px;}
+  .cj-branch-dd-item .del:hover{opacity:1;color:var(--red-text);}
+  .cj-branch-dd-item.disabled{opacity:.4;cursor:not-allowed;}
+  .cj-branch-dd-empty{padding:var(--space-3) var(--space-2);font-size:13px;color:var(--text-tertiary);}
+
+  .mini-spinner{width:13px;height:13px;border-radius:50%;border:2px solid var(--gray-bg);border-top-color:var(--yellow);animation:spin .8s linear infinite;flex:0 0 auto;}
+  .cj-branch-lock-badge,.cj-merge-running-banner{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary);}
+  .cj-merge-running-banner{font-weight:600;color:var(--text);}
 
   .cj-matrix-wrap{flex:1;min-height:0;overflow:auto;padding:var(--space-5) var(--space-6);}
   /* CSS grid (not independent flex columns) so every row's height stays in sync across
@@ -3367,8 +3395,10 @@ const state = {
   cjExpanded:{},        // {["stageId:scenarioId"]: bool} — is a given scenario's source list expanded
   cjSourcePanel:null,   // {stageId, scenarioId, sourceId, editing, draft} — the source side sheet
   cjBranchPanel:null,    // {name, parent} — create-branch side panel
-  cjMergePanel:null,     // {source, target, strategy} — merge side panel
+  cjMergePanel:null,     // {source, target, strategy, description, conflicts, sourceQuery, targetQuery} — merge side panel
   cjBranchDeleteConfirm:null, // branch id pending delete confirmation
+  cjBranchSwitchQuery:"",     // search text inside the CJ_DETAIL branch-switch dropdown
+  cjMergeRunning:null,    // {cjId, source, target, strategy, description} while a merge is being processed (global — only one at a time)
 
   appcat: defaultAppcatState(),
   graph: defaultGraphState(),
@@ -3736,18 +3766,87 @@ function cjSystemBranchMeta(){
 }
 ["cj2","cj3","cj4","cj5","cj6"].forEach(id=>{ CJ_BRANCH_META[id] = cjSystemBranchMeta(); });
 
+// updatedAt/changeDescription — per-branch "last change" metadata shown on the merge
+// panel's compare cards (2026-09-23 walkthrough: replaces raw stage/scenario/source
+// counts, which the team found unhelpful, with recency + what changed). Seeded here for
+// the demo branches that already have real content; null means "never touched" and
+// renders as "Ещё не обновлялась" — set for real once a merge actually writes the branch
+// (see cj-merge-submit) or a user branch is created (see cj-branch-create-submit).
 const CJ_BRANCHES = {
   cj1: {
-    design: { stages: CJ_DESIGN_STAGES },
-    develop: { stages: CJ_DEVELOP_STAGES },
-    main: { stages: CJ_MAIN_STAGES },
+    design: { stages: CJ_DESIGN_STAGES, updatedAt:"22.01.2025", changeDescription:"Черновая проработка первых 2 этапов" },
+    develop: { stages: CJ_DEVELOP_STAGES, updatedAt:"05.02.2025", changeDescription:"Переформулирован шаг отключения услуги (SMS) и добавлен новый сценарий отключения через IVR" },
+    main: { stages: CJ_MAIN_STAGES, updatedAt:"20.01.2025", changeDescription:"Опубликованная версия" },
   },
-  cj2: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ2_STAGES} },
-  cj3: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ3_STAGES} },
-  cj4: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ4_STAGES} },
-  cj5: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ5_STAGES} },
-  cj6: { design:{stages:[cjUnfilledStage()]}, develop:{stages:[cjUnfilledStage()]}, main:{stages:CJ6_STAGES} },
+  cj2: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ2_STAGES, updatedAt:"20.01.2025", changeDescription:"Опубликованная версия"} },
+  cj3: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ3_STAGES, updatedAt:"20.01.2025", changeDescription:"Опубликованная версия"} },
+  cj4: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ4_STAGES, updatedAt:"18.01.2025", changeDescription:"Опубликованная версия"} },
+  cj5: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ5_STAGES, updatedAt:"18.01.2025", changeDescription:"Опубликованная версия"} },
+  cj6: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ6_STAGES, updatedAt:"18.01.2025", changeDescription:"Опубликованная версия"} },
 };
+
+// Simplified stand-in for "does this branch's product/method catalog resolve this call" —
+// the real vision doc models this via separate product branches (§3.2, out of scope here);
+// for the prototype we key known apps by system branch id (user branches inherit from the
+// branch they were cloned from) so cjMergeConflicts has something real to check against.
+const CJ_BRANCH_KNOWN_APPS = {
+  main: ["Beeatlas","USSD Gateway","Billing","CRM Connector","Call Blocker Service","Antispam Service","SMS Gateway"],
+  design: ["Beeatlas","USSD Gateway","Billing","CRM Connector","Call Blocker Service","Antispam Service","SMS Gateway"],
+  develop: ["Beeatlas","USSD Gateway","Billing","CRM Connector","Call Blocker Service","Antispam Service","SMS Gateway","IVR Gateway"],
+};
+function cjBranchKnownApps(cjId, branchId){
+  if(CJ_BRANCH_KNOWN_APPS[branchId]) return CJ_BRANCH_KNOWN_APPS[branchId];
+  const meta = cjBranchList(cjId).find(b=>b.id===branchId);
+  return meta && meta.parent ? cjBranchKnownApps(cjId, meta.parent) : CJ_BRANCH_KNOWN_APPS.main;
+}
+// 2026-09-23 walkthrough (Владислав): merge isn't instant — target-branch links need to
+// resolve against the target's own product methods, and that can fail (a BI step in
+// develop calling a method main doesn't have yet). Team decision: block the merge
+// outright in that case (no partial/forced merge in v1) and explain why. This walks the
+// elements the merge would actually introduce (skips elements "add" would skip anyway)
+// and flags any call whose app isn't in the target branch's known catalog.
+function cjMergeConflicts(cjId, source, target, strategy){
+  const knownApps = new Set(cjBranchKnownApps(cjId, target));
+  const srcStages = cjBranchTree(cjId, source);
+  const targetStages = cjBranchTree(cjId, target);
+  const conflicts = [];
+  const seenApps = new Set();
+  srcStages.forEach(stage=>{
+    if(stage.unfilled) return;
+    const tgtStage = strategy==="replace" ? null : targetStages.find(s=>s.id===stage.id);
+    (stage.scenarios||[]).forEach(sc=>{
+      const tgtSc = tgtStage ? (tgtStage.scenarios||[]).find(s=>s.id===sc.id) : null;
+      (sc.sources||[]).forEach(src=>{
+        if(strategy==="add" && tgtSc && (tgtSc.sources||[]).some(s=>s.id===src.id)) return; // add skips existing ids — no new dependency
+        (src.calls||[]).forEach(call=>{
+          if(!knownApps.has(call.app) && !seenApps.has(call.app)){
+            seenApps.add(call.app);
+            conflicts.push({app:call.app, capability:call.capability, biName:stage.biName});
+          }
+        });
+      });
+    });
+  });
+  return conflicts;
+}
+function cjBranchLocked(cjId, branchId){
+  const r = state.cjMergeRunning;
+  return !!(r && r.cjId===cjId && r.target===branchId);
+}
+// 2026-09-23 (Александр): opening a CJ should default to main if it's actually filled
+// there, then fall back to any other branch that is — not just whatever branch the
+// library toolbar happened to be set to.
+function cjBranchHasRealContent(cjId, branchId){
+  const stages = cjBranchTree(cjId, branchId);
+  return stages.length>0 && !(stages.length===1 && stages[0].unfilled);
+}
+function cjDefaultOpenBranch(cjId){
+  const lib = state.cjLibraryBranch;
+  if(cjBranchHasRealContent(cjId, lib)) return lib;
+  if(cjBranchHasRealContent(cjId, "main")) return "main";
+  const anyReal = cjBranchList(cjId).find(b=>cjBranchHasRealContent(cjId,b.id));
+  return anyReal ? anyReal.id : lib;
+}
 
 // Для CJ без явной записи в CJ_META (весь набор, кроме cj1, где нет отдельно
 // заданных title/subtitle) название берётся прямо из карточки библиотеки — не дублируем
@@ -3771,18 +3870,13 @@ function ensureCjBranches(cjId){
   // только что созданный CJ — во всех трёх ветках есть черновик-заготовка (незаполненный
   // этап), а не буквально пустая матрица; см. cjUnfilledStage.
   CJ_BRANCHES[cjId] = {
-    design:{stages:[cjUnfilledStage()]},
-    develop:{stages:[cjUnfilledStage()]},
-    main:{stages:[cjUnfilledStage()]},
+    design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null},
+    develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null},
+    main:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null},
   };
 }
 function activeCjStages(){
   return state.cjOpen ? cjBranchTree(state.cjOpen.cjId, state.cjOpen.branch) : [];
-}
-function cjTreeStats(stages){
-  let scenarios=0, sources=0;
-  stages.forEach(s=>(s.scenarios||[]).forEach(sc=>{ scenarios++; sources += (sc.sources||[]).length; }));
-  return {stages: stages.length, scenarios, sources};
 }
 // Ветки полностью изолированы (§3.1) — merge на стороне staging, реализация здесь мутирует
 // CJ_BRANCHES[cjId][target] напрямую, как это делал бы Publisher после успешного merge (§4.1).
@@ -6377,35 +6471,73 @@ function CjVersionsPanel(){
 }
 
 /* ============================= CJ BRANCHES (design/develop/main + пользовательские) ============================= */
+// 2026-09-23 walkthrough (Владислав): a flat pill row doesn't scale once user branches
+// pile up ("веток там много будет"). Replaced with a dropdown + type-to-filter search,
+// same pattern as the merge panel's source/target pickers (see CjBranchDropdown).
 function CjBranchBar(cjId){
   const branches = cjBranchList(cjId);
   const active = state.cjOpen.branch;
+  const running = state.cjMergeRunning;
+  const runningHere = running && running.cjId===cjId;
+  const mergeLockedElsewhere = running && !runningHere;
   return `
     <div class="cj-branch-bar">
-      <div class="cj-branch-pills">
-        ${branches.map(b=>{
-          const has = cjHasComposition(cjId, b.id);
-          return `
-          <div class="cj-branch-pill-wrap">
-            <div class="cj-branch-pill ${b.id===active?"active":""} ${b.kind==="user"?"user":""}" data-action="cj-switch-branch" data-branch="${b.id}">
-              <span class="name">${escapeHtml(b.id)}</span>
-              ${!has?`<span class="empty-dot" title="Нет состава в этой ветке"></span>`:""}
-              ${b.kind==="user" ? `<span class="del" data-action="cj-branch-delete-ask" data-branch="${b.id}" title="Удалить ветку">${icon("x")}</span>` : ""}
-            </div>
-            ${state.cjBranchDeleteConfirm===b.id ? CjBranchDeleteConfirm(b.id) : ""}
-          </div>`;
-        }).join("")}
-        <button class="cj-branch-add" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
-      </div>
-      <button class="btn btn-outline btn-sm" data-action="cj-open-merge" style="margin-left:auto;">Объединить ветки</button>
+      ${CjBranchDropdown({
+        popoverId:"cj-branch-switch", queryField:"cjBranchSwitchQuery", branches, activeId:active,
+        selectAction:"cj-switch-branch", showDelete:true,
+      })}
+      <button class="cj-branch-add" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
+      ${cjBranchLocked(cjId, active) ? `<span class="cj-branch-lock-badge"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
+      ${runningHere ? `<span class="cj-merge-running-banner"><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>` : ""}
+      <button class="btn btn-outline btn-sm" data-action="cj-open-merge" style="margin-left:auto;" ${running?"disabled":""} title="${running?"Дождитесь завершения текущего объединения":""}">Объединить ветки</button>
     </div>
   `;
 }
 
+// Shared dropdown used both for the branch switcher above and the merge panel's
+// source/target pickers — trigger button (current selection) + popover with a search
+// input and the filtered branch list. Reuses the app's existing single-popover mechanism
+// (state.popover) rather than inventing a second one.
+function CjBranchDropdown({popoverId, queryField, branches, activeId, selectAction, showDelete, excludeId, disabledId, disabledTitle}){
+  const active = branches.find(b=>b.id===activeId);
+  const open = state.popover===popoverId;
+  const query = (queryField.includes(".") ? queryField.split(".").reduce((o,k)=>o&&o[k], state) : state[queryField]) || "";
+  const list = branches.filter(b=>b.id!==excludeId && b.id.toLowerCase().includes(query.toLowerCase()));
+  return `
+    <div class="cj-branch-dd-wrap">
+      <button class="cj-branch-dd-trigger" data-action="toggle-popover" data-popover="${popoverId}">
+        <span class="name">${escapeHtml(activeId||"—")}</span>${icon("chevronDown")}
+      </button>
+      ${open ? `
+        <div class="popover cj-branch-dd-popover">
+          <div class="cj-branch-dd-search field-with-icon">
+            ${icon("search")}
+            <input class="input" id="dd-search-${popoverId}" data-dd-search="${popoverId}" placeholder="Поиск ветки" value="${escapeHtml(query)}" autocomplete="off">
+          </div>
+          <div class="cj-branch-dd-list">
+            ${list.length ? list.map(b=>{
+              const isDisabled = b.id===disabledId;
+              if(showDelete && state.cjBranchDeleteConfirm===b.id) return CjBranchDeleteConfirm(b.id);
+              return `
+              <div class="cj-branch-dd-item ${b.id===activeId?"active":""} ${b.kind==="user"?"user":""} ${isDisabled?"disabled":""}" ${isDisabled?`title="${escapeHtml(disabledTitle||"")}"`:`data-action="${selectAction}" data-branch="${b.id}"`}>
+                <span class="name">${escapeHtml(b.id)}</span>
+                ${b.kind==="user"?`<span class="tag">своя</span>`:""}
+                ${showDelete && b.kind==="user" ? `<span class="del" data-action="cj-branch-delete-ask" data-branch="${b.id}" title="Удалить ветку">${icon("x")}</span>` : ""}
+              </div>`;
+            }).join("") : `<div class="cj-branch-dd-empty">Ничего не найдено</div>`}
+          </div>
+        </div>` : ""}
+    </div>
+  `;
+}
+
+// Inline row (not a floating popover) — the branch dropdown's list scrolls
+// (.cj-branch-dd-list{overflow-y:auto}), which would clip an absolutely-positioned
+// confirm box; a normal-flow row has no such problem.
 function CjBranchDeleteConfirm(branchId){
   return `
     <div class="cj-branch-del-confirm">
-      <div class="txt">Удалить ветку «${escapeHtml(branchId)}»? Состав будет потерян без возможности восстановления.</div>
+      <div class="txt">Удалить «${escapeHtml(branchId)}»? Состав будет потерян без восстановления.</div>
       <div class="row">
         <button class="btn btn-outline btn-sm" data-action="cj-branch-delete-cancel">Отмена</button>
         <button class="btn btn-primary btn-sm" data-action="cj-branch-delete-do" data-branch="${escapeHtml(branchId)}">Удалить</button>
@@ -6475,24 +6607,40 @@ function CjBranchCreatePanel(){
   `;
 }
 
+// 2026-09-23 walkthrough correction round:
+// - откуда/куда pill rows → dropdowns (branches can pile up, see CjBranchDropdown)
+// - the schematic "откуда→куда" compare cards with stage/scenario/source counts were
+//   called excessive and unhelpful — replaced with a plain description+date per branch
+// - added an optional merge-description field (no "commit" entity exists otherwise, so
+//   there'd be no record of *what* was merged) and a conflict-blocking validation step
+// - moved from a side panel into a full-screen modal (richer content no longer fits
+//   compressed in a 560px-wide side panel) — same wizard-overlay pattern as CjBpmnOverlay
+function CjMergeBranchInfo(cjId, branchId, label){
+  const b = CJ_BRANCHES[cjId] && CJ_BRANCHES[cjId][branchId];
+  const updated = b && b.updatedAt;
+  const desc = b && b.changeDescription;
+  return `
+    <div class="cj-merge-info-card">
+      <div class="hd">${escapeHtml(branchId)}<span class="sub">${label}</span></div>
+      <div class="upd">${updated ? `Обновлено: ${escapeHtml(updated)}` : "Ещё не обновлялась"}</div>
+      <div class="desc">${desc ? escapeHtml(desc) : "—"}</div>
+    </div>
+  `;
+}
 function CjMergePanel(){
   const p = state.cjMergePanel;
-  // the whole panel is rebuilt from scratch on every click inside it (source/target/
-  // strategy pills all trigger a full render()) — only play the open animation on the
-  // very first paint, or every one of those clicks replays it and the screen flashes.
-  const firstPaint = !p._entered;
-  p._entered = true;
   const cjId = state.cjOpen.cjId;
   const branches = cjBranchList(cjId);
-  const srcStats = cjTreeStats(cjBranchTree(cjId, p.source));
-  const tgtStats = cjTreeStats(cjBranchTree(cjId, p.target));
-  const canMerge = !!p.source && !!p.target && p.source!==p.target;
+  const canMerge = !!p.source && !!p.target && p.source!==p.target && !state.cjMergeRunning;
   return `
-    <div class="backdrop${firstPaint?" enter":""}" data-action="cj-close-merge"></div>
-    <div class="side-panel${firstPaint?" enter":""}">
-      <div class="side-head">
+    <div class="wizard-overlay">
+      <div class="wizard-head">
+        <div class="proj-link" style="display:flex;align-items:center;gap:var(--space-2);color:var(--text);font-weight:600;" data-action="cj-close-merge">${icon("chevronLeft")} Назад</div>
+      </div>
+      <div class="wizard-body">
+       <div style="max-width:640px;margin:0 auto;">
         <div class="cj-merge-title-wrap">
-          <h2>Объединение веток</h2>
+          <h2 style="margin-bottom:var(--space-2);">Объединение веток</h2>
           <button class="icon-btn cj-merge-help-btn" data-action="toggle-popover" data-popover="cj-merge-help" title="Как это работает">${icon("info")}</button>
           ${state.popover==="cj-merge-help" ? `
             <div class="popover cj-merge-help-popover">
@@ -6504,41 +6652,22 @@ function CjMergePanel(){
               </ul>
             </div>` : ""}
         </div>
-        <button class="wizard-close" data-action="cj-close-merge">${icon("x")}</button>
-      </div>
-      <div class="side-body">
-        <div class="field-block">
-          <label class="field-label">Откуда (source)</label>
-          <div class="cj-branch-pills">
-            ${branches.map(b=>`<div class="cj-branch-pill ${p.source===b.id?"active":""}" data-action="cj-merge-set-source" data-branch="${b.id}">${escapeHtml(b.id)}</div>`).join("")}
+        <div style="color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-6);">Выберите, откуда и куда переносим изменения</div>
+
+        <div style="display:flex;gap:var(--space-4);">
+          <div class="field-block" style="flex:1;">
+            <label class="field-label">Откуда</label>
+            ${CjBranchDropdown({popoverId:"cj-merge-source", queryField:"cjMergePanel.sourceQuery", branches, activeId:p.source, selectAction:"cj-merge-set-source"})}
           </div>
-        </div>
-        <div class="field-block">
-          <label class="field-label">Куда (target)</label>
-          <div class="cj-branch-pills">
-            ${branches.map(b=>b.id===p.source
-              ? `<div class="cj-branch-pill disabled" title="Совпадает с источником">${escapeHtml(b.id)}</div>`
-              : `<div class="cj-branch-pill ${p.target===b.id?"active":""}" data-action="cj-merge-set-target" data-branch="${b.id}">${escapeHtml(b.id)}</div>`
-            ).join("")}
+          <div class="field-block" style="flex:1;">
+            <label class="field-label">Куда</label>
+            ${CjBranchDropdown({popoverId:"cj-merge-target", queryField:"cjMergePanel.targetQuery", branches, activeId:p.target, selectAction:"cj-merge-set-target", disabledId:p.source, disabledTitle:"Совпадает с источником"})}
           </div>
         </div>
 
-        <div class="cj-merge-compare">
-          <div class="col">
-            <div class="hd">${escapeHtml(p.source)}</div>
-            <div class="sub">Откуда</div>
-            <div class="row">${srcStats.stages} ${ruPlural(srcStats.stages,"этап","этапа","этапов")}</div>
-            <div class="row">${srcStats.scenarios} ${ruPlural(srcStats.scenarios,"сценарий","сценария","сценариев")}</div>
-            <div class="row">${srcStats.sources} ${ruPlural(srcStats.sources,"источник","источника","источников")}</div>
-          </div>
-          <div class="arrow">${icon("chevronRight")}</div>
-          <div class="col">
-            <div class="hd">${escapeHtml(p.target)}</div>
-            <div class="sub">Куда</div>
-            <div class="row">${tgtStats.stages} ${ruPlural(tgtStats.stages,"этап","этапа","этапов")}</div>
-            <div class="row">${tgtStats.scenarios} ${ruPlural(tgtStats.scenarios,"сценарий","сценария","сценариев")}</div>
-            <div class="row">${tgtStats.sources} ${ruPlural(tgtStats.sources,"источник","источника","источников")}</div>
-          </div>
+        <div class="cj-merge-info-cards">
+          ${CjMergeBranchInfo(cjId, p.source, "Откуда")}
+          ${CjMergeBranchInfo(cjId, p.target, "Куда")}
         </div>
 
         <div class="field-block" style="margin-top:var(--space-5);">
@@ -6555,11 +6684,29 @@ function CjMergePanel(){
           </div>
         </div>
 
+        <div class="field-block">
+          <label class="field-label">Описание объединения (необязательно)</label>
+          <textarea class="textarea" id="cjMergeDescInput" style="min-height:70px;" placeholder="Что перелили и зачем — пригодится, когда вернётесь к этой ветке позже">${escapeHtml(p.description||"")}</textarea>
+        </div>
+
+        ${p.conflicts && p.conflicts.length ? `
+          <div class="cj-merge-conflict-box">
+            <div class="t">${icon("info")} Объединение невозможно: в «${escapeHtml(p.target)}» не найдены методы, на которые ссылается «${escapeHtml(p.source)}»</div>
+            <ul>
+              ${p.conflicts.map(c=>`<li><b>${escapeHtml(c.app)}</b> — ${escapeHtml(c.capability)}${c.biName?` (BI «${escapeHtml(c.biName)}»)`:""}</li>`).join("")}
+            </ul>
+            <div class="hint">Приведите ссылки в соответствие в ветке «${escapeHtml(p.target)}» и повторите объединение.</div>
+          </div>
+        ` : ""}
+
         ${p.target==="main" ? `<div class="readonly-note" style="align-items:flex-start;margin-top:var(--space-5);background:var(--blue-bg);color:var(--blue-text);">${icon("info")} Объединение с main обновит канон сразу после подтверждения — действие необратимо.</div>` : ""}
+       </div>
       </div>
-      <div class="side-foot">
-        <button class="btn btn-outline" data-action="cj-close-merge">Отменить</button>
-        <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"}>Объединить</button>
+      <div class="wizard-foot">
+        <div style="max-width:640px;width:100%;margin:0 auto;display:flex;gap:var(--space-3);justify-content:flex-end;">
+          <button class="btn btn-outline" data-action="cj-close-merge">Отменить</button>
+          <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"} title="${state.cjMergeRunning?"Дождитесь завершения текущего объединения":""}">Объединить</button>
+        </div>
       </div>
     </div>
   `;
@@ -9756,6 +9903,8 @@ function bindGlobalEvents(){
   document.body.onclick = function(e){
     const t = e.target.closest("[data-action]");
     if(!t) {
+      // clicks inside an open popover (e.g. a search input) shouldn't dismiss it
+      if(e.target.closest(".popover")) return;
       // close popovers on outside click
       if(state.popover){ state.popover=null; render(); }
       return;
@@ -9933,6 +10082,10 @@ function handleInput(el){
   else if(el.id==="cjSearchInput"){ state.cjSearch = el.value; render(); reFocus("cjSearchInput"); }
   else if(el.id==="cjCreateName"){ state.cjCreatePanel.name = el.value; render(); reFocus("cjCreateName"); }
   else if(el.id==="cjBranchName"){ state.cjBranchPanel.name = el.value; render(); reFocus("cjBranchName"); }
+  else if(el.dataset.ddSearch==="cj-branch-switch"){ state.cjBranchSwitchQuery = el.value; render(); reFocus(el.id); }
+  else if(el.dataset.ddSearch==="cj-merge-source"){ state.cjMergePanel.sourceQuery = el.value; render(); reFocus(el.id); }
+  else if(el.dataset.ddSearch==="cj-merge-target"){ state.cjMergePanel.targetQuery = el.value; render(); reFocus(el.id); }
+  else if(el.id==="cjMergeDescInput"){ state.cjMergePanel.description = el.value; render(); reFocus("cjMergeDescInput"); }
   else if(el.id==="cjCreatePortrait"){ state.cjCreatePanel.portrait = el.value; render(); reFocus("cjCreatePortrait"); }
   else if(el.id==="cjCreateOwner"){ state.cjCreatePanel.owner = el.value; render(); reFocus("cjCreateOwner"); }
   else if(el.id==="cjCreateTags"){ state.cjCreatePanel.tags = el.value; render(); reFocus("cjCreateTags"); }
@@ -10068,7 +10221,7 @@ function handleAction(action, el){
 
     case "open-cj":
       ensureCjBranches(el.dataset.id);
-      state.cjOpen = {cjId: el.dataset.id, branch: state.cjLibraryBranch};
+      state.cjOpen = {cjId: el.dataset.id, branch: cjDefaultOpenBranch(el.dataset.id)};
       state.cjExpanded = {};
       state.cjSourcePanel = null;
       state.cjMenuOpen = false;
@@ -10078,6 +10231,7 @@ function handleAction(action, el){
     case "close-cj":
       state.cjOpen = null; state.cjMenuOpen=false; state.cjVersionsOpen=false; state.cjSourcePanel=null;
       state.cjBranchPanel=null; state.cjMergePanel=null; state.cjBranchDeleteConfirm=null;
+      state.popover=null;
       render();
       break;
     case "cj-set-library-branch": state.cjLibraryBranch = el.dataset.branch; render(); break;
@@ -10086,10 +10240,12 @@ function handleAction(action, el){
       state.cjExpanded = {};
       state.cjSourcePanel = null;
       state.cjBranchDeleteConfirm = null;
+      state.cjBranchSwitchQuery = "";
+      state.popover = null;
       render();
       break;
     }
-    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: state.cjOpen.branch}; render(); break;
+    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: state.cjOpen.branch}; state.popover=null; render(); break;
     case "cj-close-branch-create": state.cjBranchPanel = null; render(); break;
     case "cj-branch-create-submit": {
       const p = state.cjBranchPanel;
@@ -10099,7 +10255,7 @@ function handleAction(action, el){
       const existing = cjBranchList(cjId).map(b=>b.id.toLowerCase());
       if(!name || reserved.includes(name.toLowerCase()) || existing.includes(name.toLowerCase())) break;
       if(!CJ_BRANCHES[cjId]) CJ_BRANCHES[cjId] = {};
-      CJ_BRANCHES[cjId][name] = { stages: deepClone(cjBranchTree(cjId, p.parent)) };
+      CJ_BRANCHES[cjId][name] = { stages: deepClone(cjBranchTree(cjId, p.parent)), updatedAt: NOW_DATE, changeDescription: `Создана как клон «${p.parent}»` };
       cjBranchList(cjId).push({id:name, kind:"user", parent:p.parent, createdBy:ARCHITECT, createdAt:NOW_DATE});
       state.cjOpen.branch = name;
       state.cjBranchPanel = null;
@@ -10112,6 +10268,7 @@ function handleAction(action, el){
     case "cj-branch-delete-do": {
       const cjId = state.cjOpen.cjId;
       const branchId = el.dataset.branch;
+      if(cjBranchLocked(cjId, branchId)){ showToast("Ветка обновляется, дождитесь завершения объединения"); break; }
       const list = cjBranchList(cjId);
       const idx = list.findIndex(b=>b.id===branchId);
       if(idx>=0) list.splice(idx,1);
@@ -10123,15 +10280,17 @@ function handleAction(action, el){
       break;
     }
     case "cj-open-merge": {
+      if(state.cjMergeRunning){ showToast("Дождитесь завершения текущего объединения"); break; }
       const cjId = state.cjOpen.cjId;
       const branches = cjBranchList(cjId).map(b=>b.id);
       const source = state.cjOpen.branch;
       const target = branches.find(b=>b!==source) || source;
-      state.cjMergePanel = {source, target, strategy:"add"};
+      state.cjMergePanel = {source, target, strategy:"add", description:"", conflicts:null, sourceQuery:"", targetQuery:""};
+      state.popover = null;
       render();
       break;
     }
-    case "cj-close-merge": state.cjMergePanel = null; render(); break;
+    case "cj-close-merge": state.cjMergePanel = null; state.popover=null; render(); break;
     case "cj-merge-set-source": {
       const p = state.cjMergePanel;
       p.source = el.dataset.branch;
@@ -10139,23 +10298,59 @@ function handleAction(action, el){
         const alt = cjBranchList(state.cjOpen.cjId).map(b=>b.id).find(b=>b!==p.source);
         p.target = alt || p.source;
       }
+      p.conflicts = null;
+      p.sourceQuery = ""; p.targetQuery = "";
+      state.popover = null;
       render();
       break;
     }
     case "cj-merge-set-target": {
-      if(el.dataset.branch===state.cjMergePanel.source) break;
-      state.cjMergePanel.target = el.dataset.branch;
+      const p = state.cjMergePanel;
+      if(el.dataset.branch===p.source) break;
+      p.target = el.dataset.branch;
+      p.conflicts = null;
+      p.sourceQuery = ""; p.targetQuery = "";
+      state.popover = null;
       render();
       break;
     }
-    case "cj-merge-set-strategy": state.cjMergePanel.strategy = el.dataset.strategy; render(); break;
+    case "cj-merge-set-strategy": {
+      const p = state.cjMergePanel;
+      p.strategy = el.dataset.strategy;
+      p.conflicts = null;
+      render();
+      break;
+    }
     case "cj-merge-submit": {
       const p = state.cjMergePanel;
-      if(!p.source || !p.target || p.source===p.target) break;
-      cjMergeExecute(state.cjOpen.cjId, p.source, p.target, p.strategy);
-      showToast(`Ветка «${p.source}» объединена с «${p.target}» (${p.strategy==="replace"?"замена":"добавление"})`);
+      if(!p.source || !p.target || p.source===p.target || state.cjMergeRunning) break;
+      const cjId = state.cjOpen.cjId;
+      const conflicts = cjMergeConflicts(cjId, p.source, p.target, p.strategy);
+      if(conflicts.length){
+        p.conflicts = conflicts;
+        render();
+        break;
+      }
+      // 2026-09-23 (Владислав): merge isn't instant — links get re-resolved against the
+      // target branch's own product methods, which takes time in the real system. Panel
+      // closes right away; a persistent banner in CjBranchBar shows progress and the
+      // target branch stays visible (read-only) so the user can "провалиться и посмотреть".
+      state.cjMergeRunning = {cjId, source:p.source, target:p.target, strategy:p.strategy, description:p.description};
       state.cjMergePanel = null;
+      state.popover = null;
       render();
+      setTimeout(()=>{
+        const r = state.cjMergeRunning;
+        if(!r) return;
+        cjMergeExecute(r.cjId, r.source, r.target, r.strategy);
+        if(CJ_BRANCHES[r.cjId] && CJ_BRANCHES[r.cjId][r.target]){
+          CJ_BRANCHES[r.cjId][r.target].updatedAt = NOW_DATE;
+          CJ_BRANCHES[r.cjId][r.target].changeDescription = (r.description||"").trim() || "(без описания)";
+        }
+        state.cjMergeRunning = null;
+        showToast(`Ветка «${r.source}» объединена с «${r.target}» (${r.strategy==="replace"?"замена":"добавление"})`);
+        render();
+      }, 2200);
       break;
     }
     case "cj-toggle-menu": state.cjMenuOpen = !state.cjMenuOpen; render(); break;
@@ -10179,6 +10374,7 @@ function handleAction(action, el){
     }
     case "cj-close-source-panel": state.cjSourcePanel=null; render(); break;
     case "cj-source-edit-start": {
+      if(cjBranchLocked(state.cjOpen.cjId, state.cjOpen.branch)){ showToast("Ветка обновляется, дождитесь завершения объединения"); break; }
       const p = state.cjSourcePanel;
       const src = findCjSource(p.stageId, p.scenarioId, p.sourceId);
       p.editing = true;
@@ -10194,6 +10390,7 @@ function handleAction(action, el){
       break;
     }
     case "cj-add-manual-source": {
+      if(cjBranchLocked(state.cjOpen.cjId, state.cjOpen.branch)){ showToast("Ветка обновляется, дождитесь завершения объединения"); break; }
       state.cjSourcePanel = {
         stageId: el.dataset.stage, scenarioId: el.dataset.scenario, sourceId: null,
         editing: true, creating: true,
