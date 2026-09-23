@@ -632,6 +632,10 @@
     border:1px solid transparent;background:var(--input-bg);border-radius:var(--radius-sm);
     padding:var(--space-3) var(--space-4);font-size:15px;color:var(--text);text-align:left;
   }
+  .cj-select-trigger:hover{background:var(--bg-alt);}
+  /* open = same treatment as this app's other field-focus state (.ffield-box.focus) —
+     surfaced background + a solid border, for consistency rather than a one-off style */
+  .cj-select-trigger.open{background:var(--bg);border-color:var(--text);}
   .cj-select-trigger svg{width:16px;height:16px;color:var(--text-secondary);flex:0 0 auto;transition:transform .12s ease;}
   .cj-select-trigger.open svg{transform:rotate(180deg);}
   .cj-select-menu{
@@ -642,10 +646,12 @@
   .cj-select-field.wide .cj-select-menu{width:100%;max-width:none;}
   .cj-select-item{display:flex;align-items:center;gap:6px;padding:var(--space-3) var(--space-4);border-radius:8px;font-size:14.5px;cursor:pointer;}
   .cj-select-item:hover{background:var(--bg-alt);}
-  .cj-select-item.active{font-weight:600;background:var(--bg-alt);}
+  .cj-select-item.active{background:var(--bg-alt);}
   .cj-select-item.disabled{opacity:.4;cursor:not-allowed;}
   .cj-select-item .name{flex:1;}
   .cj-select-item .tag{font-size:10.5px;color:var(--text-tertiary);border:1px solid var(--border);border-radius:6px;padding:1px 6px;}
+  .cj-select-item .check{color:var(--text);flex:0 0 auto;display:flex;}
+  .cj-select-item .check svg{width:16px;height:16px;}
 
   .cj-branch-add{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px dashed var(--border-strong);background:transparent;color:var(--blue);}
   .cj-branch-add svg{width:14px;height:14px;}
@@ -6496,7 +6502,7 @@ function CjSelectField({id, branches, activeId, action, excludeId, disabledId, d
           ${opts.map(b=>{
             const isDisabled = b.id===disabledId;
             return `<div class="cj-select-item ${b.id===activeId?"active":""} ${isDisabled?"disabled":""}" ${isDisabled?`title="${escapeHtml(disabledTitle||"")}"`:`data-action="${action}" data-branch="${b.id}"`}>
-              <span class="name">${escapeHtml(b.id)}</span>${b.kind==="user"?`<span class="tag">своя</span>`:""}
+              <span class="name">${escapeHtml(b.id)}</span>${b.kind==="user"?`<span class="tag">своя</span>`:""}${b.id===activeId?`<span class="check">${icon("check")}</span>`:""}
             </div>`;
           }).join("")}
         </div>` : ""}
