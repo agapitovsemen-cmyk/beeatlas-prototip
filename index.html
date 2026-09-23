@@ -621,6 +621,12 @@
 
   /* ---------- CJ branches (design/develop/main + user) ---------- */
   .cj-branch-bar{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border);background:var(--bg-alt);flex-wrap:wrap;}
+  .cj-branch-toggle-wrap{position:relative;height:0;flex:0 0 auto;z-index:5;}
+  .cj-branch-toggle-pill{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);box-shadow:var(--shadow);font-size:12.5px;font-weight:500;color:var(--text-secondary);cursor:pointer;white-space:nowrap;}
+  .cj-branch-toggle-pill:hover{color:var(--text);border-color:var(--border-strong);}
+  .cj-branch-toggle-pill .chev{display:flex;transition:transform .12s ease;}
+  .cj-branch-toggle-pill .chev svg{width:14px;height:14px;}
+  .cj-branch-toggle-pill .chev.open{transform:rotate(180deg);}
 
   /* field-styled custom select — trigger looks exactly like .input/.select (16px inset for
      both the text and the chevron); menu is absolutely positioned below the trigger so it
@@ -3395,6 +3401,7 @@ const state = {
   cjMergePanel:null,     // {source, target, strategy, description, conflicts} — merge side panel
   cjBranchDeleteConfirm:null, // branch id pending delete confirmation
   cjMergeRunning:null,    // {cjId, source, target, strategy, description} while a merge is being processed (global — only one at a time)
+  cjBranchPanelOpen:true, // whether the branch bar (select + new branch + merge) is expanded
 
   appcat: defaultAppcatState(),
   graph: defaultGraphState(),
@@ -6471,7 +6478,14 @@ function CjBranchBar(cjId){
   const activeMeta = branches.find(b=>b.id===active);
   const running = state.cjMergeRunning;
   const runningHere = running && running.cjId===cjId;
+  const open = state.cjBranchPanelOpen;
   return `
+    <div class="cj-branch-toggle-wrap">
+      <button class="cj-branch-toggle-pill" data-action="cj-toggle-branch-panel" title="${open?"Скрыть ветки":"Показать ветки"}">
+        Ветки <span class="chev ${open?"open":""}">${icon("chevronDown")}</span>
+      </button>
+    </div>
+    ${open ? `
     <div class="cj-branch-bar">
       ${CjSelectField({id:"cj-branch-switch", branches, activeId:active, action:"cj-switch-branch"})}
       ${activeMeta && activeMeta.kind==="user" ? `<button class="icon-btn" data-action="cj-branch-delete-ask" data-branch="${active}" title="Удалить ветку">${icon("trash")}</button>` : ""}
@@ -6481,6 +6495,7 @@ function CjBranchBar(cjId){
       ${runningHere ? `<span class="cj-merge-running-banner"${cjBranchLocked(cjId, active)?"":' style="margin-left:auto;"'}><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>` : ""}
     </div>
     ${state.cjBranchDeleteConfirm===active ? `<div style="padding:0 var(--space-6) var(--space-3);">${CjBranchDeleteConfirm(active)}</div>` : ""}
+    ` : ""}
   `;
 }
 
@@ -10321,6 +10336,7 @@ function handleAction(action, el){
       break;
     }
     case "cj-toggle-menu": state.cjMenuOpen = !state.cjMenuOpen; render(); break;
+    case "cj-toggle-branch-panel": state.cjBranchPanelOpen = !state.cjBranchPanelOpen; render(); break;
     case "cj-noop": state.cjMenuOpen=false; showToast("Не входит в состав переданных макетов"); break;
     case "cj-show-versions": state.cjMenuOpen=false; state.cjVersionsOpen=true; render(); break;
     case "cj-close-versions": state.cjVersionsOpen=false; render(); break;
