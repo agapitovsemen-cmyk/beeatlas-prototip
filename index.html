@@ -639,9 +639,9 @@
   .cj-select-trigger svg{width:16px;height:16px;color:var(--text-secondary);flex:0 0 auto;transition:transform .12s ease;}
   .cj-select-trigger.open svg{transform:rotate(180deg);}
   /* menu is its own fully-rounded floating panel positioned directly under the field —
-     a small standard gap, own shadow/border on all sides, not merged into the trigger. */
+     zero gap (touches the field edge), own shadow/border on all sides, not merged into the trigger. */
   .cj-select-menu{
-    position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:320px;
+    position:absolute;top:100%;left:0;min-width:100%;width:max-content;max-width:320px;
     background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);
     padding:var(--space-2);z-index:60;max-height:260px;overflow-y:auto;
   }
