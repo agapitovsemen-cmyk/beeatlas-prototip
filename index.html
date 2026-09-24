@@ -2287,7 +2287,7 @@ var REST_RE=/\b(GET|POST|PUT|PATCH|DELETE)\s+[^\s:;,()]+/i;
 function validatePlantUml(text){
   var parsed=parsePlantUml(text);
   if(parsed.messages.length===0){
-    return {ok:false,blocking:true,error:'Не удалось распознать ни одного сообщения. Проверьте синтаксис PlantUML Sequence Diagram — например: "СистемаA -> СистемаB: GET /api/v1/order".'};
+    return {ok:false,blocking:true,error:'Не удалось распознать ни одного сообщения. Проверь синтаксис PlantUML Sequence Diagram — например: "СистемаA -> СистемаB: GET /api/v1/order".'};
   }
   var recP=[], unrecP=[];
   var byKind={system:[],container:[],component:[]};
@@ -2563,7 +2563,7 @@ function submitPanel(){
   var p=state.panel; if(!p) return;
   var val=(p.value||'').trim();
   if(!val){
-    p.err = p.type==='createDashboard' ? 'Введите название дашборда' : 'Введите комментарий';
+    p.err = p.type==='createDashboard' ? 'Введи название дашборда' : 'Введи комментарий';
     render(); return;
   }
   if(p.type==='createDashboard'){
@@ -2575,7 +2575,7 @@ function submitPanel(){
   }
   if(p.type==='createAlerts' || p.type==='updateAlerts'){
     if(/ошибка/i.test(val)){
-      p.err='Нет соединения с сервером. Проверьте интернет-подключение и попробуйте снова';
+      p.err='Нет соединения с сервером. Проверь интернет-подключение и попробуй снова';
       render();
       return;
     }
@@ -2649,7 +2649,7 @@ function openCreateE2ePanel(){
 function submitCreateE2e(){
   var p=state.panel; if(!p) return;
   var val=(p.value||'').trim();
-  if(!val){ p.err='Введите название шага Е2Е-сценария'; render(); return; }
+  if(!val){ p.err='Введи название шага Е2Е-сценария'; render(); return; }
   var e={id:uid('e2e-c'), type:'e2e', title:val, code:'E2E.00.00.'+pad2(E2E_LIST_COMBINED.length+1), createdAt:nowStr(), versions:[]};
   E2E_LIST_COMBINED.push(e);
   closePanel();
@@ -2718,7 +2718,7 @@ function downloadAttachedFile(){
 function runValidate(){
   var p=state.panel; if(!p||p.type!=='uploadPlantuml') return;
   var text=(p.value||'').trim();
-  if(!text){ p.err='Вставьте текст PlantUML или загрузите файл'; render(); return; }
+  if(!text){ p.err='Вставь текст PlantUML или загрузи файл'; render(); return; }
   var result=validatePlantUml(text);
   p.err=null; p.report=result; p.stage='result';
   render();
@@ -3031,7 +3031,7 @@ function renderUseCaseTab(step){
   if(!uc){
     return '<div class="card">'+
       '<div class="card-title">Use Case</div>'+
-      '<p style="color:var(--text-tertiary);font-size:14px;margin:0 0 16px;">К этому шагу пока не привязан Use Case — сценарий описан только последовательностью вызовов.</p>'+
+      '<p style="color:var(--text-tertiary);font-size:14px;margin:0 0 16px;">К этому шагу пока не привязан Use Case — сценарий описан только последовательностью вызовов</p>'+
       '<div class="btnrow"><button class="btn primary" onclick="notAvail()">'+ic('plus',16)+' Привязать Use Case</button></div>'+
     '</div>';
   }
@@ -3283,7 +3283,7 @@ function renderObsTab(stepId){
 function renderVersionHistory(proc){
   if(!proc.versions.length){
     return '<div class="card"><div class="card-title">История загрузок</div>'+
-      '<div style="color:var(--text-secondary);font-size:14px;">Ещё не загружено ни одной версии PlantUML для этого процесса.</div>'+
+      '<div style="color:var(--text-secondary);font-size:14px;">Ещё не загружено ни одной версии PlantUML для этого процесса</div>'+
     '</div>';
   }
   var rows=proc.versions.slice().reverse().map(function(v){
@@ -3339,7 +3339,7 @@ function renderResultBody(report){
   } else if(report.hasWarnings){
     banner='<div class="err-box" style="background:var(--warn-bg);border-color:var(--warn-border);color:var(--warn-text);">'+ic('warn',16)+'<div>Есть замечания: часть участников или вызовов не распознана в ландшафте BeeAtlas. Версию всё равно можно сохранить.</div></div>';
   } else {
-    banner='<div class="err-box" style="background:var(--success-bg);border-color:var(--success-text);color:var(--success-text);">'+ic('infoc',16)+'<div>Всё распознано, блокирующих ошибок нет.</div></div>';
+    banner='<div class="err-box" style="background:var(--success-bg);border-color:var(--success-text);color:var(--success-text);">'+ic('infoc',16)+'<div>Всё распознано, блокирующих ошибок нет</div></div>';
   }
 
   var tiles='<div class="stat-grid">'+cats.map(function(c){
@@ -3404,7 +3404,7 @@ function renderImportModal(){
     var v=vproc?vproc.versions.find(function(x){return x.version===p.version;}):null;
     if(!v){
       return '<div class="import-backdrop"><div class="import-head"><h3>Версия PlantUML</h3><button class="panel-close" onclick="closePanel()">'+ic('x',18)+'</button></div>'+
-        '<div class="import-body"><div class="import-body-inner">Версия не найдена.</div></div>'+
+        '<div class="import-body"><div class="import-body-inner">Версия не найдена</div></div>'+
       '</div>';
     }
     return '<div class="import-backdrop">'+
@@ -3442,7 +3442,7 @@ function renderImportModal(){
       '<div class="info-banner" style="margin-bottom:28px;">'+ic('infoc',20)+'<div class="txt">Для добавления данных доступно два варианта: вставка текста или добавление файла с устройства</div></div>'+
       '<div style="font-size:15px;font-weight:700;margin-bottom:12px;">Добавить файл</div>'+
       '<div class="dropzone" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="onDropzoneDrop(event)" onclick="document.getElementById(\'file-input\').click()">'+
-        '<a onclick="event.stopPropagation();document.getElementById(\'file-input\').click()">Выберите файл</a> или переместите его сюда'+
+        '<a onclick="event.stopPropagation();document.getElementById(\'file-input\').click()">Выбери файл</a> или перемести его сюда'+
         '<div class="hint">puml до 100 мб</div>'+
         '<input id="file-input" type="file" accept=".puml,.txt,.uml" style="display:none" onchange="onFileInputChange(this)">'+
       '</div>'+
@@ -4287,7 +4287,7 @@ const CJ_DEVELOP_STAGES = deepClone(CJ_MAIN_STAGES);
 const CJ_DESIGN_STAGES = deepClone(CJ_MAIN_STAGES.slice(0,2));
 
 // Реальный "незаполненный" CJ — не нулевая матрица, а один пустой этап-заготовка (см.
-// мокап продукта: колонка "Название этапа 1" с единственным блоком "Добавьте BI в этап").
+// мокап продукта: колонка "Название этапа 1" с единственным блоком "Добавь BI в этап").
 // Если CJ в ветке создан — он либо заполнен, либо пустой в этом смысле; ветка, где CJ
 // вовсе не заводили, отдельный (более редкий) случай — см. CjBranchEmptyState.
 function cjUnfilledStage(){ return {id:"st-unfilled", color:"c1", name:"Название этапа 1", unfilled:true}; }
@@ -4961,7 +4961,7 @@ function PlaceholderPage(){
   return `
     <div class="placeholder-page">
       <h2>${escapeHtml(item ? item.label : "")}</h2>
-      <p>Этот раздел не входит в состав переданных макетов и не реализован в прототипе.</p>
+      <p>Этот раздел не входит в состав переданных макетов и не реализован в прототипе</p>
       <button class="btn btn-outline" data-action="go-home">На главную</button>
     </div>`;
 }
@@ -5353,7 +5353,7 @@ function AcRelatedTab(app){
         <span class="rp-legend-item"><span class="rp-dot orange"></span>Требует разработки</span>
       </div>
     </div>
-    ${list.length ? list.map(rpProjectBlock).join("") : `<p style="color:var(--text-secondary);">Ничего не нашлось. Измените запрос</p>`}
+    ${list.length ? list.map(rpProjectBlock).join("") : `<p style="color:var(--text-secondary);">Ничего не нашлось. Измени запрос</p>`}
   `;
 }
 
@@ -5659,7 +5659,7 @@ function AcTcTab(app){
       <span class="reset-link" data-action="ac-reset-tc">Сбросить</span>
     </div>
     <div class="tc-grid">
-      ${list.length ? list.map(AcTcCard).join("") : `<p style="color:var(--text-secondary);">Ничего не нашлось. Измените фильтры или сбросьте их</p>`}
+      ${list.length ? list.map(AcTcCard).join("") : `<p style="color:var(--text-secondary);">Ничего не нашлось. Измени фильтры или сбрось их</p>`}
     </div>
   `;
 }
@@ -5786,7 +5786,7 @@ function AcTechTab(app){
               <td><span class="badge green">${escapeHtml(t.ki)}</span></td>
               <td>${escapeHtml(t.src)}</td>
             </tr>
-          `).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измените фильтры или сбросьте их</td></tr>`}
+          `).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измени фильтры или сбрось их</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -6043,7 +6043,7 @@ function GraphCanvasPage(){
         ${!collapsed ? `<div class="graph-resize-handle" data-resize="graph-detail"></div>` : ""}
         <button class="graph-panel-toggle" data-action="graph-toggle-detail-collapsed" title="${collapsed?"Показать панель":"Скрыть панель"}">${icon(collapsed?"chevronLeft":"chevronRight")}</button>
         <div class="graph-detail" style="${collapsed?"display:none;":(selected?"":"display:flex;align-items:center;justify-content:center;text-align:center;")}">
-          ${selected ? GraphNodeDetail(selected) : `<p style="color:var(--text-secondary);">Найдите и выберите элемент выше, чтобы увидеть карточку.</p>`}
+          ${selected ? GraphNodeDetail(selected) : `<p style="color:var(--text-secondary);">Найди и выбери элемент выше, чтобы увидеть карточку</p>`}
         </div>
       </div>
     </div>
@@ -6054,7 +6054,7 @@ function GraphSearchPrompt(){
   return `
     <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);color:var(--text-secondary);text-align:center;">
       ${icon("search")}
-      <div>Найдите элемент выше, чтобы построить диаграмму</div>
+      <div>Найди элемент выше, чтобы построить диаграмму</div>
     </div>
   `;
 }
@@ -6081,7 +6081,7 @@ function GraphToolbar(){
               <div class="graph-search-suggest-item" data-action="graph-select-node" data-id="${n.id}">
                 <span class="badge gray" style="margin-right:6px;">${escapeHtml(n.type)}</span>${escapeHtml(n.label)}
               </div>
-            `).join("") : `<div class="graph-search-suggest-item" style="color:var(--text-secondary);cursor:default;">Ничего не нашлось. Проверьте написание</div>`}
+            `).join("") : `<div class="graph-search-suggest-item" style="color:var(--text-secondary);cursor:default;">Ничего не нашлось. Проверь написание</div>`}
           </div>
         ` : ""}
       </div>
@@ -6332,7 +6332,7 @@ function GraphNodeDetail(node){
             </tbody>
           </table>
         </div>
-      ` : `<p style="color:var(--text-secondary);">Нет связей канона.</p>`}
+      ` : `<p style="color:var(--text-secondary);">Нет связей канона</p>`}
     </div>
 
     <div class="toggle-wrap" style="margin-bottom:var(--space-6);">
@@ -6343,7 +6343,7 @@ function GraphNodeDetail(node){
     ${g.showCustomLayer ? `
       <div class="section">
         <h2>Кастомные ноды</h2>
-        ${customNodes.length ? customNodes.map(GraphCustomNodeCard).join("") : `<p style="color:var(--text-secondary);">Нет видимых кастомных нод на этом элементе.</p>`}
+        ${customNodes.length ? customNodes.map(GraphCustomNodeCard).join("") : `<p style="color:var(--text-secondary);">Нет видимых кастомных нод на этом элементе</p>`}
       </div>
       <div class="section">
         <h2>Кастомные связи</h2>
@@ -6365,7 +6365,7 @@ function GraphNodeDetail(node){
               </tbody>
             </table>
           </div>
-        ` : `<p style="color:var(--text-secondary);">Нет видимых кастомных связей на этом элементе.</p>`}
+        ` : `<p style="color:var(--text-secondary);">Нет видимых кастомных связей на этом элементе</p>`}
       </div>
     ` : ""}
   `;
@@ -6413,7 +6413,7 @@ function GraphTypesPage(){
         ${buckets.map(b=>GraphTypeTreeRoot(b.root, b.items, isNode)).join("")}
         ${orphans.length ? GraphTypeTreeRoot({id:"__other__", label:"Другое"}, orphans, isNode) : ""}
       </div>
-    ` : `<p style="color:var(--text-secondary);">Нет типов в этой группе.</p>`}
+    ` : `<p style="color:var(--text-secondary);">Нет типов в этой группе</p>`}
   `;
 }
 
@@ -6634,7 +6634,7 @@ function GraphAddRelOverlay(){
         <div class="field-block">
           <label class="field-label">Второй элемент</label>
           <select class="select" id="garOtherSelect">
-            <option value="">— выберите —</option>
+            <option value="">— выбери —</option>
             ${otherOptions.map(o=>`<option value="${o.id}" ${st.draft.otherId===o.id?"selected":""}>${escapeHtml(o.label)} (${escapeHtml(o.type)})</option>`).join("")}
           </select>
         </div>
@@ -6715,7 +6715,7 @@ function CjLibraryEmptyState(){
     <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--space-10) 0;color:var(--text-secondary);">
       <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-5);color:var(--text-tertiary);">${icon("search")}</div>
       <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:var(--space-2);">Нет результатов, подходящих под параметры поиска</div>
-      <div style="font-size:14px;">Попробуйте изменить поисковый запрос или сбросить фильтры</div>
+      <div style="font-size:14px;">Попробуй изменить поисковый запрос или сбросить фильтры</div>
     </div>
   `;
 }
@@ -6927,7 +6927,7 @@ function CjUnfilledStageCell(stageIndex){
   const col = stageIndex + 2; // 1 = колонка подписей, дальше по одной на этап
   return `
     <div class="cj-stage-unfilled" style="grid-column:${col};grid-row:2 / span ${CJ_FIELD_ROWS.length};" data-action="cj-noop">
-      <div class="txt">Добавьте BI в этап</div>
+      <div class="txt">Добавь BI в этап</div>
       <button class="cj-stage-unfilled-add" data-action="cj-noop">${icon("plus")}</button>
     </div>
   `;
@@ -7205,8 +7205,8 @@ function CjBranchEmptyState(){
   const branch = state.cjOpen.branch;
   const donors = cjBranchList(cjId).filter(b=>b.id!==branch && cjHasComposition(cjId,b.id)).map(b=>b.id);
   const hint = donors.length
-    ? `Создайте ветку-клон от «${donors.join("»/«")}», чтобы перенести сюда состав, либо начните с нуля.`
-    : `В других ветках этого CJ его тоже пока нет — начните с нуля.`;
+    ? `Создай ветку-клон от «${donors.join("»/«")}», чтобы перенести сюда состав, либо начни с нуля.`
+    : `В других ветках этого CJ его тоже пока нет — начни с нуля.`;
   return `
     <div class="empty-state">
       <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-5);color:var(--text-tertiary);">${icon("gitBranch")}</div>
@@ -7296,13 +7296,13 @@ function CjMergePanel(){
             <div class="popover cj-merge-help-popover">
               <div class="pv-title">Как работает объединение</div>
               <ul class="cj-merge-help-list">
-                <li><b>Откуда → Куда</b> — из какой ветки берём изменения и в какую их вносим.</li>
-                <li><b>Добавление</b> — добавит только то, чего нет в целевой ветке; то, что там уже есть, не трогает.</li>
-                <li><b>Замена</b> — полностью заменит состав целевой ветки составом исходной.</li>
+                <li><b>Откуда → Куда</b> — из какой ветки берём изменения и в какую их вносим</li>
+                <li><b>Добавление</b> — добавит только то, чего нет в целевой ветке; то, что там уже есть, не трогает</li>
+                <li><b>Замена</b> — полностью заменит состав целевой ветки составом исходной</li>
               </ul>
             </div>` : ""}
         </div>
-        <div style="color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-6);">Выберите, откуда и куда переносим изменения</div>
+        <div style="color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-6);">Выбери, откуда и куда переносим изменения</div>
 
         <div style="display:flex;gap:var(--space-4);">
           <div class="field-block" style="flex:1;">
@@ -7336,7 +7336,7 @@ function CjMergePanel(){
 
         <div class="field-block">
           <label class="field-label">Описание объединения (необязательно)</label>
-          <textarea class="textarea" id="cjMergeDescInput" style="min-height:70px;" placeholder="Что перелили и зачем — пригодится, когда вернётесь к этой ветке позже">${escapeHtml(p.description||"")}</textarea>
+          <textarea class="textarea" id="cjMergeDescInput" style="min-height:70px;" placeholder="Что перелили и зачем — пригодится, когда вернёшься к этой ветке позже">${escapeHtml(p.description||"")}</textarea>
         </div>
 
         ${p.conflicts && p.conflicts.length ? `
@@ -7345,7 +7345,7 @@ function CjMergePanel(){
             <ul>
               ${p.conflicts.map(c=>`<li><b>${escapeHtml(c.app)}</b> — ${escapeHtml(c.capability)}${c.biName?` (BI «${escapeHtml(c.biName)}»)`:""}</li>`).join("")}
             </ul>
-            <div class="hint">Приведите ссылки в соответствие в ветке «${escapeHtml(p.target)}» и повторите объединение.</div>
+            <div class="hint">Приведи ссылки в соответствие в ветке «${escapeHtml(p.target)}» и повтори объединение.</div>
           </div>
         ` : ""}
 
@@ -7402,7 +7402,7 @@ function CjBpmnOverlay(){
         <div style="color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-6);">
           ${stage
             ? `Процесс <a data-action="cj-bpmn-up" style="color:var(--blue);cursor:pointer;">${escapeHtml(cj.title)}</a> / ${escapeHtml(stage.name)}`
-            : `Автоматически построено по этапам CJ. Кликните по этапу, чтобы раскрыть его внутренний процесс.`}
+            : `Автоматически построено по этапам CJ. Кликни по этапу, чтобы раскрыть его внутренний процесс.`}
         </div>
         <div style="overflow-x:auto;padding-bottom:var(--space-4);">
           ${stage ? CjBpmnStageDiagram(cj, stage) : CjBpmnTopDiagram(cj)}
@@ -7546,7 +7546,7 @@ function CjCreateOverlay(){
           </div>
         ` : `
           <div data-action="cj-browse-bpmn" data-dropzone="bpmn" style="border:1.5px dashed var(--border-strong);border-radius:var(--radius);padding:var(--space-7);text-align:center;margin-bottom:var(--space-6);cursor:pointer;${cp.dragOver?"background:var(--bg-alt);border-color:var(--blue);":""}">
-            <div style="font-size:14px;">Перетащите сюда файлы или <span style="color:var(--blue);">загрузите документы</span></div>
+            <div style="font-size:14px;">Перетащи сюда файлы или <span style="color:var(--blue);">загрузи документы</span></div>
             <div style="color:var(--text-tertiary);font-size:12.5px;margin-top:4px;">bpmn до 200 кб</div>
           </div>
           <input type="file" id="cjBpmnFileInput" accept=".bpmn,.xml" style="display:none;">
@@ -7660,7 +7660,7 @@ function ProjectsListPage(){
               <td><span class="proj-link">${escapeHtml(p.jira)}</span></td>
             </tr>
           `).join("") : `
-            <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измените фильтры или сбросьте их</td></tr>
+            <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измени фильтры или сбрось их</td></tr>
           `}
         </tbody>
       </table>
@@ -7797,7 +7797,7 @@ function agentStatusBadgeText(key, st){
 
 function ProjectDetailPage(projectId){
   const p = findProject(projectId);
-  if(!p) return `<div class="placeholder-page">Проект не найден. <button class="btn btn-outline" data-action="nav" data-nav="projects">К списку проектов</button></div>`;
+  if(!p) return `<div class="placeholder-page">Проект не найден <button class="btn btn-outline" data-action="nav" data-nav="projects">К списку проектов</button></div>`;
   return `
     <div class="breadcrumb">
       <a data-action="nav" data-nav="projects">Проекты</a><span class="sep">${icon("chevronRight")}</span>
@@ -7892,7 +7892,7 @@ function UseCaseTab(p){
               <td><span class="proj-link" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}">Посмотреть</span></td>
             </tr>
           `).join("") : `
-            <tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измените фильтры или сбросьте их</td></tr>
+            <tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измени фильтры или сбрось их</td></tr>
           `}
         </tbody>
       </table>
@@ -8100,7 +8100,7 @@ function UcDynamicPanel(){
   return `
     <div class="side-head"><h2>Dynamic-диаграмма ${escapeHtml(sp.seq)}</h2><button class="wizard-close" data-action="close-side">${icon("x")}</button></div>
     <div class="side-body">
-      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-4);">Диаграмма последовательности вызовов части сценария, в нотации PlantUML.</p>
+      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-4);">Диаграмма последовательности вызовов части сценария, в нотации PlantUML</p>
       <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:12.5px;line-height:1.6;overflow-x:auto;white-space:pre;">${escapeHtml(sp.plantUml||"—")}</pre>
     </div>
     <div class="side-foot">
@@ -8114,7 +8114,7 @@ function UcCjLinkPanel(){
   return `
     <div class="side-head"><h2>Привязка к CJ</h2><button class="wizard-close" data-action="close-side">${icon("x")}</button></div>
     <div class="side-body">
-      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-5);">Выберите BI Step, к которому относится этот Use Case. От привязки зависит, в какой CJ и на каком шаге путешествия клиента будет учтён сценарий.</p>
+      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-5);">Выбери BI Step, к которому относится этот Use Case. От привязки зависит, в какой CJ и на каком шаге путешествия клиента будет учтён сценарий.</p>
       <div class="field-block">
         <label class="field-label">BI Step Code</label>
         <select class="select" id="ucCjLinkStep">
@@ -8172,9 +8172,9 @@ function ucImportRuns(p, code){
 
 function UseCaseDetailPage(projectId, ucId){
   const p = findProject(projectId);
-  if(!p) return `<div class="placeholder-page">Проект не найден.</div>`;
+  if(!p) return `<div class="placeholder-page">Проект не найден</div>`;
   const u = findUseCase(p, ucId);
-  if(!u) return `<div class="placeholder-page">Use case не найден.</div>`;
+  if(!u) return `<div class="placeholder-page">Use case не найден</div>`;
   const runs = ucImportRuns(p, u.code);
   const lastRun = runs[0] || null;
   return `
@@ -8355,7 +8355,7 @@ function openAgent(projectId, agentKey){
 /* ============================= AGENT: ОЦЕНКА ============================= */
 function AgentAssessmentPage(projectId){
   const p = findProject(projectId);
-  if(!p) return `<div class="placeholder-page">Проект не найден.</div>`;
+  if(!p) return `<div class="placeholder-page">Проект не найден</div>`;
   const ag = p.agents.assessment;
   const crumb = `
     <div class="breadcrumb">
@@ -8441,9 +8441,9 @@ function findAssessment(p, aid){
 
 function AssessmentDetailPage(projectId, assessmentId){
   const p = findProject(projectId);
-  if(!p) return `<div class="placeholder-page">Проект не найден.</div>`;
+  if(!p) return `<div class="placeholder-page">Проект не найден</div>`;
   const a = findAssessment(p, assessmentId);
-  if(!a) return `<div class="placeholder-page">Оценка не найдена.</div>`;
+  if(!a) return `<div class="placeholder-page">Оценка не найдена</div>`;
   return `
     <div class="breadcrumb">
       <a data-action="nav" data-nav="projects">Проекты</a><span class="sep">${icon("chevronRight")}</span>
@@ -8600,7 +8600,7 @@ function reportSummary(type, r){
 
 function AgentHldPage(projectId){
   const p = findProject(projectId);
-  if(!p) return `<div class="placeholder-page">Проект не найден.</div>`;
+  if(!p) return `<div class="placeholder-page">Проект не найден</div>`;
   const hld = p.agents.hld;
   const crumb = `
     <div class="breadcrumb">
@@ -8710,9 +8710,9 @@ function hldDiagramSvg(systems){
 
 function HldSkeletonDetailPage(projectId){
   const p = findProject(projectId);
-  if(!p) return `<div class="placeholder-page">Проект не найден.</div>`;
+  if(!p) return `<div class="placeholder-page">Проект не найден</div>`;
   const s = p.agents.hld.skeleton;
-  if(!s) return `<div class="placeholder-page">Каркас HLD не найден.</div>`;
+  if(!s) return `<div class="placeholder-page">Каркас HLD не найден</div>`;
   return `
     <div class="breadcrumb">
       <a data-action="nav" data-nav="projects">Проекты</a><span class="sep">${icon("chevronRight")}</span>
@@ -9163,7 +9163,7 @@ function TcCandidateCard(c){
       <button class="btn btn-sm ${c.decision==="new"?"btn-primary":"btn-outline"}" data-action="tc-decide" data-cid="${c.id}" data-decision="new">Новая</button>
       <button class="btn btn-sm ${c.decision==="skip"?"btn-primary":"btn-outline"}" data-action="tc-decide" data-cid="${c.id}" data-decision="skip">Пропустить</button>
     </div>
-    ` : `<div style="color:var(--text-secondary);font-size:13px;margin-top:var(--space-4);">Решение станет доступно после анализа по каталогу.</div>`}
+    ` : `<div style="color:var(--text-secondary);font-size:13px;margin-top:var(--space-4);">Решение станет доступно после анализа по каталогу</div>`}
     ${c.decision==="reuse" && reuseTargets.length ? `
       <div style="margin-top:var(--space-2);color:var(--text-secondary);font-size:13px;">Выбрано для переиспользования: ${reuseTargets.map(t=>`<b>${escapeHtml(t.code)}</b> ${escapeHtml(t.name)}`).join("; ")}</div>
     ` : ""}
@@ -9177,7 +9177,7 @@ function TcCandidateCard(c){
       </div>
     ` : ""}
 
-    ${!c.analyzed ? `<div style="margin-top:var(--space-4);color:var(--text-secondary);font-size:13px;">Ещё не проанализирован по каталогу.</div>` : (
+    ${!c.analyzed ? `<div style="margin-top:var(--space-4);color:var(--text-secondary);font-size:13px;">Ещё не проанализирован по каталогу</div>` : (
       usefulBc.length ? `
       <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-top:var(--space-4);">
         ${usefulBc.map(bc=>`
@@ -9345,7 +9345,7 @@ function startHldWizard(projectId){
   const p = findProject(projectId);
   if(!p) return;
   if(p.agents.assessment.status!=="passed"){
-    showToast("Недостаточно данных: сначала проведите оценку требований в агенте «Оценка»");
+    showToast("Недостаточно данных: сначала проведи оценку требований в агенте «Оценка»");
     return;
   }
   const a = p.agents.assessment.current;
@@ -9441,7 +9441,7 @@ function HldStepSources(w){
         ${miniStat("ТС", w.data.tc.length)}
         ${miniStat("Системы", w.data.systems.length)}
       </div>
-      <p style="color:var(--text-secondary);font-size:14px;margin-top:var(--space-6);">Клиентские пути (CJ) не переданы в бизнес-постановке — раздел будет пропущен в шаблоне HLD. При необходимости уточните требования и перезапустите формирование.</p>
+      <p style="color:var(--text-secondary);font-size:14px;margin-top:var(--space-6);">Клиентские пути (CJ) не переданы в бизнес-постановке — раздел будет пропущен в шаблоне HLD. При необходимости уточни требования и перезапусти формирование.</p>
     </div>
   `;
 }
@@ -9498,7 +9498,7 @@ function HldStepCompose(w){
 
     <div class="section-head-row"><h2 style="margin:0;">Компонентная диаграмма</h2></div>
     <div class="card" style="margin-bottom:var(--space-3);">${hldDiagramSvg(w.data.systems)}</div>
-    <p style="color:var(--text-secondary);font-size:13px;margin:0 0 var(--space-3);">Диаграмма пересобирается автоматически при изменении реестра систем.</p>
+    <p style="color:var(--text-secondary);font-size:13px;margin:0 0 var(--space-3);">Диаграмма пересобирается автоматически при изменении реестра систем</p>
   `;
 }
 
@@ -9758,7 +9758,7 @@ function UcStepSetup(w){
         <label class="field-label">PlantUml</label>
         <textarea class="textarea" id="ucWizPlantUml" placeholder="@startuml ..." style="min-height:220px;font-family:ui-monospace,monospace;font-size:13.5px;">${escapeHtml(d.plantUml)}</textarea>
       </div>
-      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-5);">Вставьте текст диаграммы последовательности в нотации PlantUML. Используйте названия систем/контейнеров, соответствующие существующим в ландшафте BeeAtlas — так части сценария будут сопоставлены автоматически.</p>
+      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-5);">Вставь текст диаграммы последовательности в нотации PlantUML. Используй названия систем/контейнеров, соответствующие существующим в ландшафте BeeAtlas — так части сценария будут сопоставлены автоматически.</p>
       <button class="btn btn-outline btn-sm" data-action="uc-fill-sample">Подставить пример</button>
     </div>
   `;
@@ -10177,9 +10177,9 @@ function UsecasePanel(){
 
 function HldReportPage(projectId, type, reportId){
   const p = findProject(projectId);
-  if(!p) return `<div class="placeholder-page">Проект не найден.</div>`;
+  if(!p) return `<div class="placeholder-page">Проект не найден</div>`;
   const r = (p.agents.hld.reports[type]||[]).find(x=>x.id===reportId);
-  if(!r) return `<div class="placeholder-page">Отчёт не найден.</div>`;
+  if(!r) return `<div class="placeholder-page">Отчёт не найден</div>`;
   const crumb = `
     <div class="breadcrumb">
       <a data-action="nav" data-nav="projects">Проекты</a><span class="sep">${icon("chevronRight")}</span>
@@ -10486,7 +10486,7 @@ function SearchPanel(){
         <input class="input" id="panelSearchInput" placeholder="Название или код" value="${escapeHtml(sp.query)}"/>
         ${sp.query ? `<div class="clear-x" data-action="clear-panel-search">${icon("x")}</div>` : ""}
       </div>
-      ${!sp.query && !sp.loading ? `<div style="color:var(--text-secondary);font-size:13px;">Начните вводить название или код, чтобы найти ТС в каталоге</div>` : ""}
+      ${!sp.query && !sp.loading ? `<div style="color:var(--text-secondary);font-size:13px;">Начни вводить название или код, чтобы найти ТС в каталоге</div>` : ""}
       ${body}
     </div>
     <div class="side-foot">
@@ -11177,7 +11177,7 @@ function handleAction(action, el){
       if(!part || !ucPartCanSave(part)) break;
       if(part.choice==="redo"){
         ucWizardRestart();
-        showToast("Отредактируйте PlantUML и запустите импорт заново");
+        showToast("Отредактируй PlantUML и запусти импорт заново");
         break;
       }
       part.decision = part.choice;
@@ -11650,13 +11650,13 @@ function handleAction(action, el){
       const d = ed.draft;
       const codePattern = ed.kind==="node" ? /^[a-z][a-z0-9_]*$/ : /^[A-Z][A-Z0-9_]*$/;
       if(!d.name.trim() || !d.code.trim() || !codePattern.test(d.code.trim())){
-        showToast("Проверьте имя и формат кода типа");
+        showToast("Проверь имя и формат кода типа");
         break;
       }
       const attributes = {};
       d.attributes.forEach(a=>{ if(a.key.trim()) attributes[a.key.trim()] = a.desc.trim(); });
       if(ed.kind==="node"){
-        if(!d.linkableNodes.length || !d.relationshipType.trim()){ showToast("Укажите соседей и название связи"); break; }
+        if(!d.linkableNodes.length || !d.relationshipType.trim()){ showToast("Укажи соседей и название связи"); break; }
         if(!ed.editingCode && CUSTOM_NODE_TYPES.some(t=>t.code===d.code.trim())){ showToast("Тип с таким кодом уже существует"); break; }
         const obj = {
           code:d.code.trim(), name:d.name.trim(), description:d.description.trim(), attributes,
@@ -11671,7 +11671,7 @@ function handleAction(action, el){
           CUSTOM_NODE_TYPES.push(obj);
         }
       } else {
-        if(!d.nodePairs.length){ showToast("Добавьте хотя бы одну пару нод"); break; }
+        if(!d.nodePairs.length){ showToast("Добавь хотя бы одну пару нод"); break; }
         if(!ed.editingCode && CUSTOM_RELATIONSHIP_TYPES.some(t=>t.code===d.code.trim())){ showToast("Тип с таким кодом уже существует"); break; }
         const obj = {
           code:d.code.trim(), name:d.name.trim(), description:d.description.trim(), attributes,
