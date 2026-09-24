@@ -832,12 +832,22 @@
   .badge.red{background:var(--red-bg);color:var(--red-text);}
   .badge.pink{background:var(--pink-bg);color:var(--pink-text);}
 
+  /* Button (ДС: components/button). Базовый размер прототипа — medium:
+     высота 48, радиус 12, текст 17/22 с letter-spacing 0.2, padding по горизонтали 20.
+     Высота задана явно токеном, а не выведена из padding — иначе кнопка, поле и селект
+     в одной строке не совпадают (ровно для этого в ДС есть size-control-height). */
   .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);
-    border-radius:var(--radius-sm);border:1px solid transparent;padding:var(--space-3) var(--space-5);font-size:14.5px;font-weight:500;
+    display:inline-flex;align-items:center;justify-content:center;gap:var(--size-spacing-x2);
+    height:var(--size-control-height-medium);
+    border-radius:var(--size-border-radius-x6);border:1px solid transparent;
+    padding:0 var(--size-spacing-x5);
+    font-size:17px;line-height:22px;letter-spacing:.2px;font-weight:500;
     background:var(--bg-alt);color:var(--text);white-space:nowrap;
   }
-  .btn svg{width:17px;height:17px;}
+  /* С иконкой padding со стороны иконки меньше (ДС: withIcon medium 16 / 20) */
+  .btn:has(> svg:first-child){padding-left:var(--size-spacing-x4);}
+  .btn:has(> svg:last-child){padding-right:var(--size-spacing-x4);}
+  .btn svg{width:20px;height:20px;}
   .btn-primary{background:var(--yellow);color:rgba(0,0,0,.87);}
   .btn-primary:hover{background:var(--yellow-hover);}
   .btn-primary:disabled{background:var(--yellow-disabled);color:#9a8a3a;cursor:not-allowed;}
@@ -849,13 +859,30 @@
   .btn-ghost:hover{background:var(--bg-alt);}
   .btn-ghost:disabled{color:var(--text-tertiary);cursor:not-allowed;}
   .btn-ghost:disabled:hover{background:transparent;}
-  .btn-sm{padding:var(--space-2) var(--space-4);font-size:13.5px;border-radius:var(--size-border-radius-x4);}
-  .btn-icon-only{padding:var(--space-3);width:44px;}
+  /* Размер small из ДС: высота 40, текст 15/20, padding по горизонтали 16 */
+  .btn-sm{
+    height:var(--size-control-height-small);
+    padding:0 var(--size-spacing-x4);
+    font-size:15px;line-height:20px;
+  }
+  .btn-sm:has(> svg:first-child){padding-left:var(--size-spacing-x3);}
+  .btn-sm:has(> svg:last-child){padding-right:var(--size-spacing-x3);}
+  .btn-sm svg{width:18px;height:18px;}
+  /* Только иконка — квадрат по высоте контрола (ДС: onlyIcon medium 48 / small 40) */
+  .btn-icon-only{padding:0;width:var(--size-control-height-medium);}
+  .btn-sm.btn-icon-only{width:var(--size-control-height-small);}
 
   .field-label{font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);display:block;}
-  .input, .textarea, .select{
-    width:100%;border:1px solid transparent;background:var(--input-bg);border-radius:var(--radius-sm);
-    padding:var(--space-3) var(--space-4);font-size:15px;color:var(--text);outline:none;
+  /* Text field / Select (ДС: components/textfield, components/select) — medium 48,
+     радиус 12, padding по горизонтали 16. Высота явная, чтобы совпадать с .btn в строке. */
+  .input, .select{
+    width:100%;height:var(--size-control-height-medium);
+    border:1px solid transparent;background:var(--input-bg);border-radius:var(--size-border-radius-x6);
+    padding:0 var(--size-spacing-x4);font-size:17px;color:var(--text);outline:none;
+  }
+  .textarea{
+    width:100%;border:1px solid transparent;background:var(--input-bg);border-radius:var(--size-border-radius-x6);
+    padding:var(--size-spacing-x3) var(--size-spacing-x4);font-size:17px;color:var(--text);outline:none;
   }
   .input::placeholder, .textarea::placeholder{color:var(--text-tertiary);}
   .input.error, .textarea.error{border-color:var(--red-text);background:var(--red-bg);}
@@ -875,10 +902,12 @@
     position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text-tertiary);
     pointer-events:none;transition:top .1s ease,font-size .1s ease,transform .1s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 32px);
   }
-  .ffield.filled .ffield-label{top:15px;font-size:12px;color:var(--text-secondary);transform:none;}
-  .ffield .ffield-input{padding-top:var(--space-3);padding-bottom:var(--space-3);position:relative;background:transparent;}
-  .ffield.filled .ffield-input{padding-top:var(--space-6);padding-bottom:var(--space-2);}
-  .ffield-box{background:var(--input-bg);border-radius:var(--size-border-radius-x6);border:1px solid transparent;}
+  /* Поле с плавающей меткой — та же высота 48, раскладка по ДС (textfield medium):
+     метка во всплывшем состоянии margin-top 6, текст margin-top 22 / bottom 6 при line-height 20 → ровно 48. */
+  .ffield.filled .ffield-label{top:6px;font-size:13px;color:var(--text-secondary);transform:none;}
+  .ffield .ffield-input{height:100%;padding-top:0;padding-bottom:0;position:relative;background:transparent;}
+  .ffield.filled .ffield-input{padding-top:22px;padding-bottom:6px;line-height:20px;}
+  .ffield-box{height:var(--size-control-height-medium);background:var(--input-bg);border-radius:var(--size-border-radius-x6);border:1px solid transparent;}
   .ffield-box.focus{background:var(--bg);border-color:var(--text);}
 
   /* filters row */
@@ -886,9 +915,9 @@
   .filters-row .search-wrap{flex:1;min-width:260px;position:relative;}
   .filters-row .arch-input{width:230px;}
   .select-wrap{position:relative;width:180px;}
-  .select-wrap select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-top:var(--space-6);padding-bottom:var(--space-2);padding-right:var(--space-8);}
+  .select-wrap select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-top:22px;padding-bottom:6px;padding-right:var(--space-8);line-height:20px;}
   .select-wrap svg{position:absolute;right:var(--space-4);top:50%;transform:translateY(-50%);width:16px;height:16px;pointer-events:none;color:var(--text-secondary);}
-  .select-wrap .ffield-label{top:15px;font-size:12px;color:var(--text-secondary);transform:none;}
+  .select-wrap .ffield-label{top:6px;font-size:13px;color:var(--text-secondary);transform:none;}
   .archsuggest-item{padding:var(--space-3) var(--space-5);cursor:pointer;}
   .archsuggest-item:hover{background:var(--bg-alt);}
   .archsuggest-item .a-name{font-weight:700;font-size:14.5px;}
