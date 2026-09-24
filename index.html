@@ -3435,7 +3435,7 @@ function renderImportModal(){
     var proc=findE2e(p.e2eId);
     var nextV=proc?proc.versions.length+1:1;
     foot='<button class="btn" onclick="backToEdit()">Назад</button>'+
-      '<button class="btn primary" '+(canSave?'':'disabled')+' onclick="saveVersion()">Сохранить'+(canSave?(' как версию '+nextV):'')+'</button>';
+      '<button class="btn primary" '+(canSave?'':'disabled')+' onclick="saveVersion()">Сохранить'+(canSave?(' версию '+nextV):'')+'</button>';
   } else {
     var hasContent=!!(p.value||'').trim();
     body='<div class="import-body-inner">'+
@@ -4813,7 +4813,7 @@ function HomePage(){
     <div class="home-search-row">
       <div class="home-search-box">
         ${icon("search")}
-        <input class="home-search-input" placeholder="Введите запрос" readonly/>
+        <input class="home-search-input" placeholder="Приложение, паттерн, проект или система" readonly/>
       </div>
       <button class="home-search-send" data-action="noop-doc" title="Найти">${icon("send")}</button>
     </div>
@@ -5353,7 +5353,7 @@ function AcRelatedTab(app){
         <span class="rp-legend-item"><span class="rp-dot orange"></span>Требует разработки</span>
       </div>
     </div>
-    ${list.length ? list.map(rpProjectBlock).join("") : `<p style="color:var(--text-secondary);">Ничего не найдено.</p>`}
+    ${list.length ? list.map(rpProjectBlock).join("") : `<p style="color:var(--text-secondary);">Ничего не нашлось. Измените запрос</p>`}
   `;
 }
 
@@ -5659,7 +5659,7 @@ function AcTcTab(app){
       <span class="reset-link" data-action="ac-reset-tc">Сбросить</span>
     </div>
     <div class="tc-grid">
-      ${list.length ? list.map(AcTcCard).join("") : `<p style="color:var(--text-secondary);">Ничего не найдено.</p>`}
+      ${list.length ? list.map(AcTcCard).join("") : `<p style="color:var(--text-secondary);">Ничего не нашлось. Измените фильтры или сбросьте их</p>`}
     </div>
   `;
 }
@@ -5786,7 +5786,7 @@ function AcTechTab(app){
               <td><span class="badge green">${escapeHtml(t.ki)}</span></td>
               <td>${escapeHtml(t.src)}</td>
             </tr>
-          `).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не найдено</td></tr>`}
+          `).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измените фильтры или сбросьте их</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -6081,7 +6081,7 @@ function GraphToolbar(){
               <div class="graph-search-suggest-item" data-action="graph-select-node" data-id="${n.id}">
                 <span class="badge gray" style="margin-right:6px;">${escapeHtml(n.type)}</span>${escapeHtml(n.label)}
               </div>
-            `).join("") : `<div class="graph-search-suggest-item" style="color:var(--text-secondary);cursor:default;">Ничего не найдено</div>`}
+            `).join("") : `<div class="graph-search-suggest-item" style="color:var(--text-secondary);cursor:default;">Ничего не нашлось. Проверьте написание</div>`}
           </div>
         ` : ""}
       </div>
@@ -6859,7 +6859,7 @@ function CjOverlay(){
       <div class="cj-head-actions">
         <button class="btn btn-outline btn-sm" data-action="cj-open-bpmn">CJ в BPMN</button>
         <button class="btn btn-outline btn-sm" data-action="cj-noop" disabled>Дашборд в grafana</button>
-        <button class="btn btn-outline btn-sm" data-action="cj-noop" disabled>Создать дашборд в grafana</button>
+        <button class="btn btn-outline btn-sm" data-action="cj-noop" disabled>Создать дашборд</button>
         <button class="btn btn-primary btn-sm" data-action="cj-noop">Опубликовать</button>
       </div>
     </div>
@@ -7660,7 +7660,7 @@ function ProjectsListPage(){
               <td><span class="proj-link">${escapeHtml(p.jira)}</span></td>
             </tr>
           `).join("") : `
-            <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не найдено по заданным фильтрам</td></tr>
+            <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измените фильтры или сбросьте их</td></tr>
           `}
         </tbody>
       </table>
@@ -7741,7 +7741,7 @@ function CreatePanel(){
     <div class="side-body">
       <div class="field-block">
         <label class="field-label">Название проекта</label>
-        <input class="input ${hasError?"error":""}" id="createNameInput" value="${escapeHtml(cp.name)}" placeholder="Введите название"/>
+        <input class="input ${hasError?"error":""}" id="createNameInput" value="${escapeHtml(cp.name)}" placeholder="Например, Онлайн-заказ SIM-карт"/>
         <div style="display:flex;justify-content:space-between;margin-top:var(--space-2);">
           <span class="error-text">${dup ? "Проект с таким названием уже существует" : (tooLong ? "Превышено допустимое количество символов" : "")}</span>
           <span class="char-counter" style="margin:0;">${counter}</span>
@@ -7892,7 +7892,7 @@ function UseCaseTab(p){
               <td><span class="proj-link" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}">Посмотреть</span></td>
             </tr>
           `).join("") : `
-            <tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не найдено по заданным фильтрам</td></tr>
+            <tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измените фильтры или сбросьте их</td></tr>
           `}
         </tbody>
       </table>
@@ -9033,7 +9033,7 @@ function WizardStepBusiness(w){
 
       <h3 style="font-size:16px;margin:var(--space-7) 0 var(--space-4);">Вставить бизнес-постановку текстом</h3>
       <div class="field-block">
-        <textarea class="textarea" id="wizBpText" placeholder="Бизнес-постоновка">${escapeHtml(w.data.bpText)}</textarea>
+        <textarea class="textarea" id="wizBpText" placeholder="Например, «Клиент оформляет возврат eSIM»">${escapeHtml(w.data.bpText)}</textarea>
       </div>
     </div>
   `;
@@ -9882,11 +9882,11 @@ function UcUnmappedPartCard(x){
         <div class="uc-field-grid">
           <div class="field-block">
             <label class="field-label">Продукт (мнемоника)</label>
-            <input class="input" id="pf-bc-${x.id}" data-part-field="bc" data-id="${x.id}" placeholder="напр. LOY" value="${escapeHtml(x.bc||"")}"/>
+            <input class="input" id="pf-bc-${x.id}" data-part-field="bc" data-id="${x.id}" placeholder="Например, LOY" value="${escapeHtml(x.bc||"")}"/>
           </div>
           <div class="field-block">
             <label class="field-label">Контейнер / интерфейс</label>
-            <input class="input" id="pf-containerName-${x.id}" data-part-field="containerName" data-id="${x.id}" placeholder="напр. Сервис бонусов" value="${escapeHtml(x.containerName||"")}"/>
+            <input class="input" id="pf-containerName-${x.id}" data-part-field="containerName" data-id="${x.id}" placeholder="Например, Сервис бонусов" value="${escapeHtml(x.containerName||"")}"/>
           </div>
           <div class="field-block">
             <label class="field-label">Код интерфейса</label>
@@ -10083,7 +10083,7 @@ function HldFlowPanel(){
     fields = `
       <div class="field-block">
         <label class="field-label">Текст новых/изменившихся требований</label>
-        <textarea class="textarea" id="hldFlowText" placeholder="Вставьте текст требований">${escapeHtml(sp.text||"")}</textarea>
+        <textarea class="textarea" id="hldFlowText" placeholder="Например, «Клиент оплачивает заказ частями»">${escapeHtml(sp.text||"")}</textarea>
       </div>
       <div class="field-block">
         <input class="input" id="hldFlowUrl" placeholder="или ссылка на страницу Confluence" value="${escapeHtml(sp.url||"")}"/>
@@ -10627,12 +10627,30 @@ function bindGlobalEvents(){
 
   const searchInput = document.getElementById("searchInput");
   if(searchInput){
-    searchInput.addEventListener("focus", ()=>{ state.searchOpen = state.search.length>0; render(); reFocus("searchInput"); });
+    // render() пересоздаёт это поле, поэтому reFocus() ставит фокус на НОВЫЙ узел,
+    // а старый в этот момент отдаёт blur. Без двух защит ниже получается бесконечная
+    // рекурсия focus → render → reFocus → blur → render → … (Maximum call stack).
+    // Защита 1 — флаг refocusing: события, которые мы породили сами, игнорируем.
+    // Защита 2 — перерисовываем, только если состояние правда изменилось.
+    searchInput.addEventListener("focus", ()=>{
+      if(refocusing) return;
+      const next = state.search.length>0;
+      if(state.searchOpen === next) return;
+      state.searchOpen = next; render(); reFocus("searchInput");
+    });
   }
   const archInputEl = document.getElementById("archInput");
   if(archInputEl){
-    archInputEl.addEventListener("focus", ()=>{ state.archOpen = state.archFilter.length>0; state.archFocused=true; render(); reFocus("archInput"); });
-    archInputEl.addEventListener("blur", ()=>{ state.archFocused=false; render(); });
+    archInputEl.addEventListener("focus", ()=>{   // те же две защиты, см. searchInput выше
+      if(refocusing) return;
+      const next = state.archFilter.length>0;
+      if(state.archOpen === next && state.archFocused) return;
+      state.archOpen = next; state.archFocused = true; render(); reFocus("archInput");
+    });
+    archInputEl.addEventListener("blur", ()=>{
+      if(refocusing || !state.archFocused) return;
+      state.archFocused = false; render();
+    });
   }
   bindTocScroll();
   const dropTarget = document.querySelector(".side-panel .side-body");
@@ -10660,9 +10678,15 @@ function initAcTabsScroll(){
   });
 }
 
+// Пока идёт reFocus(), focus/blur порождаем мы сами — обработчики полей их пропускают.
+// .focus() диспатчит события синхронно, поэтому обычного флага достаточно.
+let refocusing = false;
 function reFocus(id){
   const el = document.getElementById(id);
-  if(el){ el.focus(); const v=el.value; el.value=""; el.value=v; }
+  if(!el) return;
+  refocusing = true;
+  try{ el.focus(); const v=el.value; el.value=""; el.value=v; }
+  finally{ refocusing = false; }
 }
 
 function handleInput(el){
