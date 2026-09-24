@@ -923,10 +923,11 @@
   .archsuggest-item .a-name{font-weight:700;font-size:14.5px;}
   .archsuggest-item .a-email{font-size:12.5px;color:var(--text-secondary);margin-top:var(--space-1);}
   .toggle-wrap{display:flex;align-items:center;gap:var(--space-3);white-space:nowrap;font-size:14.5px;}
-  .toggle{width:38px;height:22px;border-radius:20px;background:var(--gray-bg);position:relative;cursor:pointer;border:1px solid var(--border-strong);flex:0 0 auto;}
-  .toggle.on{background:var(--yellow);border-color:var(--yellow);}
-  .toggle .knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s ease;box-shadow:0 1px 3px rgba(0,0,0,.3);}
-  .toggle.on .knob{left:18px;}
+  /* Switcher (ДС: components/switcher) — трек 44×24 радиус 10, бегунок 16 круглый, фон трека control-background */
+  .toggle{width:44px;height:24px;border-radius:var(--size-border-radius-x5);background:var(--color-control-background);position:relative;cursor:pointer;border:none;flex:0 0 auto;}
+  .toggle.on{background:var(--color-background-brand);}
+  .toggle .knob{position:absolute;top:4px;left:4px;width:16px;height:16px;border-radius:50%;background:var(--color-background-white);transition:left .15s ease;box-shadow:var(--elevation-low);}
+  .toggle.on .knob{left:24px;}
   .reset-link{color:var(--blue);font-size:14px;cursor:pointer;white-space:nowrap;}
   .reset-link:hover{text-decoration:underline;}
 
@@ -1637,85 +1638,90 @@
   td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--text-secondary);}
 </style>
 <style id="e2ecat-style">
-.e2ecat-scope{
-  --bg:#ffffff;
-  --bg-panel:#ffffff;
-  --bg-rail:#ffffff;
-  --bg-hover:rgba(25,28,52,.08);
-  --bg-selected:rgba(25,28,52,.05);
-  --border:rgba(25,28,52,.12);
-  --border-strong:rgba(25,28,52,.18);
-  --text:rgba(9,11,22,.94);
-  --text-secondary:rgba(25,28,52,.7);
-  --text-tertiary:rgba(25,28,52,.48);
-  --accent:#fdd835;
-  --accent-strong:#fdc435;
-  --accent-text:rgba(0,0,0,.87);
-  --link:#1a73e8;
-  --info-bg:#e3f2ff;
-  --info-border:#cfe0fb;
-  --info-icon:#1a73e8;
-  --danger-bg:#ffecef;
-  --danger-border:#f5c2c5;
-  --danger-text:#ff5555;
-  --success-bg:#e7f6eb;
-  --success-text:#2ca853;
-  --warn-bg:#fff4e1;
-  --warn-border:#f5dfa0;
-  --warn-text:#ff9419;
-  --badge-cj-bg:#F8E3F6;
-  --badge-cj-text:#A6279A;
-  --badge-bi-bg:#D9F2F0;
-  --badge-bi-text:#128A80;
-  --badge-sp-bg:#DCEAFB;
-  --badge-sp-text:#2E6FE0;
-  --shadow-panel:0px 6px 38px rgba(0,0,0,.16), 0px 0px 10px rgba(0,0,0,.08);
-  --shadow-card: 0px 2px 10px rgba(0,0,0,.08), 0px 2px 8px rgba(0,0,0,.08);
-  --radius-lg:16px;
-  --radius-md:12px;
-  --radius-sm:8px;
-  --radius-pill:999px;
-  color-scheme:light;
-  display:flex;flex-direction:column;height:100%;min-height:0;
-  font-family:'Beeline Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  color:var(--text);background:var(--bg);
-}
-[data-theme="dark"] .e2ecat-scope{
-  --bg:#141414;
-  --bg-panel:#212121;
-  --bg-rail:#141414;
-  --bg-hover:rgba(255,255,255,.06);
-  --bg-selected:rgba(255,255,255,.08);
-  --border:rgba(255,255,255,.2);
-  --border-strong:rgba(255,255,255,.48);
-  --text:rgba(255,255,255,.87);
-  --text-secondary:rgba(255,255,255,.6);
-  --text-tertiary:rgba(255,255,255,.38);
-  --accent:#fdd835;
-  --accent-strong:#fdc435;
-  --accent-text:rgba(0,0,0,.87);
-  --link:#5cb5ff;
-  --info-bg:#132338;
-  --info-border:#1e3a57;
-  --info-icon:#5cb5ff;
-  --danger-bg:#371313;
-  --danger-border:#5c2626;
-  --danger-text:#f37678;
-  --success-bg:#10301a;
-  --success-text:#78ce8e;
-  --warn-bg:#3d392a;
-  --warn-border:#5a5237;
-  --warn-text:#ffbd55;
-  --badge-cj-bg:#3A1F3A;
-  --badge-cj-text:#E6A6DD;
-  --badge-bi-bg:#123834;
-  --badge-bi-text:#5FD1C4;
-  --badge-sp-bg:#132A44;
-  --badge-sp-text:#8FB6F2;
-  --shadow-panel:0 20px 60px rgba(0,0,0,.6);
-  --shadow-card:0px 2px 10px rgba(0,0,0,.3);
-  color-scheme:dark;
-}
+  /* Каталог E2E — изолированный островок со своими именами переменных.
+     Все значения теперь берутся из токенов Yellowbe: имена слева локальные,
+     справа — источник правды. Ничего не поменялось визуально, кроме бейджей
+     CJ/BI/Step, которые раньше были «почти как в ДС», а теперь ровно акцентные цвета. */
+  .e2ecat-scope{
+    --bg:            var(--color-background-base);
+    --bg-panel:      var(--color-background-low);
+    --bg-rail:       var(--color-background-base);
+    --bg-hover:      var(--color-background-base-hover);
+    --bg-selected:   var(--color-background-base-selected);
+    --border:        var(--color-divider);
+    --border-strong: var(--color-border);
+    --text:          var(--color-text-active);
+    --text-secondary:var(--color-text-inactive);
+    --text-tertiary: var(--color-text-disabled);
+    --accent:        var(--color-background-brand);
+    --accent-strong: var(--color-background-brand-hover);
+    --accent-text:   var(--color-text-dark-active);
+    --link:          var(--color-text-link);
+    --info-bg:       var(--color-status-info-background);
+    --info-icon:     var(--color-status-info);
+    --danger-bg:     var(--color-status-error-background);
+    --danger-text:   var(--color-status-error);
+    --success-bg:    var(--color-status-success-background);
+    --success-text:  var(--color-status-success);
+    --warn-bg:       var(--color-status-warning-background);
+    --warn-text:     var(--color-status-warning);
+    --badge-cj-bg:   var(--color-accent-magenta-background);
+    --badge-cj-text: var(--color-accent-magenta);
+    --badge-bi-bg:   var(--color-accent-aquamarine-background);
+    --badge-bi-text: var(--color-accent-aquamarine);
+    --badge-sp-bg:   var(--color-status-info-background);
+    --badge-sp-text: var(--color-status-info);
+    --shadow-panel:  var(--elevation-high);
+    --shadow-card:   var(--elevation-low);
+    --radius-lg:     var(--size-border-radius-x8);   /* 16px */
+    --radius-md:     var(--size-border-radius-x6);   /* 12px */
+    --radius-sm:     var(--size-border-radius-x4);   /*  8px */
+    --radius-pill:   var(--size-border-radius-x15);  /* 30px, как chips в ДС */
+    /* Оттенков рамок для info/danger/warn в ДС нет — это собственные значения острова */
+    --info-border:#cfe0fb;
+    --danger-border:#f5c2c5;
+    --warn-border:#f5dfa0;
+    color-scheme:light;
+    display:flex;flex-direction:column;height:100%;min-height:0;
+    font-family:'Beeline Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    color:var(--text);background:var(--bg);
+  }
+  [data-theme="dark"] .e2ecat-scope{
+    /* Переобъявляем те же алиасы: custom property со значением var(...) вычисляется
+       на своём элементе, поэтому без повтора остров остался бы в светлой теме. */
+    --bg:            var(--color-background-base);
+    --bg-panel:      var(--color-background-low);
+    --bg-rail:       var(--color-background-base);
+    --bg-hover:      var(--color-background-base-hover);
+    --bg-selected:   var(--color-background-base-selected);
+    --border:        var(--color-divider);
+    --border-strong: var(--color-border);
+    --text:          var(--color-text-active);
+    --text-secondary:var(--color-text-inactive);
+    --text-tertiary: var(--color-text-disabled);
+    --link:          var(--color-text-link);
+    --info-bg:       var(--color-status-info-background);
+    --info-icon:     var(--color-status-info);
+    --danger-bg:     var(--color-status-error-background);
+    --danger-text:   var(--color-status-error);
+    --success-bg:    var(--color-status-success-background);
+    --success-text:  var(--color-status-success);
+    --warn-bg:       var(--color-status-warning-background);
+    --warn-text:     var(--color-status-warning);
+    --badge-cj-bg:   var(--color-accent-magenta-background);
+    --badge-cj-text: var(--color-accent-magenta);
+    --badge-bi-bg:   var(--color-accent-aquamarine-background);
+    --badge-bi-text: var(--color-accent-aquamarine);
+    --badge-sp-bg:   var(--color-status-info-background);
+    --badge-sp-text: var(--color-status-info);
+    --info-border:#1e3a57;
+    --danger-border:#5c2626;
+    --warn-border:#5a5237;
+    /* Тени в тёмной теме глубже, чем elevation ДС — как и у глобального --shadow */
+    --shadow-panel:0 20px 60px rgba(0,0,0,.6);
+    --shadow-card:0px 2px 10px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
 .e2ecat-scope button, .e2ecat-scope input, .e2ecat-scope textarea{font-family:inherit;color:inherit;}
 .e2ecat-scope a{color:var(--link);text-decoration:none;cursor:pointer;}
 .e2ecat-scope a:hover{text-decoration:underline;}
@@ -1742,18 +1748,20 @@
 .e2ecat-scope .devlinks a{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--link);font-weight:500;}
 .e2ecat-scope .iconbtn{width:36px;height:36px;border-radius:var(--radius-sm);border:none;background:transparent;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);position:relative;}
 .e2ecat-scope .iconbtn:hover{background:var(--bg-hover);}
-.e2ecat-scope .avatar{width:36px;height:36px;border-radius:50%;background:#FFE1B8;color:#8A5300;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:none;}
-[data-theme="dark"] .e2ecat-scope .avatar{background:#4A3110;color:#FFD98C;}
+/* Avatar (ДС: components/avatar) — medium 40×40, круглый, цветовая пара amber */
+.e2ecat-scope .avatar{width:40px;height:40px;border-radius:50%;background:var(--color-status-warning-background);color:var(--color-status-warning);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:none;}
+
 .e2ecat-scope .dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--danger-text);border:1.5px solid var(--bg);}
 
 .e2ecat-scope .dropdown{position:absolute;top:48px;right:0;background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-panel);min-width:220px;padding:8px;z-index:60;}
 .e2ecat-scope .dropdown-item{padding:9px 10px;border-radius:var(--radius-sm);font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .e2ecat-scope .dropdown-item:hover{background:var(--bg-hover);}
 .e2ecat-scope .dropdown-title{padding:8px 10px 4px;font-size:12px;color:var(--text-tertiary);}
-.e2ecat-scope .switch{width:34px;height:20px;border-radius:999px;background:var(--border-strong);position:relative;flex:0 0 auto;transition:.15s;}
-.e2ecat-scope .switch.on{background:var(--accent);}
-.e2ecat-scope .switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.3);}
-.e2ecat-scope .switch.on::after{left:16px;}
+/* Тот же Switcher из ДС, что и .toggle в основном приложении */
+.e2ecat-scope .switch{width:44px;height:24px;border-radius:var(--size-border-radius-x5);background:var(--color-control-background);position:relative;flex:0 0 auto;transition:.15s;}
+.e2ecat-scope .switch.on{background:var(--color-background-brand);}
+.e2ecat-scope .switch::after{content:"";position:absolute;top:4px;left:4px;width:16px;height:16px;border-radius:50%;background:var(--color-background-white);transition:.15s;box-shadow:var(--elevation-low);}
+.e2ecat-scope .switch.on::after{left:24px;}
 
 .e2ecat-scope .body-row{flex:1;display:flex;min-height:0;}
 .e2ecat-scope .rail{
@@ -1776,7 +1784,7 @@
 .e2ecat-scope .catalog-head{padding:20px 20px 12px;flex:0 0 auto;}
 .e2ecat-scope .catalog-title{font-size:20px;font-weight:700;margin:0 0 16px;}
 .e2ecat-scope .pill-toggle{display:flex;background:var(--bg-hover);border-radius:var(--radius-sm);padding:3px;gap:2px;}
-.e2ecat-scope .pill-toggle button{flex:1;border:none;background:transparent;padding:9px 10px;border-radius:7px;font-size:14px;font-weight:600;color:var(--text-secondary);}
+.e2ecat-scope .pill-toggle button{flex:1;border:none;background:transparent;padding:9px 10px;border-radius:var(--size-border-radius-x4);font-size:14px;font-weight:600;color:var(--text-secondary);}
 .e2ecat-scope .pill-toggle button.on{background:var(--bg-panel);color:var(--text);box-shadow:var(--shadow-card);}
 .e2ecat-scope .searchbox{position:relative;margin-top:12px;}
 .e2ecat-scope .searchbox input{
@@ -1804,7 +1812,7 @@
 .e2ecat-scope .tree-row .chev svg{transition:transform .12s;}
 .e2ecat-scope .tree-row .chev.open svg{transform:rotate(90deg);}
 .e2ecat-scope .tree-row .chev.none{visibility:hidden;}
-.e2ecat-scope .badge{flex:0 0 auto;font-size:11px;font-weight:800;letter-spacing:.3px;border-radius:7px;padding:3px 7px;margin-top:1px;line-height:1;}
+.e2ecat-scope .badge{flex:0 0 auto;font-size:11px;font-weight:800;letter-spacing:.3px;border-radius:var(--size-border-radius-x4);padding:3px 7px;margin-top:1px;line-height:1;}
 .e2ecat-scope .badge.cj{background:var(--badge-cj-bg);color:var(--badge-cj-text);}
 .e2ecat-scope .badge.bi{background:var(--badge-bi-bg);color:var(--badge-bi-text);}
 .e2ecat-scope .badge.sp{background:var(--badge-sp-bg);color:var(--badge-sp-text);}
@@ -2003,8 +2011,9 @@
 .e2ecat-scope ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:6px;}
 .e2ecat-scope ::-webkit-scrollbar-track{background:transparent;}
 /* diagram color tokens (from the second, small <style> block in the source file) */
-.e2ecat-scope{ --diagram-line:#5b5f6a; --diagram-text:#16181d; --diagram-box:#EEF0F3; --diagram-boxb:#D6D9DE; }
-[data-theme="dark"] .e2ecat-scope{ --diagram-line:#8e94a1; --diagram-text:#EEF0F3; --diagram-box:#20222A; --diagram-boxb:#383B46; }
+/* Палитра схем — из токенов темы, поэтому тёмная версия получается сама */
+.e2ecat-scope{ --diagram-line:var(--color-text-inactive); --diagram-text:var(--color-text-active); --diagram-box:var(--color-background-secondary); --diagram-boxb:var(--color-divider); }
+
 
 </style>
 </head>
@@ -2465,7 +2474,23 @@ var ICONS={
   upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
   check:'<polyline points="4,12 9,18 20,6"/>'
 };
-function ic(name,size){ return icon(ICONS[name]||'',size); }
+/* Соответствие иконок этого экрана иконочному шрифту Yellowbe.
+   Имена проверены по ../дизайн-система/docs/icons.md (461 лигатура BeelineIcons).
+   В разработке каждый такой <svg> заменяется на <i class="beeline-icons">имя</i>. */
+var DS_ICONS={
+  menu:'menu', map:'map', puzzle:'puzzle', search:'search', sitemap:'network', folder:'folder',
+  grid:'grid', hierarchy:'view_structure_down', branch:'split', bar:'report_columns',
+  tree:'view_structure_down', target:'goal', moon:'half_moon', bell:'notification',
+  chev:'nav_arrow_right', chevdown:'nav_arrow_down', gift:'gift', infoc:'info_circled',
+  eye:'eye', refresh:'refresh', plus:'add', x:'close', warn:'warning_triangle',
+  expand:'expand', download:'download', box:'safebox', doc:'page', code:'code',
+  pencil:'edit', upload:'upload', check:'check'
+};
+function ic(name,size){
+  var svg = icon(ICONS[name]||'', size);
+  var ds = DS_ICONS[name];
+  return ds ? svg.replace('<svg ', '<svg data-ds-icon="'+ds+'" ') : svg;
+}
 
 function toast(msg){
   state.toast={msg:msg,ts:Date.now()};
@@ -4633,7 +4658,27 @@ const ICONS = {
   gitMerge:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
 };
-function icon(name){ return ICONS[name] || ""; }
+/* Соответствие иконок прототипа иконочному шрифту Yellowbe.
+   Имена проверены по ../дизайн-система/docs/icons.md (461 лигатура BeelineIcons).
+   В разработке каждый такой <svg> заменяется на <i class="beeline-icons">имя</i>,
+   поэтому имя ДС едет вместе с разметкой в data-ds-icon. */
+const DS_ICONS = {
+  menu:'menu', doc:'page', code:'code', moon:'half_moon', bell:'notification', search:'search',
+  x:'close', chevronDown:'nav_arrow_down', chevronRight:'nav_arrow_right', chevronLeft:'nav_arrow_left',
+  chevronsLeft:'fast_arrow_left', chevronsRight:'fast_arrow_right', upload:'upload', plus:'add',
+  check:'check', checkCircle:'check_circled', map:'map', puzzle:'puzzle', target:'goal',
+  network:'network', folder:'folder', grid:'grid', flow:'pipeline', chart:'report_columns',
+  mail:'mail', layers:'group_elements', robot:'robot', gauge:'pulse', shield:'security',
+  send:'send', box:'safebox', pencil:'edit', alertTriangle:'warning_triangle',
+  moreVertical:'more_vert', info:'info_circled', download:'download', gear:'settings',
+  externalLink:'open_in_window', eye:'eye', zoomIn:'zoom_in', zoomOut:'zoom_out',
+  minimize:'collapse', gitBranch:'split', gitMerge:'merge', trash:'delete'
+};
+function icon(name){
+  const svg = ICONS[name] || "";
+  const ds = DS_ICONS[name];
+  return ds && svg ? svg.replace('<svg', '<svg data-ds-icon="'+ds+'"') : svg;
+}
 
 /* ============================= UTIL ============================= */
 function escapeHtml(s){
