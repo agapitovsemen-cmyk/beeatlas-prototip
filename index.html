@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260925-142318">
+<meta name="beeatlas-build" content="20260925-144115">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -882,7 +882,9 @@
   .home-mine-row, .home-services-columns, .agents-grid-v2,
   .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{
     display:grid;grid-template-columns:repeat(12,minmax(0,1fr));
-    gap:var(--size-spacing-x6);align-items:start;
+    gap:var(--size-spacing-x6);
+    /* align-items НЕ трогаем: у grid по умолчанию stretch, и на нём держится
+       одинаковая высота карточек в ряду (например, колонки «Сервисов»). */
   }
   .grid12 > *, .home-mine-row > *, .home-services-columns > *, .agents-grid-v2 > *,
   .stat-tiles > *, .tshirt-grid > *, .info-grid > *, .uc-stat-cards > *, .tc-grid > *{min-width:0;}
