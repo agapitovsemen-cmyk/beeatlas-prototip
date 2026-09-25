@@ -1280,12 +1280,6 @@
   .q-card .q-text{font-size:15px;line-height:18px;letter-spacing:.2px;}
   .empty-inline{color:var(--text-secondary);font-size:15px;line-height:18px;letter-spacing:.2px;padding:var(--space-5);border:1px dashed var(--border);border-radius:var(--size-border-radius-x6);}
 
-  .coach-note{display:flex;align-items:flex-start;gap:var(--space-4);border-radius:var(--size-border-radius-x6);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-6);font-size:15px;line-height:18px;letter-spacing:.2px;
-    background:var(--color-background-base);color:var(--color-text-active);max-width:640px;}
-  .coach-note .close{cursor:pointer;flex:0 0 auto;opacity:.7;display:flex;}
-  .coach-note .close:hover{opacity:1;}
-  .coach-note .close svg{width:15px;height:15px;}
-  .coach-note .close .beeline-icons{width:15px;height:15px;font-size:15px;}
 
   .with-toc{display:flex;gap:var(--space-7);align-items:flex-start;}
   .toc-col{width:230px;flex:0 0 auto;position:sticky;top:20px;}
@@ -8966,13 +8960,6 @@ function AssessmentBody(p, a, ctx){
   return `
   <div class="with-toc">
     <div class="content-col">
-      ${inWizard && !((state.wizard||{}).data||{}).coachDismissed ? `
-        <div class="coach-note invertedTheme">
-          <span>Оценка завершена и сохранена в проекте. Теперь её можно опубликовать или скачать по клику на кнопку «Публикация»</span>
-          <span class="close" data-action="dismiss-coach">${icon("x")}</span>
-        </div>
-      ` : ""}
-
       ${inWizard ? "" : `
         <div class="section" id="sec-intro">
           <h2>Вводные данные</h2>
@@ -9393,7 +9380,6 @@ function startWizard(projectId){
       tc: [],
       tcPage:0,
       tcAppFilter:null,
-      coachDismissed:false,
     },
   };
   render();
@@ -9684,12 +9670,13 @@ function TcCandidateCard(c, w){
     ${c.taskDesc ? `<div class="tc-card-desc">${escapeHtml(c.taskDesc)}</div>` : ""}
 
     ${c.decision==="new" ? `
-      <div style="margin-top:var(--space-4);max-width:320px;">
-        <label class="field-label">В какой системе создать ТС?</label>
+      <div class="select-wrap" style="margin-top:var(--space-4);width:320px;max-width:100%;">
         <select class="select" data-tc-system="${c.id}">
-          <option value="">— выбрать систему —</option>
+          <option value="">Выбери систему</option>
           ${TC_SYSTEM_POOL.map(s=>`<option value="${s}" ${c.system===s?"selected":""}>${s}</option>`).join("")}
         </select>
+        <label class="ffield-label">В какой системе создать ТС</label>
+        ${icon("chevronDown")}
       </div>
     ` : ""}
 
@@ -11896,10 +11883,6 @@ function handleAction(action, el){
       f[el.dataset.kind] = el.dataset.val;
       render(); break;
     }
-    case "dismiss-coach": {
-      if(state.wizard) state.wizard.data.coachDismissed = true;
-      render(); break;
-    }
     case "tc-toggle-bc-expand": {
       const c = state.wizard.data.tc.find(x=>x.id===el.dataset.cid);
       const bc = c && c.bcMatches.find(b=>b.code===el.dataset.bc);
@@ -11933,11 +11916,10 @@ function handleAction(action, el){
         900,
         ()=>{
           w.stepIndex = WIZARD_STEPS.findIndex(s=>s.key==="result");
-          w.data.coachDismissed = false;
           state.assessFilter = {fr:"reuse", nfr:"reuse", tc:"reuse"};
           finishAssessmentAndSave();
         },
-        "Оценка завершена"
+        "Оценка завершена и сохранена в проекте. Теперь её можно опубликовать или скачать по клику на кнопку «Публикация»"
       );
       break;
     }
