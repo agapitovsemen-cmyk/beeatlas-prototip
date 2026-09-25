@@ -1382,30 +1382,31 @@
   @keyframes spin{to{transform:rotate(360deg);}}
 
   .uc-stage-list{display:flex;flex-direction:column;}
-  .uc-stage{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4) var(--space-1);}
-  .uc-stage-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto;border:1.5px solid var(--border-strong);color:var(--text-tertiary);position:relative;font-size:13px;}
-  .uc-stage-icon svg{width:14px;height:14px;}
-  .uc-stage-icon .beeline-icons{width:14px;height:14px;font-size:14px;}
-  .uc-stage:not(:last-child) .uc-stage-icon::after{content:"";position:absolute;top:100%;left:50%;width:1.5px;height:var(--space-4);background:var(--border);transform:translateX(-50%);margin-top:8px;}
+  .uc-stage{display:flex;align-items:center;gap:var(--size-spacing-x3);padding:var(--space-4) var(--space-1);}
+  /* ДС Stepper (vertical): номер 24×24, соединитель 2px */
+  .uc-stage-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto;border:1px solid var(--border);color:var(--text-secondary);position:relative;font-size:13px;line-height:16px;}
+  .uc-stage-icon svg{width:16px;height:16px;}
+  .uc-stage-icon .beeline-icons{width:16px;height:16px;font-size:16px;}
+  .uc-stage:not(:last-child) .uc-stage-icon::after{content:"";position:absolute;top:100%;left:50%;width:2px;height:var(--space-4);border-radius:var(--size-border-radius-x2);background:var(--border);transform:translateX(-50%);margin-top:8px;}
   .uc-stage.done .uc-stage-icon{background:var(--color-status-success-background);border-color:var(--color-status-success);color:var(--color-status-success);}
   .uc-stage.running .uc-stage-icon{border-color:var(--yellow);}
-  .uc-stage .mini-spinner{width:13px;height:13px;border-radius:50%;border:2px solid var(--gray-bg);border-top-color:var(--yellow);animation:spin .8s linear infinite;}
+  .uc-stage .mini-spinner{width:20px;height:20px;}
   .uc-stage-label{font-size:15px;line-height:18px;letter-spacing:.2px;color:var(--text-tertiary);flex:1;}
   .uc-stage-status{flex:0 0 auto;}
   .uc-stage.running .uc-stage-label{color:var(--text);font-weight:500;}
   .uc-stage.done .uc-stage-label{color:var(--text);}
 
   .uc-stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--space-4);margin-bottom:var(--space-6);}
-  .uc-stat-card{border:1px solid var(--border);border-radius:var(--radius);padding:var(--space-4) var(--space-5);background:var(--bg);}
+  .uc-stat-card{border:1px solid var(--border);border-radius:var(--size-border-radius-x6);padding:var(--size-spacing-x6);background:var(--bg);}
   .uc-stat-card .val{font-size:26px;font-weight:500;line-height:32px;letter-spacing:.2px;margin-bottom:var(--space-2);}
-  .uc-stat-card .lbl{display:flex;align-items:center;gap:var(--space-2);font-size:13px;color:var(--text-secondary);}
-  .uc-stat-card .lbl .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .uc-stat-card .lbl{display:flex;align-items:center;gap:var(--space-2);font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-secondary);}
+  .uc-stat-card .lbl .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
   .uc-stat-card .lbl .dot.green{background:var(--green-text);}
   .uc-stat-card .lbl .dot.blue{background:var(--blue);}
   .uc-stat-card .lbl .dot.gray{background:var(--gray-text);}
   .uc-stat-card .lbl .dot.orange{background:var(--orange-text);}
 
-  .uc-unmapped-card{padding:var(--space-5) var(--space-6);margin-bottom:var(--space-4);}
+  .uc-unmapped-card{padding:var(--size-spacing-x6);margin-bottom:var(--space-4);}
   .uc-unmapped-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-1);}
   .uc-part-code{font-family:var(--font-family-mono),ui-monospace,monospace;font-size:13px;color:var(--text-secondary);margin-right:var(--space-2);}
   .uc-choice-group{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-1);}
@@ -1570,7 +1571,8 @@
   .cj-merge-conflict-box ul{margin:var(--space-3) 0 0;padding-left:34px;font-size:12.5px;color:var(--text);line-height:1.6;}
   .cj-merge-conflict-box .hint{margin-top:var(--space-3);padding-left:34px;font-size:12.5px;color:var(--text-secondary);}
 
-  .mini-spinner{width:13px;height:13px;border-radius:50%;border:2px solid var(--gray-bg);border-top-color:var(--yellow);animation:spin .8s linear infinite;flex:0 0 auto;}
+  /* ДС Progress indicator, circle small: 20×20, толщина 3, трек — divider */
+  .mini-spinner{box-sizing:border-box;width:20px;height:20px;border-radius:50%;border:3px solid var(--color-divider);border-top-color:var(--yellow);animation:spin .8s linear infinite;flex:0 0 auto;}
   .cj-branch-lock-badge,.cj-merge-running-banner{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary);}
   .cj-merge-running-banner{font-weight:600;color:var(--text);}
 
@@ -8116,8 +8118,8 @@ function ProjectDetailPage(projectId){
       ${statusBadge(p.status)}
     </div>
     <div style="display:flex;gap:var(--space-9);margin-bottom:var(--space-7);flex-wrap:wrap;">
-      <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Архитектор проекта</div><div style="font-size:15px;font-weight:600;">${escapeHtml(p.architect)}</div></div>
-      <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Дата изменения</div><div style="font-size:15px;font-weight:600;">${escapeHtml(p.updated)}</div></div>
+      <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Архитектор проекта</div><div style="font-size:15px;font-weight:500;">${escapeHtml(p.architect)}</div></div>
+      <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Дата изменения</div><div style="font-size:15px;font-weight:500;">${escapeHtml(p.updated)}</div></div>
     </div>
 
     <div class="page-tabs">
@@ -8229,9 +8231,9 @@ function scenarioStatusBadge(status){
 function UseCaseMetaRow(u, lastRun){
   return `
     <div style="display:flex;gap:var(--space-9);flex-wrap:wrap;align-items:flex-start;margin-bottom:var(--space-7);">
-      <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Источник</div><div style="font-size:15px;font-weight:600;">${escapeHtml(u.source)}</div></div>
-      <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Дата изменения</div><div style="font-size:15px;font-weight:600;">${escapeHtml(u.updated)}</div></div>
-      ${lastRun ? `<div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Запуск импорта</div><div style="font-size:15px;font-weight:600;">${escapeHtml(lastRun.id)} · ${lastRun.status==="Применён"?"completed":escapeHtml(lastRun.status)}</div></div>` : ""}
+      <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Источник</div><div style="font-size:15px;font-weight:500;">${escapeHtml(u.source)}</div></div>
+      <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Дата изменения</div><div style="font-size:15px;font-weight:500;">${escapeHtml(u.updated)}</div></div>
+      ${lastRun ? `<div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Запуск импорта</div><div style="font-size:15px;font-weight:500;">${escapeHtml(lastRun.id)} · ${lastRun.status==="Применён"?"completed":escapeHtml(lastRun.status)}</div></div>` : ""}
     </div>
   `;
 }
@@ -8314,7 +8316,7 @@ function UseCaseScenariosCards(u, projectId, ucId){
           </div>
           <div class="uc-card-body">
             <div><div class="field-label">Участник</div><div>${escapeHtml(s.participant)}</div></div>
-            <div><div class="field-label">Действие</div><div style="color:var(--text-secondary);font-size:14px;line-height:1.5;">${escapeHtml(s.action)}</div></div>
+            <div><div class="field-label">Действие</div><div style="color:var(--text-secondary);font-size:15px;line-height:18px;">${escapeHtml(s.action)}</div></div>
             <div><div class="field-label">Вызов</div>${scenarioCallCell(s, projectId, ucId)}</div>
             <div><div class="field-label">TC</div>${s.tcName ? clampNameCell(s.tcName, s.tcCode) : '<span class="empty-cell">—</span>'}</div>
             <div><div class="field-label">Dynamyc</div>${scenarioDynamicCell(s, projectId, ucId)}</div>
@@ -8389,12 +8391,12 @@ function UseCaseHistoryList(runs){
             <div style="padding:0 var(--space-1) var(--space-5);">
               ${r.notices && r.notices.length ? `
                 <div class="lbl" style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Реестр замечаний</div>
-                <ul style="margin:0 0 var(--space-4);padding-left:var(--space-5);font-size:14px;line-height:1.7;">
+                <ul style="margin:0 0 var(--space-4);padding-left:var(--space-5);font-size:15px;line-height:22px;">
                   ${r.notices.map(n=>`<li>${escapeHtml(n)}</li>`).join("")}
                 </ul>
               ` : ""}
               <div class="lbl" style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Исходный артефакт (PlantUML)</div>
-              <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:12.5px;line-height:1.6;overflow-x:auto;white-space:pre;">${escapeHtml(r.rawPlantUml||"—")}</pre>
+              <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:13px;line-height:22px;overflow-x:auto;white-space:pre;">${escapeHtml(r.rawPlantUml||"—")}</pre>
             </div>
           ` : ""}
         </div>
@@ -8408,8 +8410,8 @@ function UcDynamicPanel(){
   return `
     <div class="side-head"><h2>Dynamic-диаграмма ${escapeHtml(sp.seq)}</h2><button class="wizard-close" data-action="close-side">${icon("x")}</button></div>
     <div class="side-body">
-      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-4);">Диаграмма последовательности вызовов части сценария, в нотации PlantUML</p>
-      <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:12.5px;line-height:1.6;overflow-x:auto;white-space:pre;">${escapeHtml(sp.plantUml||"—")}</pre>
+      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-4);">Диаграмма последовательности вызовов части сценария, в нотации PlantUML</p>
+      <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:13px;line-height:22px;overflow-x:auto;white-space:pre;">${escapeHtml(sp.plantUml||"—")}</pre>
     </div>
     <div class="side-foot">
       <button class="btn btn-outline" data-action="close-side">Закрыть</button>
@@ -8422,7 +8424,7 @@ function UcCjLinkPanel(){
   return `
     <div class="side-head"><h2>Привязка к CJ</h2><button class="wizard-close" data-action="close-side">${icon("x")}</button></div>
     <div class="side-body">
-      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-5);">Выбери BI Step, к которому относится этот Use Case. От привязки зависит, в какой CJ и на каком шаге путешествия клиента будет учтён сценарий.</p>
+      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-5);">Выбери BI Step, к которому относится этот Use Case. От привязки зависит, в какой CJ и на каком шаге путешествия клиента будет учтён сценарий.</p>
       <div class="field-block">
         <label class="field-label">BI Step Code</label>
         <select class="select" id="ucCjLinkStep">
@@ -8713,7 +8715,7 @@ function AssessmentSummaryCard(projectId, a, isCurrent){
         <span class="badge green">Завершено</span>
         ${isCurrent ? '<span class="badge pink">Последняя оценка</span>' : ""}
       </div>
-      <div style="font-weight:700;font-size:17px;margin-bottom:var(--space-4);">${escapeHtml(a.name)}</div>
+      <div style="font-weight:500;font-size:17px;margin-bottom:var(--space-4);">${escapeHtml(a.name)}</div>
       <div style="display:flex;gap:var(--space-7);margin-bottom:var(--space-4);flex-wrap:wrap;">
         ${miniStat("FR", a.fr.length)}
         ${miniStat("NFR", a.nfr.length)}
@@ -8728,7 +8730,7 @@ function AssessmentSummaryCard(projectId, a, isCurrent){
   `;
 }
 function miniStat(label,val){
-  return `<div><div style="font-size:11.5px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:var(--space-1);">${label}</div><div style="font-weight:700;">${val}</div></div>`;
+  return `<div><div style="font-size:13px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:var(--space-1);">${label}</div><div style="font-weight:500;">${val}</div></div>`;
 }
 
 /* ============================= ASSESSMENT DETAIL (full page + confluence) ============================= */
@@ -8998,7 +9000,7 @@ function AgentHldPage(projectId){
         <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-4);flex-wrap:wrap;">
           <span class="badge green">Сформирован</span>
         </div>
-        <div style="font-weight:700;font-size:17px;margin-bottom:var(--space-4);">${escapeHtml(s.pageTitle)}</div>
+        <div style="font-weight:500;font-size:17px;margin-bottom:var(--space-4);">${escapeHtml(s.pageTitle)}</div>
         <div style="display:flex;gap:var(--space-7);margin-bottom:var(--space-4);flex-wrap:wrap;">
           ${miniStat("FR", s.fr.length)}
           ${miniStat("NFR", s.nfr.length)}
@@ -9020,7 +9022,7 @@ function AgentHldPage(projectId){
           <div class="agent-card" data-action="open-hld-flow" data-flow="${f.type}" data-id="${p.id}">
             <div class="a-icon">${icon(f.icon)}</div>
             <div class="a-name">${f.title}</div>
-            <div style="color:var(--text-secondary);font-size:13px;line-height:1.5;">${f.desc}</div>
+            <div style="color:var(--text-secondary);font-size:13px;line-height:18px;">${f.desc}</div>
           </div>
         `).join("")}
       </div>
@@ -9031,7 +9033,7 @@ function AgentHldPage(projectId){
       <h2>История проверок</h2>
       ${HLD_FLOWS.filter(f=>reports[f.type].length).map(f=>`
         <div class="qlist-box" style="margin-bottom:var(--space-4);">
-          <div style="padding:var(--space-4) var(--space-5) 0;font-weight:700;">${f.title}</div>
+          <div style="padding:var(--space-4) var(--space-5) 0;font-weight:500;">${f.title}</div>
           ${reports[f.type].map(r=>`
             <div class="qlist-item" style="cursor:pointer;" data-action="open-hld-report" data-type="${f.type}" data-id="${r.id}" data-pid="${p.id}">
               <div><div class="q-label">${escapeHtml(r.date)}</div><div class="q-text">${reportSummary(f.type, r)}</div></div>
@@ -9691,8 +9693,8 @@ function WizardLoadingPanel(w){
       <div style="display:flex;gap:var(--space-4);align-items:center;">
         <div class="spinner"></div>
         <div>
-          <div style="font-weight:700;font-size:17px;">${escapeHtml(info.title)}</div>
-          ${info.subtitle ? `<div style="color:var(--text-secondary);font-size:14px;margin-top:var(--space-1);">${escapeHtml(info.subtitle)}</div>` : ""}
+          <div style="font-weight:500;font-size:17px;">${escapeHtml(info.title)}</div>
+          ${info.subtitle ? `<div style="color:var(--text-secondary);font-size:15px;margin-top:var(--space-1);">${escapeHtml(info.subtitle)}</div>` : ""}
         </div>
       </div>
       ${info.tiles && info.tiles.length ? `
@@ -9700,7 +9702,7 @@ function WizardLoadingPanel(w){
           ${info.tiles.map(t=>`
             <div style="background:var(--gray-bg);border-radius:var(--radius);padding:var(--space-4) var(--space-5);">
               <div style="color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-1);">${escapeHtml(t.lbl)}</div>
-              <div style="font-size:20px;font-weight:700;">${escapeHtml(String(t.val))}</div>
+              <div style="font-size:20px;font-weight:500;">${escapeHtml(String(t.val))}</div>
             </div>
           `).join("")}
         </div>
@@ -9882,7 +9884,7 @@ function HldStepSources(w){
         ${miniStat("ТС", w.data.tc.length)}
         ${miniStat("Системы", w.data.systems.length)}
       </div>
-      <p style="color:var(--text-secondary);font-size:14px;margin-top:var(--space-6);">Клиентские пути (CJ) не переданы в бизнес-постановке — раздел будет пропущен в шаблоне HLD. При необходимости уточни требования и перезапусти формирование.</p>
+      <p style="color:var(--text-secondary);font-size:15px;margin-top:var(--space-6);">Клиентские пути (CJ) не переданы в бизнес-постановке — раздел будет пропущен в шаблоне HLD. При необходимости уточни требования и перезапусти формирование.</p>
     </div>
   `;
 }
@@ -10197,9 +10199,9 @@ function UcStepSetup(w){
 
       <div class="field-block">
         <label class="field-label">PlantUml</label>
-        <textarea class="textarea" id="ucWizPlantUml" placeholder="@startuml ..." style="min-height:220px;font-family:ui-monospace,monospace;font-size:13.5px;">${escapeHtml(d.plantUml)}</textarea>
+        <textarea class="textarea" id="ucWizPlantUml" placeholder="@startuml ..." style="min-height:220px;font-family:ui-monospace,monospace;font-size:13px;">${escapeHtml(d.plantUml)}</textarea>
       </div>
-      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-5);">Вставь текст диаграммы последовательности в нотации PlantUML. Используй названия систем/контейнеров, соответствующие существующим в ландшафте BeeAtlas — так части сценария будут сопоставлены автоматически.</p>
+      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-5);">Вставь текст диаграммы последовательности в нотации PlantUML. Используй названия систем/контейнеров, соответствующие существующим в ландшафте BeeAtlas — так части сценария будут сопоставлены автоматически.</p>
       <button class="btn btn-outline btn-sm" data-action="uc-fill-sample">Подставить пример</button>
     </div>
   `;
@@ -10214,7 +10216,7 @@ function ucStageStatusPill(status){
 function UcStepImport(w){
   return `
     <div style="width:100%;max-width:760px;">
-      <p style="color:var(--text-secondary);font-size:14px;margin:0 0 var(--space-6);">Процесс можно прервать в любой момент — уже сохранённые данные останутся доступны в истории импорта</p>
+      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-6);">Процесс можно прервать в любой момент — уже сохранённые данные останутся доступны в истории импорта</p>
       <div class="uc-stage-list">
         ${w.data.stages.map(s=>`
           <div class="uc-stage ${s.status}">
@@ -10238,7 +10240,7 @@ function UcStepResult(w){
   return `
     <div style="width:100%;max-width:1100px;">
     <div class="section-head-row"><h2 style="margin:0;">Staging собрал сценарии из PlantUML</h2></div>
-    <p style="color:var(--text-secondary);font-size:14px;margin:calc(-1 * var(--space-2)) 0 var(--space-5);">${parts.length} вызовов: ${mappedCount} подтверждены, ${specifiedCount} указано архитектором, ${unresolvedParts.length} требуют решения</p>
+    <p style="color:var(--text-secondary);font-size:15px;margin:calc(-1 * var(--space-2)) 0 var(--space-5);">${parts.length} вызовов: ${mappedCount} подтверждены, ${specifiedCount} указано архитектором, ${unresolvedParts.length} требуют решения</p>
     <div class="uc-stat-cards">
       <div class="uc-stat-card"><div class="val">${mappedCount}</div><div class="lbl"><span class="dot green"></span>Подтверждено</div></div>
       <div class="uc-stat-card"><div class="val">${specifiedCount}</div><div class="lbl"><span class="dot blue"></span>Указан архитектором</div></div>
@@ -10248,7 +10250,7 @@ function UcStepResult(w){
     ${resolvedParts.length ? `
       <div class="section-head-row" style="margin-bottom:var(--space-4);">
         <h3 style="margin:0;font-size:15px;">Смаппированные части</h3>
-        <span style="font-size:12.5px;color:var(--text-secondary);">подтверждены по канонической модели (is_current)</span>
+        <span style="font-size:13px;color:var(--text-secondary);">подтверждены по канонической модели (is_current)</span>
       </div>
       <div class="table-wrap-fit" style="margin-bottom:var(--space-7);">
         <table class="fixed-table">
@@ -10279,7 +10281,7 @@ function UcStepResult(w){
     ` : ""}
     <div class="section-head-row" style="margin-bottom:var(--space-4);">
       <h3 style="margin:0;font-size:15px;">Несмаппированные части</h3>
-      <span style="font-size:12.5px;color:var(--text-secondary);">кол-во частей ${unresolvedParts.length}</span>
+      <span style="font-size:13px;color:var(--text-secondary);">кол-во частей ${unresolvedParts.length}</span>
     </div>
     ${unresolvedParts.length ? unresolvedParts.map(UcUnmappedPartCard).join("") : `<div class="card empty-state" style="padding:var(--space-7) var(--space-5);"><p style="color:var(--text-secondary);margin:0;">Несопоставленных частей не осталось</p></div>`}
     </div>
@@ -10391,7 +10393,7 @@ function UcStepOutcome(w){
   return `
     <div style="width:100%;max-width:1100px;">
       <div class="page-title-row" style="margin-bottom:var(--space-4);">
-        <h1 style="font-size:22px;">${escapeHtml(preview.name)}</h1>
+        <h1 style="font-size:26px;">${escapeHtml(preview.name)}</h1>
         <span class="badge gray">Черновик</span>
       </div>
       ${UseCaseMetaRow(preview, null)}
@@ -10657,11 +10659,11 @@ function ImpactReportBody(p, r){
     <div class="section">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);">
         <div class="card">
-          <div style="font-weight:700;margin-bottom:var(--space-3);">Новые открытые вопросы</div>
+          <div style="font-weight:500;margin-bottom:var(--space-3);">Новые открытые вопросы</div>
           ${r.newQuestions.length ? r.newQuestions.map(q=>`<div class="qlist-item" style="padding:var(--space-3) 0;"><div class="q-text">${escapeHtml(q)}</div></div>`).join("") : '<span class="empty-cell">Нет</span>'}
         </div>
         <div class="card">
-          <div style="font-weight:700;margin-bottom:var(--space-3);">Закрытые вопросы</div>
+          <div style="font-weight:500;margin-bottom:var(--space-3);">Закрытые вопросы</div>
           ${r.closedQuestions.length ? r.closedQuestions.map(q=>`<div class="qlist-item" style="padding:var(--space-3) 0;"><div class="q-text">${escapeHtml(q)}</div></div>`).join("") : '<span class="empty-cell">Нет</span>'}
         </div>
       </div>
