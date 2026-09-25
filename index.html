@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>beeatlas (прототип)</title>
+<!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
+     на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
+<meta name="beeatlas-build" content="20260925-141816">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -856,8 +859,38 @@
   .home-chip:hover{background:var(--bg-alt);}
   .home-chip.active{background:var(--yellow);border-color:var(--yellow);color:rgba(0,0,0,.87);font-weight:600;}
   .home-h2{font-size:22px;margin:0 0 var(--space-5);}
-  .home-mine-row{display:flex;gap:var(--space-5);margin-bottom:var(--space-9);flex-wrap:wrap;}
-  .home-mine-card{flex:1;min-width:260px;}
+  .home-mine-row{margin-bottom:var(--space-9);}
+  /* ═══ Сетка страницы: 12 резиновых колонок, отступы страницы 32 слева/справа ═══
+     Блоки не задают свою раскладку в «столько-то поровну», а занимают N колонок,
+     поэтому на любой ширине контент тянется, а не вылезает за край.
+     12 колонок на десктопе → 8 ниже 1280 → 4 ниже 900. Жёлоб 24 (--size-spacing-x6). */
+  .grid12,
+  .home-mine-row, .home-services-columns, .agents-grid-v2,
+  .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));
+    gap:var(--size-spacing-x6);align-items:start;
+  }
+  .grid12 > .col-3, .home-group-col, .stat-tile, .tshirt-card, .uc-stat-card{grid-column:span 3;min-width:0;}
+  .grid12 > .col-4, .home-mine-card, .agent-card-v2, .info-grid > *, .tc-grid > *,
+  .stat-tiles.cols-3 > .stat-tile{grid-column:span 4;min-width:0;}
+  .grid12 > .col-6{grid-column:span 6;min-width:0;}
+  .grid12 > .col-12{grid-column:span 12;min-width:0;}
+  @media (max-width:1279px){
+    .grid12, .home-mine-row, .home-services-columns, .agents-grid-v2,
+    .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{grid-template-columns:repeat(8,minmax(0,1fr));}
+    .grid12 > .col-3, .grid12 > .col-4, .grid12 > .col-6,
+    .home-group-col, .stat-tile, .tshirt-card, .uc-stat-card,
+    .home-mine-card, .agent-card-v2, .info-grid > *, .tc-grid > *,
+    .stat-tiles.cols-3 > .stat-tile{grid-column:span 4;min-width:0;}
+    .grid12 > .col-12{grid-column:span 8;min-width:0;}
+  }
+  @media (max-width:899px){
+    .grid12, .home-mine-row, .home-services-columns, .agents-grid-v2,
+    .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .grid12 > *, .home-group-col, .stat-tile, .tshirt-card, .uc-stat-card,
+    .home-mine-card, .agent-card-v2, .info-grid > *, .tc-grid > *{grid-column:span 4;min-width:0;}
+  }
+
   .home-mine-title{font-weight:700;font-size:16px;margin-bottom:var(--space-4);}
   .home-mine-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);}
   .home-mine-title-row .home-mine-title{margin-bottom:0;}
@@ -870,8 +903,6 @@
   .home-mine-more:hover{text-decoration:underline;}
   .home-mine-list{margin:var(--space-2) 0 0;padding-left:var(--space-5);font-size:14.5px;line-height:1.9;}
 
-  .home-services-columns{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-6);align-items:stretch;}
-  @media (max-width:1200px){ .home-services-columns{grid-template-columns:repeat(2,1fr);} }
   .home-group-col{display:flex;flex-direction:column;gap:var(--space-6);}
   .home-group-card{display:block;}
   .home-group-title{font-weight:700;font-size:16px;margin-bottom:var(--space-4);}
@@ -885,9 +916,9 @@
   .home-svc-blue{background:var(--blue-bg);color:var(--blue-text);}
   .home-svc-green{background:var(--green-bg);color:var(--green-text);}
   .home-svc-gray{background:var(--gray-bg);color:var(--gray-text);}
-  .home-svc-title{font-weight:700;font-size:15px;margin-bottom:var(--space-1);}
+  .home-svc-title{font-weight:700;font-size:15px;margin-bottom:var(--space-1);overflow-wrap:anywhere;}
   .home-svc-soon{font-size:11px;font-weight:600;color:var(--text-tertiary);background:var(--gray-bg);border-radius:6px;padding:2px 6px;margin-left:var(--space-2);vertical-align:middle;}
-  .home-svc-desc{font-size:13.5px;color:var(--text-secondary);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .home-svc-desc{font-size:13.5px;color:var(--text-secondary);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;}
 
   /* ДС Breadcrumbs: gap 8, текст 15/400/18/0.2 */
   .breadcrumb{display:flex;align-items:center;gap:var(--size-spacing-x2);color:var(--blue);font-size:15px;line-height:18px;letter-spacing:.2px;margin-bottom:var(--space-4);flex-wrap:wrap;}
@@ -1116,9 +1147,7 @@
   .pill-item.active{background:var(--yellow);color:var(--color-text-black-active);}
   .pill-item.active:hover{background:var(--yellow-hover);}
 
-  .agents-grid-v2{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-5);}
-  @media (max-width:1100px){ .agents-grid-v2{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:680px){ .agents-grid-v2{grid-template-columns:1fr;} }
+
   .agent-card-v2{padding:var(--space-6);display:flex;flex-direction:column;}
   .agent-card-v2-title{color:var(--blue);font-weight:500;font-size:17px;line-height:22px;letter-spacing:.2px;margin-bottom:var(--space-3);cursor:pointer;}
   .agent-card-v2-title:hover{text-decoration:underline;}
@@ -1136,18 +1165,16 @@
   .empty-state .box-illustration{width:130px;height:130px;margin-bottom:var(--space-6);}
   .empty-state h3{font-size:19px;line-height:24px;letter-spacing:.2px;font-weight:500;margin:0 0 var(--space-5);}
 
-  .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-5);}
+
   .info-grid .lbl{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-secondary);margin-bottom:var(--space-2);}
   .info-grid .val{font-size:15px;line-height:20px;letter-spacing:.2px;font-weight:500;}
 
-  .stat-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4);}
-  .stat-tile{border:1px solid var(--border);border-radius:var(--radius);padding:var(--space-6);}
+  .stat-tile{border:1px solid var(--border);border-radius:var(--size-border-radius-x6);padding:var(--size-spacing-x6);}
   .stat-tile .big{font-size:34px;line-height:44px;letter-spacing:.3px;font-weight:500;margin-bottom:var(--space-2);}
   .stat-tile .big.orange-text{color:var(--color-status-warning);}
   .stat-tile .lbl{color:var(--text-secondary);font-size:15px;line-height:18px;letter-spacing:.2px;}
 
-  .tshirt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4);}
-  .tshirt-card{border:1px solid var(--border);border-radius:var(--radius);padding:var(--space-6);text-align:center;}
+  .tshirt-card{border:1px solid var(--border);border-radius:var(--size-border-radius-x6);padding:var(--size-spacing-x6);text-align:center;}
   .tshirt-card .sz{font-size:34px;line-height:44px;letter-spacing:.3px;font-weight:500;color:var(--text-tertiary);margin-bottom:var(--space-3);}
   .tshirt-card .lvl{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-tertiary);text-transform:none;margin-bottom:var(--space-3);}
   .tshirt-card .desc{font-size:13px;color:var(--text-secondary);line-height:16px;letter-spacing:.2px;text-align:left;}
@@ -1170,10 +1197,10 @@
   .inline-alert.neutral .ia-ico{color:var(--color-status-neutral);}
 
   /* ===== агент «Оценка»: шаг ТС и отображение результата (макеты 2026-09) ===== */
-  .stat-tiles.cols-3{grid-template-columns:repeat(3,1fr);}
+
   .stat-tile{position:relative;}
   .stat-tile .tile-badge{position:absolute;top:var(--space-4);right:var(--space-4);}
-  @media (max-width:900px){ .stat-tiles.cols-3{grid-template-columns:repeat(2,1fr);} }
+
 
   .req-bulk-bar{display:flex;align-items:center;gap:var(--space-3);background:var(--bg-alt);border-radius:var(--size-border-radius-x6);padding:var(--space-3) var(--space-5);margin-bottom:var(--space-4);font-size:15px;line-height:18px;letter-spacing:.2px;}
   .req-bulk-bar .cnt{font-weight:500;margin-right:auto;}
@@ -1431,7 +1458,7 @@
   .uc-stage.running .uc-stage-label{color:var(--text);font-weight:500;}
   .uc-stage.done .uc-stage-label{color:var(--text);}
 
-  .uc-stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--space-4);margin-bottom:var(--space-6);}
+  .uc-stat-cards{margin-bottom:var(--space-6);}
   .uc-stat-card{border:1px solid var(--border);border-radius:var(--size-border-radius-x6);padding:var(--size-spacing-x6);background:var(--bg);}
   .uc-stat-card .val{font-size:26px;font-weight:500;line-height:32px;letter-spacing:.2px;margin-bottom:var(--space-2);}
   .uc-stat-card .lbl{display:flex;align-items:center;gap:var(--space-2);font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-secondary);}
@@ -1490,7 +1517,7 @@
   /* 12-column fluid grid — each card spans 4 of 12 columns, so 3 cards per row at any
      container width (was auto-fill/minmax, which happened to fit 4 narrower cards). */
   .cj-card-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--space-5);}
-  .cj-card-grid .cj-card{grid-column:span 4;}
+  .cj-card-grid .cj-card{grid-column:span 4;min-width:0;}
   .cj-card{cursor:pointer;display:flex;flex-direction:column;}
   .cj-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-sm);}
   .cj-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-2);margin-bottom:var(--space-4);}
@@ -1716,8 +1743,7 @@
 
   @media (max-width:1100px){
     .agents-grid{grid-template-columns:repeat(2,1fr);}
-    .stat-tiles{grid-template-columns:repeat(2,1fr);}
-    .tshirt-grid{grid-template-columns:repeat(2,1fr);}
+
     .with-toc{flex-direction:column;}
     .toc-col{width:100%;position:static;display:flex;flex-wrap:wrap;gap:var(--space-1);}
   }
@@ -1751,9 +1777,7 @@
   .exp-detail-note{font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-3);}
   .exp-cell{display:flex;align-items:center;gap:var(--space-2);}
 
-  .tc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-5);}
-  @media (max-width:1200px){ .tc-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:800px){ .tc-grid{grid-template-columns:1fr;} }
+
   .tc-card{border:1px solid var(--border);border-radius:var(--radius);padding:var(--space-5);display:flex;flex-direction:column;gap:var(--space-3);}
   .tc-card .tc-title{color:var(--blue);font-weight:600;font-size:14.5px;line-height:1.35;cursor:pointer;}
   .tc-card .tc-title:hover{text-decoration:underline;}
@@ -2713,6 +2737,12 @@ function withFocus(fn){
     }
   }
 }
+/* Отметка сборки — чтобы отличать свежую страницу от отданной из кэша GitHub Pages
+   (index.html там приходит с cache-control: max-age=600 поверх CDN Fastly). */
+const BUILD = (document.querySelector('meta[name="beeatlas-build"]')||{}).content || "dev";
+window.BUILD = BUILD;
+try{ console.info("beeatlas build:", BUILD); }catch(e){}
+
 function render(){
   withFocus(function(){
     var root=document.getElementById('pageRoot');
@@ -5075,7 +5105,7 @@ function renderShell(){
 function Header(){
   return `
   <div class="header">
-    <div class="brand" data-action="go-home" style="cursor:pointer;">
+    <div class="brand" data-action="go-home" style="cursor:pointer;" title="Сборка ${BUILD}">
       beeatlas
     </div>
     <div class="header-spacer"></div>
