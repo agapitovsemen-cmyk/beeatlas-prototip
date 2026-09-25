@@ -1313,6 +1313,31 @@
 
   .wizard-step-content{margin-top:var(--space-7);}
   .wizard-step-content.centered{display:flex;flex-direction:column;align-items:center;}
+
+  /* ═══ Визард «Проведение оценки»: геометрия снята с макетов (кадр 1440) ═══
+     колонка контента 908px по центру (265…1174), оглавление вынесено в правое поле,
+     футер выровнен по правому краю той же колонки, шапка с отступом 24. */
+  .wiz-col .wizard-head{padding:var(--size-spacing-x6) var(--size-spacing-x6) var(--size-spacing-x5);}
+  .wiz-col .wizard-step-content{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) min(908px,100%) minmax(0,1fr);
+    column-gap:var(--size-spacing-x10);
+    align-items:start;
+  }
+  .wiz-col .wizard-step-content > *{grid-column:2;min-width:0;}
+  .wiz-col .wizard-step-content > .with-toc{display:contents;}
+  .wiz-col .wizard-step-content > .with-toc > .content-col{grid-column:2;min-width:0;}
+  .wiz-col .wizard-step-content > .with-toc > .toc-col{grid-column:3;width:152px;justify-self:start;}
+  .wiz-col .wizard-step-content.centered{display:flex;flex-direction:column;align-items:center;}
+  .wiz-col .wizard-foot{padding-left:var(--size-spacing-x8);padding-right:var(--size-spacing-x8);}
+  .wiz-col .wizard-foot-inner{width:min(908px,100%);margin:0 auto;display:flex;gap:var(--space-3);justify-content:flex-end;}
+  /* На узких экранах колонка и оглавление возвращаются в обычный поток */
+  @media (max-width:1280px){
+    .wiz-col .wizard-step-content{display:block;}
+    .wiz-col .wizard-step-content > .with-toc{display:flex;}
+    .wiz-col .wizard-step-content > .with-toc > .toc-col{width:230px;}
+    .wiz-col .wizard-foot-inner{width:100%;}
+  }
   .wizard-body-center{display:flex;flex-direction:column;}
   .wizard-body-center > .wizard-stepper-wrap{flex:0 0 auto;}
   .wizard-body-center > *:last-child{flex:1;display:flex;flex-direction:column;justify-content:center;margin-left:auto;margin-right:auto;width:100%;}
@@ -1340,6 +1365,7 @@
   .step.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--yellow);}
   /* Степпер агента «Оценка»: одна строка «номер + название», активный шаг подчёркнут
      тёмной линией (макеты 2026-09). Остальные визарды оставляют двухстрочный вариант. */
+  .stepper.stepper-inline{gap:var(--size-spacing-x10);}
   .stepper.stepper-inline .step .stxt .s-lbl{display:none;}
   .stepper.stepper-inline .step .stxt .s-name{font-size:17px;}
   .stepper.stepper-inline .step.active::after{background:var(--text);}
@@ -1429,6 +1455,8 @@
     box-shadow:var(--elevation-high);font-size:14.5px;max-width:520px;line-height:1.45;animation:toastin .18s ease;
   }
   @keyframes toastin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+  /* Когда открыт визард, снекбар поднимается над его футером (88px), иначе перекрывает кнопки */
+  body:has(.wizard-overlay) .toast{bottom:calc(88px + var(--size-spacing-x9));}
   .toast .t-close{cursor:pointer;color:var(--color-text-inactive);flex:0 0 auto;width:18px;height:18px;}
   .toast .t-close svg{width:18px;height:18px;}
   .toast .t-close .beeline-icons{width:18px;height:18px;font-size:18px;}
@@ -9317,8 +9345,8 @@ function WizardOverlay(){
   const w = state.wizard;
   const step = WIZARD_STEPS[w.stepIndex].key;
   const centerCls = w.loading ? " wizard-body-center" : "";
-  const contentCentered = (step==="business" || w.loading) ? " centered" : "";
-  return `<div class="wizard-overlay">
+  const contentCentered = w.loading ? " centered" : "";
+  return `<div class="wizard-overlay wiz-col">
     <div class="wizard-head">
       <h2>Проведение оценки</h2>
       <button class="wizard-close" data-action="close-wizard">${icon("x")}</button>
@@ -9327,7 +9355,7 @@ function WizardOverlay(){
       <div class="wizard-stepper-wrap">${Stepper(w.stepIndex)}</div>
       <div class="wizard-step-content${contentCentered}">${WizardStepContent(w)}</div>
     </div>
-    <div class="wizard-foot">${WizardStepFooter(w)}</div>
+    <div class="wizard-foot"><div class="wizard-foot-inner">${WizardStepFooter(w)}</div></div>
   </div>`;
 }
 
@@ -9391,7 +9419,7 @@ function WizardStepFooter(w){
 
 function WizardStepBusiness(w){
   return `
-    <div style="max-width:720px;">
+    <div>
       <div class="inline-alert info" style="margin-bottom:var(--space-7);">
         <span class="ia-ico">${icon("info")}</span>
         <span class="ia-txt">Для добавления данных доступно два варианта: вставка текста или добавление ссылки</span>
