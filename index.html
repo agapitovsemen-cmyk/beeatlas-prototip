@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260925-141816">
+<meta name="beeatlas-build" content="20260925-142318">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -860,37 +860,6 @@
   .home-chip.active{background:var(--yellow);border-color:var(--yellow);color:rgba(0,0,0,.87);font-weight:600;}
   .home-h2{font-size:22px;margin:0 0 var(--space-5);}
   .home-mine-row{margin-bottom:var(--space-9);}
-  /* ═══ Сетка страницы: 12 резиновых колонок, отступы страницы 32 слева/справа ═══
-     Блоки не задают свою раскладку в «столько-то поровну», а занимают N колонок,
-     поэтому на любой ширине контент тянется, а не вылезает за край.
-     12 колонок на десктопе → 8 ниже 1280 → 4 ниже 900. Жёлоб 24 (--size-spacing-x6). */
-  .grid12,
-  .home-mine-row, .home-services-columns, .agents-grid-v2,
-  .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{
-    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));
-    gap:var(--size-spacing-x6);align-items:start;
-  }
-  .grid12 > .col-3, .home-group-col, .stat-tile, .tshirt-card, .uc-stat-card{grid-column:span 3;min-width:0;}
-  .grid12 > .col-4, .home-mine-card, .agent-card-v2, .info-grid > *, .tc-grid > *,
-  .stat-tiles.cols-3 > .stat-tile{grid-column:span 4;min-width:0;}
-  .grid12 > .col-6{grid-column:span 6;min-width:0;}
-  .grid12 > .col-12{grid-column:span 12;min-width:0;}
-  @media (max-width:1279px){
-    .grid12, .home-mine-row, .home-services-columns, .agents-grid-v2,
-    .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{grid-template-columns:repeat(8,minmax(0,1fr));}
-    .grid12 > .col-3, .grid12 > .col-4, .grid12 > .col-6,
-    .home-group-col, .stat-tile, .tshirt-card, .uc-stat-card,
-    .home-mine-card, .agent-card-v2, .info-grid > *, .tc-grid > *,
-    .stat-tiles.cols-3 > .stat-tile{grid-column:span 4;min-width:0;}
-    .grid12 > .col-12{grid-column:span 8;min-width:0;}
-  }
-  @media (max-width:899px){
-    .grid12, .home-mine-row, .home-services-columns, .agents-grid-v2,
-    .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
-    .grid12 > *, .home-group-col, .stat-tile, .tshirt-card, .uc-stat-card,
-    .home-mine-card, .agent-card-v2, .info-grid > *, .tc-grid > *{grid-column:span 4;min-width:0;}
-  }
-
   .home-mine-title{font-weight:700;font-size:16px;margin-bottom:var(--space-4);}
   .home-mine-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);}
   .home-mine-title-row .home-mine-title{margin-bottom:0;}
@@ -902,6 +871,43 @@
   .home-mine-more .beeline-icons{width:14px;height:14px;font-size:14px;}
   .home-mine-more:hover{text-decoration:underline;}
   .home-mine-list{margin:var(--space-2) 0 0;padding-left:var(--space-5);font-size:14.5px;line-height:1.9;}
+  /* ═══ Сетка страницы: 12 резиновых колонок, отступы страницы 32 слева/справа ═══
+     Блоки не задают свою раскладку в «столько-то поровну», а занимают N колонок,
+     поэтому на любой ширине контент тянется, а не вылезает за край.
+     12 колонок на десктопе → 8 ниже 1280 → 4 ниже 900. Жёлоб 24 (--size-spacing-x6).
+     Ширину задаём дочерним селектором `> *`, а не классом карточки: в некоторых
+     блоках дети разного типа (например, в «Сервисах» колонка либо .home-group-col,
+     либо одиночная карточка), и правило по классу их пропускало. */
+  .grid12,
+  .home-mine-row, .home-services-columns, .agents-grid-v2,
+  .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));
+    gap:var(--size-spacing-x6);align-items:start;
+  }
+  .grid12 > *, .home-mine-row > *, .home-services-columns > *, .agents-grid-v2 > *,
+  .stat-tiles > *, .tshirt-grid > *, .info-grid > *, .uc-stat-cards > *, .tc-grid > *{min-width:0;}
+
+  .home-services-columns > *, .stat-tiles > *, .tshirt-grid > *, .uc-stat-cards > *,
+  .grid12 > .col-3{grid-column:span 3;}
+  .home-mine-row > *, .agents-grid-v2 > *, .info-grid > *, .tc-grid > *,
+  .stat-tiles.cols-3 > *, .grid12 > .col-4{grid-column:span 4;}
+  .grid12 > .col-6{grid-column:span 6;}
+  .grid12 > .col-12{grid-column:span 12;}
+
+  @media (max-width:1279px){
+    .grid12, .home-mine-row, .home-services-columns, .agents-grid-v2,
+    .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{grid-template-columns:repeat(8,minmax(0,1fr));}
+    .grid12 > .col-3, .grid12 > .col-4, .grid12 > .col-6,
+    .home-mine-row > *, .home-services-columns > *, .agents-grid-v2 > *,
+    .stat-tiles > *, .tshirt-grid > *, .info-grid > *, .uc-stat-cards > *, .tc-grid > *{grid-column:span 4;}
+    .grid12 > .col-12{grid-column:span 8;}
+  }
+  @media (max-width:899px){
+    .grid12, .home-mine-row, .home-services-columns, .agents-grid-v2,
+    .stat-tiles, .tshirt-grid, .info-grid, .uc-stat-cards, .tc-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .grid12 > *, .home-mine-row > *, .home-services-columns > *, .agents-grid-v2 > *,
+    .stat-tiles > *, .tshirt-grid > *, .info-grid > *, .uc-stat-cards > *, .tc-grid > *{grid-column:span 4;}
+  }
 
   .home-group-col{display:flex;flex-direction:column;gap:var(--space-6);}
   .home-group-card{display:block;}
