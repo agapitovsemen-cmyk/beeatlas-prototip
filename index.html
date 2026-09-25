@@ -1138,6 +1138,83 @@
   .justif-banner{background:var(--orange-bg);border-radius:var(--radius);padding:var(--space-5) var(--space-6);font-size:14.5px;line-height:1.6;color:#6b4a10;}
   .justif-banner b{display:block;margin-bottom:var(--space-1);color:#6b4a10;}
 
+  /* ===== агент «Оценка»: шаг ТС и отображение результата (макеты 2026-09) ===== */
+  .stat-tiles.cols-3{grid-template-columns:repeat(3,1fr);}
+  .stat-tile{position:relative;}
+  .stat-tile .tile-badge{position:absolute;top:var(--space-4);right:var(--space-4);}
+  @media (max-width:900px){ .stat-tiles.cols-3{grid-template-columns:repeat(2,1fr);} }
+
+  .req-bulk-bar{display:flex;align-items:center;gap:var(--space-3);background:var(--bg-alt);border-radius:var(--radius-sm);padding:var(--space-3) var(--space-5);margin-bottom:var(--space-4);font-size:14px;}
+  .req-bulk-bar .cnt{font-weight:600;margin-right:auto;}
+  table tr.row-excluded td{opacity:.55;}
+
+  .tc-step-hint{color:var(--text-secondary);font-size:14px;line-height:1.5;max-width:820px;margin:0 0 var(--space-6);}
+  .tc-toolbar{display:flex;align-items:center;gap:var(--space-5);flex-wrap:wrap;margin-bottom:var(--space-5);}
+  .tc-pager{display:flex;align-items:center;gap:var(--space-3);}
+  .tc-pager .pg-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border-strong);background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text);cursor:pointer;}
+  .tc-pager .pg-btn:hover:not([disabled]){background:var(--bg-alt);}
+  .tc-pager .pg-btn[disabled]{opacity:.4;cursor:default;}
+  .tc-pager .pg-btn svg{width:18px;height:18px;}
+  .tc-pager .pg-btn .beeline-icons{width:18px;height:18px;font-size:18px;}
+  .tc-pager .pg-pos{font-size:15px;font-weight:600;min-width:48px;text-align:center;}
+  .tc-mapping{font-size:15px;}
+  .tc-counters{margin-left:auto;display:flex;gap:var(--space-5);font-size:15px;color:var(--text-secondary);}
+  .tc-counters b{color:var(--text);font-weight:600;}
+
+  .tc-card{margin-bottom:var(--space-4);}
+  .tc-card-head{display:flex;align-items:flex-start;gap:var(--space-4);flex-wrap:wrap;}
+  .tc-card-title{font-size:16px;font-weight:700;line-height:1.4;flex:1;min-width:240px;}
+  .tc-card-actions{display:flex;gap:var(--space-3);flex:0 0 auto;}
+  .tc-card-desc{color:var(--text-secondary);font-size:14px;line-height:1.5;margin-top:var(--space-3);}
+  .tc-card-note{font-size:15px;margin-top:var(--space-5);}
+
+  .tc-skip-banner{display:flex;align-items:center;gap:var(--space-3);background:var(--bg-alt);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-5);margin:calc(-1 * var(--space-2)) 0 var(--space-5);}
+  .tc-skip-banner .txt{flex:1;font-size:14px;}
+  .tc-skip-banner .ico{color:var(--text-tertiary);display:flex;}
+  .tc-skip-banner .ico svg{width:18px;height:18px;}
+  .tc-skip-banner .ico .beeline-icons{width:18px;height:18px;font-size:18px;}
+
+  .app-chip-scroll{display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-5);}
+  .app-chip-track{display:flex;gap:var(--space-3);overflow-x:auto;flex:1;padding:2px;scrollbar-width:none;}
+  .app-chip-track::-webkit-scrollbar{display:none;}
+  .app-chip-track .pill-item{flex:0 0 auto;max-width:220px;overflow:hidden;text-overflow:ellipsis;}
+  .chip-arrow{width:24px;height:24px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);cursor:pointer;}
+  .chip-arrow svg{width:16px;height:16px;}
+  .chip-arrow .beeline-icons{width:16px;height:16px;font-size:16px;}
+
+  .bc-list{display:flex;flex-direction:column;gap:var(--space-3);margin-top:var(--space-5);}
+  .bc-row{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--bg);}
+  .bc-row.hit{border-color:var(--yellow);box-shadow:0 0 0 1px var(--yellow);}
+  .bc-row-head{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-5);cursor:pointer;}
+  .bc-row-head .main{flex:1;min-width:0;}
+  .bc-row-head .name{font-weight:700;font-size:15px;display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;}
+  .bc-row-head .right{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);color:var(--text-secondary);font-size:14px;}
+  .chev{display:flex;transition:transform .15s;}
+  .chev svg{width:18px;height:18px;}
+  .chev .beeline-icons{width:18px;height:18px;font-size:18px;}
+  .chev.open{transform:rotate(180deg);}
+  .bc-nested{background:var(--bg-alt);padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3);}
+  .tc-nested{display:flex;gap:var(--space-4);align-items:flex-start;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-5);cursor:pointer;}
+  .tc-nested.sel{border-color:var(--green-text);background:var(--green-bg);}
+  .tc-nested .n-name{font-weight:700;font-size:15px;display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;}
+  .tc-nested .n-desc{color:var(--text-secondary);font-size:13.5px;margin-top:var(--space-2);line-height:1.5;}
+  .app-tag{display:inline-block;background:var(--gray-bg);color:var(--gray-text);border-radius:var(--size-border-radius-x4);padding:2px var(--space-3);font-size:13px;margin-top:var(--space-2);}
+
+  .tc-req-foot{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);border-top:1px solid var(--border);margin-top:var(--space-5);padding-top:var(--space-4);cursor:pointer;font-size:14.5px;}
+  .tc-req-list{display:flex;flex-direction:column;gap:var(--space-2);margin-top:var(--space-3);color:var(--text-secondary);font-size:13.5px;}
+
+  .q-card{border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);}
+  .q-card .q-label{color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-1);}
+  .q-card .q-text{font-size:15px;}
+  .empty-inline{color:var(--text-secondary);font-size:14px;padding:var(--space-5);border:1px dashed var(--border-strong);border-radius:var(--radius-sm);}
+
+  .coach-note{display:flex;align-items:flex-start;gap:var(--space-4);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-6);font-size:14px;line-height:1.5;
+    background:var(--color-background-base);color:var(--color-text-active);max-width:640px;}
+  .coach-note .close{cursor:pointer;flex:0 0 auto;opacity:.7;display:flex;}
+  .coach-note .close:hover{opacity:1;}
+  .coach-note .close svg{width:15px;height:15px;}
+  .coach-note .close .beeline-icons{width:15px;height:15px;font-size:15px;}
+
   .with-toc{display:flex;gap:var(--space-7);align-items:flex-start;}
   .toc-col{width:230px;flex:0 0 auto;position:sticky;top:20px;}
   .toc-item{padding:var(--space-3) var(--space-4);font-size:14px;color:var(--text-secondary);cursor:pointer;border-left:2px solid transparent;line-height:1.4;}
@@ -1227,6 +1304,11 @@
   .step.active .stxt .s-name{color:var(--text);font-weight:700;}
   .step.done .stxt .s-name{color:var(--text);}
   .step.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--yellow);}
+  /* Степпер агента «Оценка»: одна строка «номер + название», активный шаг подчёркнут
+     тёмной линией (макеты 2026-09). Остальные визарды оставляют двухстрочный вариант. */
+  .stepper.stepper-inline .step .stxt .s-lbl{display:none;}
+  .stepper.stepper-inline .step .stxt .s-name{font-size:15px;}
+  .stepper.stepper-inline .step.active::after{background:var(--text);}
 
   .wizard-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
   .wizard-head{display:flex;align-items:center;justify-content:space-between;padding:var(--space-6) var(--space-8) var(--space-5);flex:0 0 auto;border-bottom:1px solid var(--border);}
@@ -8618,11 +8700,11 @@ function miniStat(label,val){
 const DETAIL_TOC = [
   {id:"intro",label:"Вводные данные"},
   {id:"stats",label:"Статистика"},
-  {id:"tshirt",label:"Оценка в соответствии с методологией"},
+  {id:"tshirt",label:"Оценка по методологии"},
   {id:"fr",label:"Функциональные требования"},
   {id:"nfr",label:"Нефункциональные требования"},
+  {id:"tc",label:"Технические возможности"},
   {id:"oq",label:"Вопросы для уточнения"},
-  {id:"bctc",label:"Технические возможности и связанные БС"},
 ];
 
 function findAssessment(p, aid){
@@ -8655,115 +8737,167 @@ function AssessmentDetailPage(projectId, assessmentId){
   `;
 }
 
+/* Активный чип в разделах результата: требования и ТС фильтруются по тому,
+   переиспользованы они, заведены заново или исключены из расчёта. */
+function assessFilter(){
+  state.assessFilter = state.assessFilter || {fr:"reuse", nfr:"reuse", tc:"reuse"};
+  return state.assessFilter;
+}
+
+function ReqFilterPills(kind, list, active){
+  return `<div class="pill-toggle" style="margin-bottom:var(--space-4);">
+    ${REQ_STATUSES.map(o=>`<div class="pill-item ${active===o.key?"active":""}" data-action="assess-filter" data-kind="${kind}" data-val="${o.key}">${o.label} (${reqByStatus(list,o.key).length})</div>`).join("")}
+  </div>`;
+}
+
+function ReqResultTable(list){
+  if(!list.length) return `<div class="empty-inline">В этой группе требований нет</div>`;
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Название</th><th>Описание</th></tr></thead>
+        <tbody>
+          ${list.map(r=>`<tr><td><span class="req-name">${escapeHtml(r.name)}</span><div class="row-sub">${r.code}</div></td><td>${escapeHtml(r.desc)}</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function assessTouchedSystems(cands){
+  return [...new Set((cands||[]).flatMap(c=>
+    c.decision==="reuse" ? (c.reuseTargets||[]).map(t=>t.system)
+    : (c.decision==="new" ? [c.system] : [])
+  ).filter(Boolean))];
+}
+
+function AssessmentStats(a){
+  const cands = a.tcCandidates||[];
+  const reuse = cands.filter(c=>c.decision==="reuse").length;
+  const created = cands.filter(c=>c.decision==="new").length;
+  return `
+    <div class="stat-tiles cols-3">
+      <div class="stat-tile"><div class="big orange-text">${escapeHtml(a.tshirt||"L")}</div><div class="lbl">Оценка влияния</div></div>
+      <div class="stat-tile"><div class="big">${a.fr.length}</div><div class="lbl">Функциональные требования</div></div>
+      <div class="stat-tile"><div class="big">${a.nfr.length}</div><div class="lbl">Нефункциональные требования</div></div>
+      <div class="stat-tile"><span class="badge blue tile-badge">Новые</span><div class="big">${created}</div><div class="lbl">Технических возможностей</div></div>
+      <div class="stat-tile"><span class="badge green tile-badge">Переиспользованные</span><div class="big">${reuse}</div><div class="lbl">Технических возможностей</div></div>
+      <div class="stat-tile"><div class="big">${assessTouchedSystems(cands).length}</div><div class="lbl">Затронутые системы</div></div>
+    </div>`;
+}
+
+function TcResultCard(title, code, match, desc, system, frCodes, badge){
+  return `
+    <div class="card tc-card">
+      <div class="tc-card-head">
+        <div class="tc-card-title">${escapeHtml(title)} ${match ? `<span class="badge orange">${match}%</span>` : ""}</div>
+        ${badge}
+      </div>
+      ${code ? `<div class="row-sub">${escapeHtml(code)}</div>` : ""}
+      ${desc ? `<div class="tc-card-desc">${escapeHtml(desc)}</div>` : ""}
+      ${system ? `<div><span class="app-tag">${escapeHtml(system)}</span></div>` : ""}
+      ${frCodes.length ? `<div class="tc-req-foot" style="cursor:default;"><span>Требования: <span class="req-chip">${frCodes.join(", ")}</span></span></div>` : ""}
+    </div>`;
+}
+
+function AssessmentTcSection(a, active){
+  const cands = a.tcCandidates||[];
+  const reuse = cands.filter(c=>c.decision==="reuse");
+  const created = cands.filter(c=>c.decision==="new");
+  const systems = assessTouchedSystems(cands);
+  const opts = [
+    {key:"reuse", label:"Переиспользованные", n:reuse.length},
+    {key:"new", label:"Новые", n:created.length},
+    {key:"systems", label:"Затронутые системы", n:systems.length},
+  ];
+  let body;
+  if(active==="systems"){
+    body = systems.length
+      ? `<div style="display:flex;gap:var(--space-3);flex-wrap:wrap;">${systems.map(s=>`<span class="app-tag" style="margin:0;">${escapeHtml(s)}</span>`).join("")}</div>`
+      : `<div class="empty-inline">Затронутых систем нет</div>`;
+  } else if(active==="new"){
+    body = created.length
+      ? created.map(c=>TcResultCard(c.name, "", null, c.taskDesc, c.system, c.fr.map(f=>f.code), '<span class="badge blue">Новая</span>')).join("")
+      : `<div class="empty-inline">Новых ТС нет</div>`;
+  } else {
+    const cards = reuse.flatMap(c=>(c.reuseTargets||[]).map(t=>
+      TcResultCard(t.name, t.code, t.match, t.desc, t.system, c.fr.map(f=>f.code), '<span class="badge green">Переиспользование</span>')
+    ));
+    body = cards.length ? cards.join("") : `<div class="empty-inline">Переиспользованных ТС нет</div>`;
+  }
+  return `
+    <div class="pill-toggle" style="margin-bottom:var(--space-4);">
+      ${opts.map(o=>`<div class="pill-item ${active===o.key?"active":""}" data-action="assess-filter" data-kind="tc" data-val="${o.key}">${o.label} (${o.n})</div>`).join("")}
+    </div>
+    ${body}`;
+}
+
 function AssessmentBody(p, a, ctx){
+  const f = assessFilter();
+  const inWizard = ctx==="wizard";
+  const toc = DETAIL_TOC.filter(t=>!(inWizard && t.id==="intro"));
   return `
   <div class="with-toc">
     <div class="content-col">
-      <div class="section" id="sec-intro">
-        <h2>Вводные данные</h2>
-        <div class="card info-grid">
-          <div><div class="lbl">Проект</div><div class="val">«${escapeHtml(p.name)}»</div></div>
-          <div><div class="lbl">Автор оценки</div><div class="val">${escapeHtml(a.author)}</div></div>
-          <div><div class="lbl">Дата проведения</div><div class="val">${escapeHtml(a.date)}</div></div>
+      ${inWizard && !((state.wizard||{}).data||{}).coachDismissed ? `
+        <div class="coach-note invertedTheme">
+          <span>Оценка завершена и сохранена в проекте. Теперь её можно опубликовать или скачать по клику на кнопку «Публикация»</span>
+          <span class="close" data-action="dismiss-coach">${icon("x")}</span>
         </div>
-      </div>
+      ` : ""}
+
+      ${inWizard ? "" : `
+        <div class="section" id="sec-intro">
+          <h2>Вводные данные</h2>
+          <div class="card info-grid">
+            <div><div class="lbl">Проект</div><div class="val">«${escapeHtml(p.name)}»</div></div>
+            <div><div class="lbl">Автор оценки</div><div class="val">${escapeHtml(a.author)}</div></div>
+            <div><div class="lbl">Дата проведения</div><div class="val">${escapeHtml(a.date)}</div></div>
+          </div>
+        </div>
+      `}
 
       <div class="section" id="sec-stats">
         <h2>Статистика</h2>
-        <div class="stat-tiles">
-          <div class="stat-tile"><div class="big orange-text">L</div><div class="lbl">Оценка влияния</div></div>
-          <div class="stat-tile"><div class="big">${a.fr.length}</div><div class="lbl">Функциональных требований</div></div>
-          <div class="stat-tile"><div class="big">${a.nfr.length}</div><div class="lbl">Нефункциональных требований</div></div>
-          <div class="stat-tile"><div class="big">${(a.questions||[]).length}</div><div class="lbl">Открытых вопросов</div></div>
-          <div class="stat-tile"><div class="big">${(a.tcCandidates||[]).filter(c=>c.decision==="reuse").length}</div><div class="lbl">ТС (Reuse)</div></div>
-          <div class="stat-tile"><div class="big">${(a.tcCandidates||[]).filter(c=>c.decision==="new").length}</div><div class="lbl">ТС (New)</div></div>
-          <div class="stat-tile"><div class="big">${new Set((a.tcCandidates||[]).flatMap(c=>c.decision==="reuse"?(c.reuseTargets||[]).map(t=>t.system):(c.decision==="new"?[c.system]:[])).filter(Boolean)).size}</div><div class="lbl">Затронутые системы</div></div>
-        </div>
+        ${AssessmentStats(a)}
       </div>
 
       <div class="section" id="sec-tshirt">
-        <h2>Оценка в соответствии с методологией</h2>
+        <h2>Оценка по методологии</h2>
         <div class="tshirt-grid">
-          ${tshirtCard("S","Минимальная","Доработка 1-ой системы (внутренняя команда); нет доработок смежных систем; изменение конфигурационного параметра);", false)}
-          ${tshirtCard("M","Низкая","Доработка не более 1-2х систем (внутренняя команда); новый конфигурационный параметр; незначительные изменения без влияния на архитектуру)", false)}
-          ${tshirtCard("L","Минимальная","Доработка не более 4-х систем: DMP (внутренняя разработка); PBE (внутренняя разработка); доработка смежных систем (внутренними командами))", true)}
-          ${tshirtCard("XL","Минимальная","Доработка 5-и и более систем; +дор. биллинговых систем; + DMP; + разраб. нового ИТ решения (собственного продукта))", false)}
-        </div>
-        <div class="justif-banner" style="margin-top:var(--space-5);">
-          <b>Обоснование оценки L (Средняя)</b>
-          Затронуто 6 систем(ы) из 9 выбранных ТС. Все доработки выполняются внутренними командами.
+          ${tshirtCard("S","Минимальная","Доработка 1-ой системы (внутренняя команда); нет доработок смежных систем; изменение конфигурационного параметра);", a.tshirt==="S")}
+          ${tshirtCard("M","Низкая","Доработка не более 1-2х систем (внутренняя команда); новый конфигурационный параметр; незначительные изменения без влияния на архитектуру)", a.tshirt==="M")}
+          ${tshirtCard("L","Средняя","Доработка не более 4-х систем: DMP (внутренняя разработка); PBE (внутренняя разработка); доработка смежных систем (внутренними командами))", (a.tshirt||"L")==="L")}
+          ${tshirtCard("XL","Высокая","Доработка 5-и и более систем; +дор. биллинговых систем; + DMP; + разраб. нового ИТ решения (собственного продукта))", a.tshirt==="XL")}
         </div>
       </div>
 
       <div class="section" id="sec-fr">
         <h2>Функциональные требования</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Название</th><th>Описание</th><th>Источник</th><th>Версия</th></tr></thead>
-            <tbody>
-              ${a.fr.map(r=>`
-                <tr><td><span class="req-chip">${escapeHtml(r.name)}</span><div class="row-sub">${r.code}</div></td>
-                <td>${escapeHtml(r.desc)}</td><td>${escapeHtml(r.source)}</td><td>${r.version}</td></tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
+        ${ReqFilterPills("fr", a.fr, f.fr)}
+        ${ReqResultTable(reqByStatus(a.fr, f.fr))}
       </div>
 
       <div class="section" id="sec-nfr">
         <h2>Нефункциональные требования</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Название</th><th>Описание</th><th>Источник</th><th>Версия</th></tr></thead>
-            <tbody>
-              ${a.nfr.map(r=>`
-                <tr><td><span class="req-chip">${escapeHtml(r.name)}</span><div class="row-sub">${r.code}</div></td>
-                <td>${escapeHtml(r.desc)}</td><td>${escapeHtml(r.source)}</td><td>${r.version}</td></tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
+        ${ReqFilterPills("nfr", a.nfr, f.nfr)}
+        ${ReqResultTable(reqByStatus(a.nfr, f.nfr))}
+      </div>
+
+      <div class="section" id="sec-tc">
+        <h2>Технические возможности</h2>
+        ${AssessmentTcSection(a, f.tc)}
       </div>
 
       <div class="section" id="sec-oq">
         <h2>Вопросы для уточнения</h2>
-        <div class="qlist-box">
-          ${(a.questions||[]).length ? a.questions.map((q,i)=>`
-            <div class="qlist-item"><div><div class="q-label">Вопрос №${i+1}</div><div class="q-text">${escapeHtml(q.text)}</div></div></div>
-          `).join("") : '<div style="padding:var(--space-4);color:var(--text-secondary);">Нет</div>'}
-        </div>
-      </div>
-
-      <div class="section" id="sec-bctc">
-        <h2>Технические возможности и связанные бизнес-возможности</h2>
-        <p style="color:var(--text-secondary);font-size:14px;margin-top:calc(-1 * var(--space-2));">Для каждой отобранной ТС показано решение агента (Reuse/New) и найденная в каталоге бизнес-возможность, из которой она взята.</p>
-        ${(a.tcCandidates||[]).filter(c=>c.decision==="reuse"||c.decision==="new").map(c=>`
-          <div class="card" style="margin-bottom:var(--space-3);">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);flex-wrap:wrap;">
-              <div>${tcDecisionBadge(c.decision)} <b>${escapeHtml(c.name)}</b></div>
-            </div>
-            ${c.decision==="reuse" && (c.reuseTargets||[]).length ? `
-              <div style="color:var(--text-secondary);font-size:13px;margin-top:var(--space-2);display:flex;flex-direction:column;gap:var(--space-1);">
-                ${c.reuseTargets.map(target=>`
-                  <div>↳ БС <b>${escapeHtml(target.bcCode||"—")}</b> ${escapeHtml(target.bcName||"")} → ТС <b>${escapeHtml(target.code)}</b> ${escapeHtml(target.name)} ⚡ ${target.match}%
-                  ${target.system ? ` · Система ${escapeHtml(target.system)}` : ""}</div>
-                `).join("")}
-              </div>
-            ` : `<div style="color:var(--text-secondary);font-size:13px;margin-top:var(--space-2);">Совпадений в каталоге не найдено — заводится как новая ТС${c.system?(" в системе "+escapeHtml(c.system)):""}.</div>`}
-            ${c.fr.length ? `<div style="margin-top:var(--space-3);display:flex;gap:var(--space-2);flex-wrap:wrap;">${c.fr.map(f=>`<span class="req-chip">${f.code}</span>`).join("")}</div>` : ""}
-          </div>
-        `).join("") || '<div style="padding:var(--space-4);color:var(--text-secondary);">Нет отобранных ТС</div>'}
-        ${(a.tcCandidates||[]).some(c=>c.decision==="skip") ? `
-          <details style="margin-top:var(--space-3);color:var(--text-secondary);font-size:13px;">
-            <summary style="cursor:pointer;">Пропущено (${(a.tcCandidates||[]).filter(c=>c.decision==="skip").length})</summary>
-            <ul style="margin:var(--space-2) 0 0 var(--space-5);">${(a.tcCandidates||[]).filter(c=>c.decision==="skip").map(c=>`<li>${escapeHtml(c.name)}</li>`).join("")}</ul>
-          </details>
-        ` : ""}
+        ${(a.questions||[]).length
+          ? (a.questions||[]).map((q,i)=>`<div class="q-card"><div class="q-label">Вопрос №${i+1}</div><div class="q-text">${escapeHtml(q.text)}</div></div>`).join("")
+          : `<div class="empty-inline">Вопросов нет</div>`}
       </div>
 
     </div>
     <div class="toc-col">
-      ${DETAIL_TOC.map((t,i)=>`<div class="toc-item ${i===0?"active":""}" data-action="toc-scroll" data-target="sec-${t.id}">${t.label}</div>`).join("")}
+      ${toc.map((t,i)=>`<div class="toc-item ${i===0?"active":""}" data-action="toc-scroll" data-target="sec-${t.id}">${t.label}</div>`).join("")}
     </div>
   </div>`;
 }
@@ -9037,7 +9171,6 @@ function openPublishPanel(projectId, assessmentId){
   state.sidePanel = {
     type:"publish", projectId, assessmentId,
     author: a ? a.author : ARCHITECT,
-    jiraTask:"",
     pageTitle:"",
     parentUrl:"https://bwiki.beeline.ru/x/6wifFQ",
     bpUrl: a && a.bpUrl ? a.bpUrl : "https://bwiki.beeline.ru/x/POxveg",
@@ -9062,14 +9195,11 @@ function PublishPanel(){
         <input class="input" id="pubAuthor" value="${escapeHtml(sp.author)}"/>
       </div>
       <div class="field-block">
-        <label class="field-label" style="display:none;"></label>
-        <input class="input" id="pubJira" placeholder="Номер Jira Task" value="${escapeHtml(sp.jiraTask)}"/>
-      </div>
-      <div class="field-block">
         <input class="input" id="pubTitle" placeholder="Название страницы" value="${escapeHtml(sp.pageTitle)}"/>
       </div>
       <div class="field-block">
-        <input class="input" id="pubParent" placeholder="URL родительской страницы" value="${escapeHtml(sp.parentUrl)}"/>
+        <label class="field-label">Ссылка для публикации в confluence*</label>
+        <input class="input" id="pubParent" value="${escapeHtml(sp.parentUrl)}"/>
       </div>
       <div class="field-block">
         <label class="field-label">Ссылка на бизнес-постановку в confluence*</label>
@@ -9099,6 +9229,22 @@ const WIZARD_STEPS = [
   {key:"result", label:"Оценка"},
 ];
 
+/* Требование несёт статус, по которому оно попадает в чипы на шаге «Оценка»:
+   переиспользованное / новое / исключённое. Исключение архитектор проставляет сам
+   на шаге «Требования», остальное раскладывает агент. */
+function makeReqRows(list){
+  return list.map((x,i)=>{
+    const base = (i % 3 === 1) ? "new" : "reuse";
+    return Object.assign({}, x, {status:base, baseStatus:base});
+  });
+}
+const REQ_STATUSES = [
+  {key:"reuse", label:"Переиспользованные"},
+  {key:"new", label:"Новые"},
+  {key:"excluded", label:"Исключённые"},
+];
+function reqByStatus(list, status){ return (list||[]).filter(r=>(r.status||"reuse")===status); }
+
 function startWizard(projectId){
   const p = findProject(projectId);
   if(!p) return;
@@ -9112,12 +9258,15 @@ function startWizard(projectId){
       bpUrl:"",
       bpPat:"",
       bpText:"",
-      fr: FR_LIST.slice(0,12).map(x=>Object.assign({},x)),
-      nfr: NFR_LIST.slice(0,8).map(x=>Object.assign({},x)),
-      reqViewMode:"table",
+      fr: makeReqRows(FR_LIST.slice(0,12)),
+      nfr: makeReqRows(NFR_LIST.slice(0,8)),
+      reqSel:[],
       questions: DEFAULT_QUESTIONS.map(q=>({id:uid("q"),text:q})),
       tc: [],
       tcCatalogAnalyzed:false,
+      tcPage:0,
+      tcAppFilter:null,
+      coachDismissed:false,
       justifShown:false,
     },
   };
@@ -9147,7 +9296,7 @@ function WizardOverlay(){
 }
 
 function Stepper(activeIndex){
-  return `<div class="stepper">
+  return `<div class="stepper stepper-inline">
     ${WIZARD_STEPS.map((s,i)=>{
       const cls = i<activeIndex ? "done" : (i===activeIndex ? "active" : "");
       return `<div class="step ${cls}">
@@ -9186,21 +9335,21 @@ function WizardStepFooter(w){
   }
   const step = WIZARD_STEPS[w.stepIndex].key;
   const backBtn = step==="business" ? "" : `<button class="btn btn-outline" data-action="wiz-back">Назад</button>`;
-  const restartBtn = `<button class="btn btn-outline" data-action="wiz-restart-step" data-step="${step}">Перезапустить шаг</button>`;
   if(step==="business"){
-    const canGo = w.data.bpUrl.trim().length>0;
-    return `${backBtn}${restartBtn}<button class="btn btn-primary" data-action="wiz-to-requirements" ${canGo?"":"disabled"}>Выявить требования</button>`;
+    const canGo = w.data.bpUrl.trim().length>0 || w.data.bpText.trim().length>0;
+    return `<button class="btn btn-primary" data-action="wiz-to-requirements" ${canGo?"":"disabled"}>Выявить требования</button>`;
   }
-  if(step==="requirements") return `${backBtn}${restartBtn}<button class="btn btn-primary" data-action="wiz-to-tc">Выявить ТС</button>`;
-  if(step==="tc") return `${backBtn}${restartBtn}<button class="btn btn-primary" data-action="wiz-to-result" ${w.data.tc.some(c=>c.decision)?"":"disabled"}>Провести оценку</button>`;
-  if(step==="result"){
-    return `
-      ${backBtn}
-      ${restartBtn}
-      <button class="btn btn-outline" data-action="export">Экспорт</button>
-      <button class="btn btn-primary" data-action="wiz-publish">Публикация в confluence</button>
-    `;
-  }
+  if(step==="requirements") return `${backBtn}<button class="btn btn-primary" data-action="wiz-to-tc">Выявить ТС</button>`;
+  if(step==="tc") return `
+    ${backBtn}
+    <button class="btn btn-outline" data-action="wiz-restart-step" data-step="tc">Перезапустить ТС</button>
+    <button class="btn btn-primary" data-action="wiz-to-result" ${w.data.tc.some(c=>c.decision)?"":"disabled"}>Провести оценку</button>
+  `;
+  if(step==="result") return `
+    ${backBtn}
+    <button class="btn btn-outline" data-action="export">${icon("upload")} Экспорт</button>
+    <button class="btn btn-primary" data-action="wiz-publish">Публикация в confluence</button>
+  `;
   return "";
 }
 
@@ -9235,68 +9384,70 @@ const REQ_TOC = [
   {id:"nfr", label:"Нефункциональные требования"},
   {id:"questions", label:"Вопросы для уточнения"},
 ];
-function ReqViewToggle(mode){
-  return `
-    <div class="view-toggle">
-      <button class="view-toggle-btn ${mode==="table"?"active":""}" data-action="set-req-view" data-mode="table" title="Табличный вид">${icon("menu")}</button>
-      <button class="view-toggle-btn ${mode==="card"?"active":""}" data-action="set-req-view" data-mode="card" title="Карточный вид">${icon("grid")}</button>
-    </div>
-  `;
-}
-function ReqTable(list){
+function ReqSelectTable(list, kind, sel){
+  const allOn = list.length>0 && list.every(r=>sel.includes(r.code));
   return `
     <div class="table-wrap" style="margin-bottom:var(--space-7);">
       <table>
-        <thead><tr><th>Название</th><th>Описание</th></tr></thead>
+        <thead><tr>
+          <th style="width:56px;"><div class="checkbox ${allOn?"checked":""}" data-action="req-toggle-all" data-kind="${kind}">${icon("check")}</div></th>
+          <th>Название</th><th>Описание</th>
+        </tr></thead>
         <tbody>
-          ${list.map(r=>`
-            <tr><td><span class="req-name">${escapeHtml(r.name)}</span><div class="row-sub">${r.code}</div></td>
-            <td>${escapeHtml(r.desc)}</td></tr>
-          `).join("")}
+          ${list.map(r=>{
+            const on = sel.includes(r.code);
+            return `<tr class="${r.status==="excluded"?"row-excluded":""}">
+              <td><div class="checkbox ${on?"checked":""}" data-action="req-toggle" data-code="${r.code}">${icon("check")}</div></td>
+              <td><span class="req-name">${escapeHtml(r.name)}</span><div class="row-sub">${r.code}</div></td>
+              <td>${escapeHtml(r.desc)}</td>
+            </tr>`;
+          }).join("")}
         </tbody>
       </table>
     </div>
   `;
 }
-function ReqCards(list){
-  return `
-    <div class="req-card-grid" style="margin-bottom:var(--space-7);">
-      ${list.map(r=>`
-        <div class="card req-card">
-          <div class="req-name">${escapeHtml(r.name)}</div>
-          <div class="row-sub" style="margin-bottom:var(--space-2);">${r.code}</div>
-          <div style="color:var(--text-secondary);font-size:13.5px;line-height:1.5;">${escapeHtml(r.desc)}</div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
+
 function WizardStepRequirements(w){
-  const mode = w.data.reqViewMode || "table";
-  const renderList = mode==="card" ? ReqCards : ReqTable;
+  const sel = w.data.reqSel || [];
+  const all = w.data.fr.concat(w.data.nfr);
+  const selRows = all.filter(r=>sel.includes(r.code));
+  const canExclude = selRows.some(r=>r.status!=="excluded");
+  const canRestore = selRows.some(r=>r.status==="excluded");
   return `
     <div class="with-toc">
       <div class="content-col">
-        <div class="section-head-row" id="sec-fr">
-          <h2 style="margin:0;">Функциональные требования</h2>
-          ${ReqViewToggle(mode)}
-        </div>
-        ${renderList(w.data.fr)}
+        ${sel.length ? `
+          <div class="req-bulk-bar">
+            <span class="cnt">Выбрано требований: ${sel.length}</span>
+            ${canExclude ? `<button class="btn btn-outline btn-sm" data-action="req-bulk" data-mode="exclude">Исключить</button>` : ""}
+            ${canRestore ? `<button class="btn btn-outline btn-sm" data-action="req-bulk" data-mode="restore">Вернуть</button>` : ""}
+            <button class="btn btn-outline btn-sm" data-action="req-bulk" data-mode="clear">Снять выделение</button>
+          </div>
+        ` : ""}
+
+        <div class="section-head-row" id="sec-fr"><h2 style="margin:0;">Функциональные требования</h2></div>
+        ${ReqSelectTable(w.data.fr, "fr", sel)}
 
         <div class="section-head-row" id="sec-nfr"><h2 style="margin:0;">Нефункциональные требования</h2></div>
-        ${renderList(w.data.nfr)}
+        ${ReqSelectTable(w.data.nfr, "nfr", sel)}
 
-        <div class="section-head-row" id="sec-questions">
-          <h2 style="margin:0;">Вопросы для уточнения</h2>
-        </div>
-        <div class="qlist-box">
-          ${w.data.questions.map((q,i)=>`
-            <div class="qlist-item">
-              <div><div class="q-label">Вопрос №${i+1}</div><div class="q-text">${escapeHtml(q.text)}</div></div>
-              <div class="del-x" data-action="del-question" data-qid="${q.id}">${icon("x")}</div>
-            </div>
-          `).join("")}
-        </div>
+        <div class="section-head-row" id="sec-questions"><h2 style="margin:0;">Вопросы для уточнения</h2></div>
+        ${w.data.questions.length ? `
+          <div class="qlist-box">
+            ${w.data.questions.map((q,i)=>`
+              <div class="qlist-item">
+                <div><div class="q-label">Вопрос №${i+1}</div><div class="q-text">${escapeHtml(q.text)}</div></div>
+                <div class="del-x" data-action="del-question" data-qid="${q.id}">${icon("x")}</div>
+              </div>
+            `).join("")}
+          </div>
+        ` : `
+          <div class="empty-state">
+            ${boxIllustration()}
+            <h3 style="margin:0;">Нет вопросов</h3>
+          </div>
+        `}
       </div>
       <div class="toc-col">
         ${REQ_TOC.map((t,i)=>`<div class="toc-item ${i===0?"active":""}" data-action="toc-scroll" data-target="sec-${t.id}">${t.label}</div>`).join("")}
@@ -9307,59 +9458,125 @@ function WizardStepRequirements(w){
 
 function tcDecisionBadge(decision){
   if(decision==="reuse") return '<span class="badge green">Переиспользование</span>';
-  if(decision==="new") return '<span class="badge orange">Новая</span>';
-  if(decision==="skip") return '<span class="badge gray">Пропущено</span>';
-  return '<span class="badge gray">Не проанализирован</span>';
+  if(decision==="new") return '<span class="badge blue">Новая</span>';
+  if(decision==="skip") return '<span class="badge gray">Исключена</span>';
+  return '<span class="badge gray">Решение не принято</span>';
+}
+
+/* Приложения, встречающиеся во вложенных ТС кандидата, — из них собирается ряд чипов-фильтров. */
+function tcCandidateApps(c){
+  const apps = [];
+  (c.bcMatches||[]).forEach(bc=>(bc.tcNested||[]).forEach(t=>{
+    if(t.system && apps.indexOf(t.system)<0) apps.push(t.system);
+  }));
+  return apps;
+}
+function bcHasApp(bc, app){
+  return (bc.tcNested||[]).some(t=>t.system===app);
+}
+
+/* Подвал карточки кандидата: свёрнутый список требований, из которых он выведен. */
+function TcReqFoot(c){
+  if(!c.fr.length) return "";
+  return `
+    <div class="tc-req-foot" data-action="tc-toggle-req" data-cid="${c.id}">
+      <span>Требования: <span class="req-chip">${c.fr.map(f=>f.code).join(", ")}</span></span>
+      <span class="chev ${c.reqOpen?"open":""}">${icon("chevronDown")}</span>
+    </div>
+    ${c.reqOpen ? `<div class="tc-req-list">${c.fr.map(f=>`<div><b>${f.code}</b> — ${escapeHtml(f.desc)}</div>`).join("")}</div>` : ""}
+  `;
 }
 
 function WizardStepTc(w){
   const list = w.data.tc;
-  const counts = tcCandidateCounts(list);
-  return `
+  const analyzed = w.data.tcCatalogAnalyzed;
+  const head = `
     <div class="section-head-row">
-      <h2 style="margin:0;">Кандидаты технических возможностей (ТС)</h2>
+      <h2 style="margin:0;">Кандидаты ТС на основании требований</h2>
       <div style="display:flex;gap:var(--space-3);align-items:center;">
-        <button class="btn btn-outline btn-sm" data-action="open-add-tc">Добавить ТС вручную</button>
-        <button class="btn btn-primary btn-sm" data-action="tc-analyze-catalog">Проанализировать по каталогу</button>
+        ${analyzed ? "" : `<button class="btn btn-primary btn-sm" data-action="tc-analyze-catalog">Проанализировать по каталогу</button>`}
+        <button class="btn btn-outline btn-sm" data-action="open-add-tc">Добавить ТС</button>
       </div>
     </div>
-    <p style="color:var(--text-secondary);font-size:13px;max-width:820px;margin:0 0 var(--space-5);">
-      Для каждого кандидата каталог показывает подходящие ВС и найденные в них ТС. Клик по ТС означает переиспользование. Если подходящих ТС нет — их можно подобрать вручную.
-    </p>
-    <div style="display:flex;justify-content:flex-end;margin-bottom:var(--space-2);">
-      <span style="color:var(--text-secondary);font-size:14px;">Переиспользование: <b style="color:var(--text);">${counts.reuse}</b> · Новые: <b style="color:var(--text);">${counts.create}</b> · Пропущено: <b style="color:var(--text);">${counts.skip}</b></span>
+    <p class="tc-step-hint">Для каждого кандидата каталог выдаёт подходящие ВС и входящие в них ТС. Нажмите на ТС — и она будет переиспользована. Если ничего не подошло, вы всегда можете подобрать ТС вручную</p>
+  `;
+
+  /* До анализа по каталогу показываем весь список кандидатов без решений. */
+  if(!analyzed){
+    return `${head}<div class="tc-candidate-list">${list.map(c=>TcCandidatePreviewCard(c)).join("")}</div>`;
+  }
+
+  /* После анализа — по одному кандидату на страницу, с маппингом и метаданными. */
+  const counts = tcCandidateCounts(list);
+  const decided = list.filter(c=>c.decision).length;
+  const pct = list.length ? Math.round(decided / list.length * 100) : 0;
+  const page = Math.min(Math.max(w.data.tcPage||0, 0), Math.max(list.length-1, 0));
+  const c = list[page];
+  return `
+    ${head}
+    <div class="tc-toolbar">
+      <div class="tc-pager">
+        <button class="pg-btn" data-action="tc-page" data-dir="-1" ${page===0?"disabled":""}>${icon("chevronLeft")}</button>
+        <span class="pg-pos">${page+1}/${list.length}</span>
+        <button class="pg-btn" data-action="tc-page" data-dir="1" ${page>=list.length-1?"disabled":""}>${icon("chevronRight")}</button>
+      </div>
+      <span class="tc-mapping">Маппинг: ${decided} из ${list.length} — ${pct}%</span>
+      <span class="tc-counters">
+        <span>Переиспользовано: <b>${counts.reuse}</b></span>
+        <span>Новые: <b>${counts.create}</b></span>
+        <span>Исключено: <b>${counts.skip}</b></span>
+      </span>
     </div>
-    <div class="tc-candidate-list">
-      ${list.map(c=>TcCandidateCard(c)).join("")}
-    </div>
+    ${c ? TcCandidateCard(c, w) : `<div class="empty-inline">Кандидатов ТС нет</div>`}
   `;
 }
 
-function TcCandidateCard(c){
+function TcCandidatePreviewCard(c){
+  return `
+  <div class="card tc-card" id="cand-${c.id}">
+    <div class="tc-card-title">${escapeHtml(c.name)}</div>
+    ${c.taskDesc ? `<div class="tc-card-desc">${escapeHtml(c.taskDesc)}</div>` : ""}
+    <div class="tc-card-note">Решение станет доступно после анализа по каталогу</div>
+    ${TcReqFoot(c)}
+  </div>`;
+}
+
+function TcCandidateCard(c, w){
+  /* Исключённый кандидат сворачивается до баннера с возвратом в расчёт. */
+  if(c.decision==="skip"){
+    return `
+    <div class="card tc-card" id="cand-${c.id}">
+      <div class="tc-skip-banner">
+        <span class="ico">${icon("info")}</span>
+        <span class="txt">ТС пропущена и не участвует в оценке. Нажмите «Вернуть», чтобы снова учитывать её при расчёте</span>
+        <button class="btn btn-outline btn-sm" data-action="tc-decide" data-cid="${c.id}" data-decision="">Вернуть</button>
+      </div>
+      <div class="tc-card-title">${escapeHtml(c.name)}</div>
+      ${c.taskDesc ? `<div class="tc-card-desc">${escapeHtml(c.taskDesc)}</div>` : ""}
+      ${TcReqFoot(c)}
+    </div>`;
+  }
+
   const reuseTargets = c.reuseTargets || [];
   const usefulBc = (c.bcMatches||[]).filter(bc=>(bc.tcNested||[]).length>0);
+  const apps = tcCandidateApps(c);
+  const activeApp = w.data.tcAppFilter;
   const isSelected = (bcCode, tcCode) => reuseTargets.some(t=>t.bcCode===bcCode && t.code===tcCode);
-  return `
-  <div class="card" id="cand-${c.id}" style="margin-bottom:var(--space-4);">
-    <div style="display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap;">
-      <span class="badge gray">ТС</span>
-      ${tcDecisionBadge(c.decision)}
-      <b>${escapeHtml(c.name)}</b>
-      <span style="color:var(--text-secondary);font-size:13px;">FR ${c.fr.length}</span>
-    </div>
-    ${c.taskDesc ? `<div style="color:var(--text-secondary);font-size:13px;margin-top:var(--space-2);max-width:900px;">${escapeHtml(c.taskDesc)}</div>` : ""}
 
-    ${c.analyzed ? `
-    <div style="display:flex;gap:var(--space-3);margin-top:var(--space-4);flex-wrap:wrap;">
-      <button class="btn btn-sm ${c.decision==="new"?"btn-primary":"btn-outline"}" data-action="tc-decide" data-cid="${c.id}" data-decision="new">Новая</button>
-      <button class="btn btn-sm ${c.decision==="skip"?"btn-primary":"btn-outline"}" data-action="tc-decide" data-cid="${c.id}" data-decision="skip">Пропустить</button>
+  return `
+  <div class="card tc-card" id="cand-${c.id}">
+    <div class="tc-card-head">
+      <div class="tc-card-title">${escapeHtml(c.name)}</div>
+      ${tcDecisionBadge(c.decision || c.suggestion)}
+      <div class="tc-card-actions">
+        <button class="btn btn-outline btn-sm" data-action="tc-decide" data-cid="${c.id}" data-decision="skip">Исключить</button>
+        <button class="btn btn-sm ${c.decision==="new"?"btn-primary":"btn-outline"}" data-action="tc-decide" data-cid="${c.id}" data-decision="new">Отметить ТС как новую</button>
+      </div>
     </div>
-    ` : `<div style="color:var(--text-secondary);font-size:13px;margin-top:var(--space-4);">Решение станет доступно после анализа по каталогу</div>`}
-    ${c.decision==="reuse" && reuseTargets.length ? `
-      <div style="margin-top:var(--space-2);color:var(--text-secondary);font-size:13px;">Выбрано для переиспользования: ${reuseTargets.map(t=>`<b>${escapeHtml(t.code)}</b> ${escapeHtml(t.name)}`).join("; ")}</div>
-    ` : ""}
+    ${c.taskDesc ? `<div class="tc-card-desc">${escapeHtml(c.taskDesc)}</div>` : ""}
+
     ${c.decision==="new" ? `
-      <div style="margin-top:var(--space-3);max-width:320px;">
+      <div style="margin-top:var(--space-4);max-width:320px;">
         <label class="field-label">В какой системе создать ТС?</label>
         <select class="select" data-tc-system="${c.id}">
           <option value="">— выбрать систему —</option>
@@ -9368,35 +9585,42 @@ function TcCandidateCard(c){
       </div>
     ` : ""}
 
-    ${!c.analyzed ? `<div style="margin-top:var(--space-4);color:var(--text-secondary);font-size:13px;">Ещё не проанализирован по каталогу</div>` : (
-      usefulBc.length ? `
-      <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-top:var(--space-4);">
+    ${apps.length ? `
+      <div class="app-chip-scroll">
+        <span class="chip-arrow" data-action="tc-app-scroll" data-dir="-1">${icon("chevronLeft")}</span>
+        <div class="app-chip-track" id="appTrack-${c.id}">
+          ${apps.map(a=>`<div class="pill-item ${activeApp===a?"active":""}" data-action="tc-app-filter" data-app="${escapeHtml(a)}" title="${escapeHtml(a)}">${escapeHtml(a)}</div>`).join("")}
+        </div>
+        <span class="chip-arrow" data-action="tc-app-scroll" data-dir="1">${icon("chevronRight")}</span>
+      </div>
+    ` : ""}
+
+    ${usefulBc.length ? `
+      <div class="bc-list">
         ${usefulBc.map(bc=>`
-          <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
-            <div data-action="tc-toggle-bc-expand" data-cid="${c.id}" data-bc="${bc.code}"
-              style="cursor:pointer;padding:var(--space-4) var(--space-5);">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-4);">
-                <div><span class="req-chip">${escapeHtml(bc.name)}</span><div class="row-sub">${bc.code}</div></div>
-                <div style="display:flex;align-items:center;gap:var(--space-4);flex:0 0 auto;white-space:nowrap;">
-                  <span style="color:var(--text-secondary);font-size:13px;">${bc.match}%</span>
-                  <span style="color:var(--text-secondary);font-size:13px;">ТС (${bc.tcNested.length}) ${bc.expanded?icon("chevronDown"):icon("chevronRight")}</span>
-                </div>
+          <div class="bc-row ${activeApp && bcHasApp(bc, activeApp) ? "hit" : ""}">
+            <div class="bc-row-head" data-action="tc-toggle-bc-expand" data-cid="${c.id}" data-bc="${bc.code}">
+              <div class="main">
+                <div class="name">${escapeHtml(bc.name)} <span class="badge orange">${bc.match}%</span></div>
+                <div class="row-sub">${bc.code}</div>
               </div>
-              ${bc.desc ? `<div style="color:var(--text-secondary);font-size:13px;margin-top:var(--space-2);">${escapeHtml(bc.desc)}</div>` : ""}
+              <div class="right">
+                <span>ТС (${bc.tcNested.length})</span>
+                <span class="chev ${bc.expanded?"open":""}">${icon("chevronDown")}</span>
+              </div>
             </div>
             ${bc.expanded ? `
-              <div style="display:flex;flex-direction:column;gap:var(--space-2);padding:0 var(--space-4) var(--space-4);background:var(--bg-alt);border-top:1px solid var(--border);padding-top:var(--space-4);">
+              <div class="bc-nested">
                 ${bc.tcNested.map(t=>{
                   const selected = isSelected(bc.code, t.code);
                   return `
-                  <div data-action="tc-select-reuse" data-cid="${c.id}" data-bc="${bc.code}" data-tc="${t.code}"
-                    style="display:flex;gap:var(--space-3);align-items:flex-start;cursor:pointer;padding:var(--space-3) var(--space-4);border-radius:var(--radius);
-                    background:${selected?"var(--green-bg)":"var(--bg)"};border:1px solid ${selected?"var(--green-text)":"var(--border)"};">
-                    <div class="checkbox ${selected?"checked":""}" style="flex:0 0 auto;margin-top:var(--space-1);">${selected?icon("check"):""}</div>
-                    <div>
-                      <b>${t.code}</b> ${escapeHtml(t.name)} <span style="color:var(--text-secondary);">${t.match}%</span>
-                      ${t.system ? `<span class="badge gray">${t.system}</span>` : ""}
-                      <div style="color:var(--text-secondary);font-size:13px;margin-top:var(--space-1);">${escapeHtml(t.desc||"")}</div>
+                  <div class="tc-nested ${selected?"sel":""}" data-action="tc-select-reuse" data-cid="${c.id}" data-bc="${bc.code}" data-tc="${t.code}">
+                    <div class="checkbox ${selected?"checked":""}">${icon("check")}</div>
+                    <div style="min-width:0;">
+                      <div class="n-name">${escapeHtml(t.name)} <span class="badge orange">${t.match}%</span></div>
+                      <div class="row-sub">${t.code}</div>
+                      ${t.desc ? `<div class="n-desc">${escapeHtml(t.desc)}</div>` : ""}
+                      ${t.system ? `<span class="app-tag">${escapeHtml(t.system)}</span>` : ""}
                     </div>
                   </div>
                 `;}).join("")}
@@ -9405,19 +9629,11 @@ function TcCandidateCard(c){
           </div>
         `).join("")}
       </div>
-      ` : `
-      <div style="margin-top:var(--space-4);padding:var(--space-5);border:1px dashed var(--border-strong);border-radius:var(--radius);text-align:center;color:var(--text-secondary);">
-        Каталог не вернул совпадений для этого кандидата.
-      </div>
-      `
-    )}
-    ${c.analyzed ? `<div style="margin-top:var(--space-3);"><button class="btn btn-outline btn-sm" data-action="open-add-tc" data-cid="${c.id}">Указать ТС вручную</button></div>` : ""}
+    ` : `
+      <div class="empty-inline" style="margin-top:var(--space-5);">Каталог не вернул подходящих ВС для этого кандидата — отметьте ТС как новую или исключите её из оценки.</div>
+    `}
 
-    ${c.fr.length ? `
-      <div style="margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--border);display:flex;gap:var(--space-3);flex-wrap:wrap;">
-        ${c.fr.map(f=>`<span class="req-chip" title="${escapeHtml(f.desc)}">${f.code}</span>`).join("")}
-      </div>
-    ` : ""}
+    ${TcReqFoot(c)}
   </div>
   `;
 }
@@ -10920,7 +11136,6 @@ function handleInput(el){
   else if(el.id==="wizBpPat"){ state.wizard.data.bpPat = el.value; render(); reFocus("wizBpPat"); }
   else if(el.id==="wizBpText"){ state.wizard.data.bpText = el.value; render(); reFocus("wizBpText"); }
   else if(el.id==="pubAuthor"){ state.sidePanel.author = el.value; render(); reFocus("pubAuthor"); }
-  else if(el.id==="pubJira"){ state.sidePanel.jiraTask = el.value; render(); reFocus("pubJira"); }
   else if(el.id==="pubTitle"){ state.sidePanel.pageTitle = el.value; render(); reFocus("pubTitle"); }
   else if(el.id==="pubParent"){ state.sidePanel.parentUrl = el.value; render(); reFocus("pubParent"); }
   else if(el.id==="pubBpUrl"){ state.sidePanel.bpUrl = el.value; render(); reFocus("pubBpUrl"); }
@@ -11426,7 +11641,6 @@ function handleAction(action, el){
 
     case "start-wizard": startWizard(el.dataset.id); break;
     case "close-wizard": closeWizard(); break;
-    case "set-req-view": state.wizard.data.reqViewMode = el.dataset.mode; render(); break;
     case "wiz-back": {
       const w = state.wizard;
       if(w.loadingTimer){ clearTimeout(w.loadingTimer); w.loadingTimer = null; }
@@ -11482,20 +11696,25 @@ function handleAction(action, el){
           {title:"Поиск ТС в каталоге бизнес-возможностей", subtitle:"Формирование рекомендаций по переиспользованию…", tiles, delay:900},
         ],
         ()=>{
+          /* Агент только подсказывает решение (suggestion) — принимает его архитектор:
+             отметив ТС в раскрытой ВС, нажав «Отметить ТС как новую» или «Исключить».
+             Поэтому маппинг сразу после анализа честно равен 0. */
           w.data.tc.forEach(c=>{
             c.analyzed = true;
             const useful = c.bcMatches.filter(bc=>(bc.tcNested||[]).length>0);
             const best = tcBestNested(c);
             if(!useful.length){
-              c.decision = "new";
+              c.suggestion = "new";
             } else if(best && best.match>=50){
-              c.decision = "reuse"; c.reuseTargets = [best];
+              c.suggestion = "reuse";
               c.bcMatches.forEach(bc=>{ if(bc.code===best.bcCode) bc.expanded = true; });
             } else {
-              c.decision = "skip";
+              c.suggestion = "reuse";
             }
           });
           w.data.tcCatalogAnalyzed = true;
+          w.data.tcPage = 0;
+          w.data.tcAppFilter = null;
         },
         "Каталог проанализирован по всем кандидатам"
       );
@@ -11521,6 +11740,8 @@ function handleAction(action, el){
           } else if(step==="tc"){
             w.data.tc = makeTcCandidatePool();
             w.data.tcCatalogAnalyzed = false;
+            w.data.tcPage = 0;
+            w.data.tcAppFilter = null;
           }
         },
         "Шаг перезапущен, данные обновлены"
@@ -11530,12 +11751,75 @@ function handleAction(action, el){
     case "tc-decide": {
       const c = state.wizard.data.tc.find(x=>x.id===el.dataset.cid);
       if(c){
-        c.decision = el.dataset.decision;
+        const d = el.dataset.decision || null;
+        c.decision = (c.decision===d) ? null : d;
         if(c.decision==="reuse" && !(c.reuseTargets||[]).length){
           const best = tcBestNested(c);
           c.reuseTargets = best ? [best] : [];
         }
+        if(c.decision!=="reuse") c.reuseTargets = [];
       }
+      render(); break;
+    }
+    case "tc-page": {
+      const w = state.wizard;
+      const n = w.data.tc.length;
+      w.data.tcPage = Math.min(Math.max((w.data.tcPage||0) + Number(el.dataset.dir), 0), Math.max(n-1,0));
+      w.data.tcAppFilter = null;
+      render(); break;
+    }
+    case "tc-app-filter": {
+      const w = state.wizard;
+      w.data.tcAppFilter = (w.data.tcAppFilter===el.dataset.app) ? null : el.dataset.app;
+      render(); break;
+    }
+    case "tc-app-scroll": {
+      const track = el.parentElement.querySelector(".app-chip-track");
+      if(track) track.scrollBy({left: Number(el.dataset.dir) * 200, behavior:"smooth"});
+      break;
+    }
+    case "tc-toggle-req": {
+      const c = state.wizard.data.tc.find(x=>x.id===el.dataset.cid);
+      if(c) c.reqOpen = !c.reqOpen;
+      render(); break;
+    }
+    case "req-toggle": {
+      const w = state.wizard;
+      const code = el.dataset.code;
+      const i = w.data.reqSel.indexOf(code);
+      if(i>=0) w.data.reqSel.splice(i,1); else w.data.reqSel.push(code);
+      render(); break;
+    }
+    case "req-toggle-all": {
+      const w = state.wizard;
+      const list = el.dataset.kind==="nfr" ? w.data.nfr : w.data.fr;
+      const codes = list.map(r=>r.code);
+      const allOn = codes.every(c=>w.data.reqSel.includes(c));
+      w.data.reqSel = allOn
+        ? w.data.reqSel.filter(c=>codes.indexOf(c)<0)
+        : w.data.reqSel.concat(codes.filter(c=>w.data.reqSel.indexOf(c)<0));
+      render(); break;
+    }
+    case "req-bulk": {
+      const w = state.wizard;
+      const mode = el.dataset.mode;
+      if(mode==="clear"){ w.data.reqSel = []; render(); break; }
+      w.data.fr.concat(w.data.nfr).forEach(r=>{
+        if(w.data.reqSel.indexOf(r.code)<0) return;
+        r.status = (mode==="exclude") ? "excluded" : (r.baseStatus||"reuse");
+      });
+      w.data.reqSel = [];
+      render();
+      showToast(mode==="exclude" ? "Требования исключены из оценки" : "Требования возвращены в оценку");
+      break;
+    }
+    case "assess-filter": {
+      const f = assessFilter();
+      f[el.dataset.kind] = el.dataset.val;
+      render(); break;
+    }
+    case "dismiss-coach": {
+      if(state.wizard) state.wizard.data.coachDismissed = true;
       render(); break;
     }
     case "tc-toggle-bc-expand": {
@@ -11571,9 +11855,11 @@ function handleAction(action, el){
         900,
         ()=>{
           w.stepIndex = WIZARD_STEPS.findIndex(s=>s.key==="result");
+          w.data.coachDismissed = false;
+          state.assessFilter = {fr:"reuse", nfr:"reuse", tc:"reuse"};
           finishAssessmentAndSave();
         },
-        "Оценка завершена и сохранена в проекте. Теперь её можно опубликовать или скачать по клику на кнопку «Публикация»"
+        "Оценка завершена"
       );
       break;
     }
