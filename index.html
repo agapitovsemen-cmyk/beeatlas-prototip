@@ -1047,7 +1047,12 @@
   .row-sub{color:var(--text-secondary);font-size:13px;line-height:16px;letter-spacing:.2px;margin-top:var(--space-1);}
   .empty-cell{color:var(--text-tertiary);}
 
-  .table-wrap-fit{border:1px solid var(--border);border-radius:var(--radius);overflow:visible;}
+  /* Таблицы с автолейаутом шире контейнера прокручиваются внутри себя, иначе они
+     вылезали за .page и обрезались справа (скролл уезжал в .main и был не виден).
+     Видимое переполнение нужно только фиксированным таблицам — у них всплывают
+     подсказки .cell-tooltip, а по ширине они и так не превышают 100%. */
+  .table-wrap-fit{border:1px solid var(--border);border-radius:var(--size-border-radius-x6);overflow-x:auto;overflow-y:hidden;}
+  .table-wrap-fit:has(> table.fixed-table){overflow:visible;}
   table.fixed-table{table-layout:fixed;width:100%;}
   table.fixed-table thead th{white-space:normal;}
   table.fixed-table tbody td{overflow:visible;}
@@ -1349,23 +1354,27 @@
   .uc-wizard-body-center > .uc-wizard-content-wrap{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;margin-top:var(--space-7);}
 
   /* stepper */
-  .stepper{display:flex;align-items:flex-start;justify-content:center;gap:var(--space-9);padding-bottom:var(--space-5);border-bottom:1px solid var(--border);margin-bottom:var(--space-7);flex-wrap:wrap;}
-  .step{display:flex;align-items:center;gap:var(--size-spacing-x3);position:relative;min-height:56px;padding:0 var(--size-spacing-x6) 2px;}
+  /* ДС Stepper (horizontal): высота шага 56, padding-bottom 2, индикатор 2px со скруглением
+     сверху 4. Своих вертикальных отступов у полосы нет — высота задаётся шагом. */
+  .stepper{display:flex;align-items:stretch;justify-content:center;gap:var(--size-spacing-x10);border-bottom:1px solid var(--border);margin-bottom:var(--space-7);flex-wrap:wrap;}
+  .step{display:flex;align-items:center;gap:var(--size-spacing-x3);position:relative;height:56px;padding:0 var(--size-spacing-x6) 2px;}
   /* ДС Stepper: number 24×24, отступ до текста 12, пройденный шаг — цвета status-success */
   .step .circle{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:16px;color:var(--text-secondary);flex:0 0 auto;}
   .step.done .circle{background:var(--color-status-success-background);border-color:var(--color-status-success);color:var(--color-status-success);}
   .step.done .circle svg{width:15px;height:15px;}
   .step.done .circle .beeline-icons{width:15px;height:15px;font-size:15px;}
   .step.active .circle{background:var(--yellow);border-color:var(--yellow);color:var(--color-text-black-active);font-weight:500;}
-  .step .stxt{line-height:1.35;}
+  .step .stxt{display:flex;flex-direction:column;justify-content:center;}
   .step .stxt .s-lbl{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-secondary);}
   .step .stxt .s-name{font-size:17px;line-height:22px;letter-spacing:.2px;font-weight:400;color:var(--text-secondary);}
   .step.active .stxt .s-name{color:var(--text);}
   .step.done .stxt .s-name{color:var(--text);}
-  .step.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--yellow);}
+  .step.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;min-width:40px;
+    border-radius:var(--size-border-radius-x2) var(--size-border-radius-x2) 0 0;background:var(--yellow);}
   /* Степпер агента «Оценка»: одна строка «номер + название», активный шаг подчёркнут
      тёмной линией (макеты 2026-09). Остальные визарды оставляют двухстрочный вариант. */
   .stepper.stepper-inline{gap:var(--size-spacing-x10);}
+  .stepper.stepper-inline .step{align-items:center;}
   .stepper.stepper-inline .step .stxt .s-lbl{display:none;}
   .stepper.stepper-inline .step .stxt .s-name{font-size:17px;}
   .stepper.stepper-inline .step.active::after{background:var(--text);}
@@ -1379,7 +1388,7 @@
   .wizard-close .beeline-icons{width:20px;height:20px;font-size:20px;}
   /* Сверху 0: над телом мастера стоит собственная шапка, 32px дал бы двойной отступ */
   .wizard-body{flex:1;overflow-y:auto;padding:0 var(--size-spacing-x8) var(--size-spacing-x10);}
-  .wizard-stepper-wrap{padding-top:var(--space-5);}
+  .wizard-stepper-wrap{padding-top:0;}
 
   /* side panel */
   .backdrop{position:fixed;inset:0;background:rgba(15,15,18,.45);z-index:300;}
@@ -4016,6 +4025,22 @@ function makeTcCandidatePool(){
       analyzed:false, decision:null, system:null, bcMatches:[],
     },
   ];
+}
+
+/* Каталог разбирает кандидатов сразу при переходе на шаг ТС — отдельной кнопки
+   «Проанализировать по каталогу» больше нет. Проставляется рекомендация (suggestion)
+   и раскрывается лучшая ВС; решение по-прежнему принимает архитектор. */
+function analyzeTcPool(list){
+  list.forEach(c=>{
+    c.analyzed = true;
+    const best = tcBestNested(c);
+    const useful = c.bcMatches.filter(bc=>(bc.tcNested||[]).length>0);
+    c.suggestion = useful.length ? "reuse" : "new";
+    if(best && best.match>=50){
+      c.bcMatches.forEach(bc=>{ if(bc.code===best.bcCode) bc.expanded = true; });
+    }
+  });
+  return list;
 }
 
 function tcBestNested(candidate){
@@ -9328,7 +9353,6 @@ function startWizard(projectId){
       reqSel:[],
       questions: DEFAULT_QUESTIONS.map(q=>({id:uid("q"),text:q})),
       tc: [],
-      tcCatalogAnalyzed:false,
       tcPage:0,
       tcAppFilter:null,
       coachDismissed:false,
@@ -9553,24 +9577,15 @@ function TcReqFoot(c){
 
 function WizardStepTc(w){
   const list = w.data.tc;
-  const analyzed = w.data.tcCatalogAnalyzed;
   const head = `
     <div class="section-head-row">
       <h2 style="margin:0;">Кандидаты ТС на основании требований</h2>
-      <div style="display:flex;gap:var(--space-3);align-items:center;">
-        ${analyzed ? "" : `<button class="btn btn-primary btn-sm" data-action="tc-analyze-catalog">Проанализировать по каталогу</button>`}
-        <button class="btn btn-outline btn-sm" data-action="open-add-tc">Добавить ТС</button>
-      </div>
+      <button class="btn btn-outline btn-sm" data-action="open-add-tc">Добавить ТС</button>
     </div>
     <p class="tc-step-hint">Для каждого кандидата каталог выдаёт подходящие ВС и входящие в них ТС. Нажмите на ТС — и она будет переиспользована. Если ничего не подошло, вы всегда можете подобрать ТС вручную</p>
   `;
 
-  /* До анализа по каталогу показываем весь список кандидатов без решений. */
-  if(!analyzed){
-    return `${head}<div class="tc-candidate-list">${list.map(c=>TcCandidatePreviewCard(c)).join("")}</div>`;
-  }
-
-  /* После анализа — по одному кандидату на страницу, с маппингом и метаданными. */
+  /* По одному кандидату на страницу, с маппингом и метаданными. */
   const counts = tcCandidateCounts(list);
   const decided = list.filter(c=>c.decision).length;
   const pct = list.length ? Math.round(decided / list.length * 100) : 0;
@@ -9595,15 +9610,6 @@ function WizardStepTc(w){
   `;
 }
 
-function TcCandidatePreviewCard(c){
-  return `
-  <div class="card tc-cand-card" id="cand-${c.id}">
-    <div class="tc-card-title">${escapeHtml(c.name)}</div>
-    ${c.taskDesc ? `<div class="tc-card-desc">${escapeHtml(c.taskDesc)}</div>` : ""}
-    <div class="tc-card-note">Решение станет доступно после анализа по каталогу</div>
-    ${TcReqFoot(c)}
-  </div>`;
-}
 
 function TcCandidateCard(c, w){
   /* Исключённый кандидат сворачивается до баннера с возвратом в расчёт. */
@@ -11734,53 +11740,24 @@ function handleAction(action, el){
     case "wiz-to-tc": {
       const w = state.wizard;
       const pool = w.data.tc.length ? w.data.tc : makeTcCandidatePool();
-      startWizardLoading(
-        {title:"Выявление Technical Capability", tiles:[
-          {lbl:"FR для анализа", val: w.data.fr.length},
-          {lbl:"NFR для анализа", val: w.data.nfr.length},
-          {lbl:"Кандидатов ТС", val: pool.length},
-        ]},
-        900,
-        ()=>{ w.data.tc = pool; w.stepIndex = WIZARD_STEPS.findIndex(s=>s.key==="tc"); },
-        "Сгенерировано кандидатов ТС: " + pool.length
-      );
-      break;
-    }
-    case "tc-analyze-catalog": {
-      const w = state.wizard;
-      const totalBc = w.data.tc.reduce((s,c)=>s+c.bcMatches.length,0);
       const tiles = [
-        {lbl:"Кандидатов ТС", val: w.data.tc.length},
-        {lbl:"БС в каталоге", val: totalBc},
+        {lbl:"FR для анализа", val: w.data.fr.length},
+        {lbl:"NFR для анализа", val: w.data.nfr.length},
+        {lbl:"Кандидатов ТС", val: pool.length},
       ];
       startWizardLoadingStaged(
         [
-          {title:"Поиск ТС в каталоге бизнес-возможностей", subtitle:"Сканирование каталога бизнес-возможностей…", tiles, delay:900},
-          {title:"Поиск ТС в каталоге бизнес-возможностей", subtitle:"Сопоставление кандидатов ТС с найденными БС…", tiles, delay:900},
-          {title:"Поиск ТС в каталоге бизнес-возможностей", subtitle:"Формирование рекомендаций по переиспользованию…", tiles, delay:900},
+          {title:"Выявление Technical Capability", subtitle:"Формирование кандидатов ТС из требований…", tiles, delay:900},
+          {title:"Выявление Technical Capability", subtitle:"Поиск подходящих ВС в каталоге…", tiles, delay:900},
+          {title:"Выявление Technical Capability", subtitle:"Сопоставление кандидатов с найденными ТС…", tiles, delay:900},
         ],
         ()=>{
-          /* Агент только подсказывает решение (suggestion) — принимает его архитектор:
-             отметив ТС в раскрытой ВС, нажав «Отметить ТС как новую» или «Исключить».
-             Поэтому маппинг сразу после анализа честно равен 0. */
-          w.data.tc.forEach(c=>{
-            c.analyzed = true;
-            const useful = c.bcMatches.filter(bc=>(bc.tcNested||[]).length>0);
-            const best = tcBestNested(c);
-            if(!useful.length){
-              c.suggestion = "new";
-            } else if(best && best.match>=50){
-              c.suggestion = "reuse";
-              c.bcMatches.forEach(bc=>{ if(bc.code===best.bcCode) bc.expanded = true; });
-            } else {
-              c.suggestion = "reuse";
-            }
-          });
-          w.data.tcCatalogAnalyzed = true;
+          w.data.tc = analyzeTcPool(pool);
           w.data.tcPage = 0;
           w.data.tcAppFilter = null;
+          w.stepIndex = WIZARD_STEPS.findIndex(s=>s.key==="tc");
         },
-        "Каталог проанализирован по всем кандидатам"
+        "Кандидатов ТС: " + pool.length
       );
       break;
     }
@@ -11802,8 +11779,7 @@ function handleAction(action, el){
             w.data.nfr = NFR_LIST.slice(0,8).map(x=>Object.assign({},x));
             w.data.questions = DEFAULT_QUESTIONS.map(q=>({id:uid("q"),text:q}));
           } else if(step==="tc"){
-            w.data.tc = makeTcCandidatePool();
-            w.data.tcCatalogAnalyzed = false;
+            w.data.tc = analyzeTcPool(makeTcCandidatePool());
             w.data.tcPage = 0;
             w.data.tcAppFilter = null;
           }
