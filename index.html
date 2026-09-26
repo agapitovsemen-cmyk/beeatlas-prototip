@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-112228">
+<meta name="beeatlas-build" content="20260926-112715">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1269,6 +1269,12 @@
   .inline-alert.info .ia-ico{color:var(--color-status-info);}
   .inline-alert.neutral{background:var(--color-status-neutral-background);}
   .inline-alert.neutral .ia-ico{color:var(--color-status-neutral);}
+  .inline-alert.success{background:var(--color-status-success-background);}
+  .inline-alert.success .ia-ico{color:var(--color-status-success);}
+  .inline-alert .ia-close{flex:0 0 auto;cursor:pointer;display:flex;color:var(--color-text-inactive);padding:var(--size-spacing-x1) 0;}
+  .inline-alert .ia-close:hover{color:var(--color-text-active);}
+  .inline-alert .ia-close svg{width:20px;height:20px;}
+  .inline-alert .ia-close .beeline-icons{width:20px;height:20px;font-size:20px;}
 
   /* ===== агент «Оценка»: шаг ТС и отображение результата (макеты 2026-09) ===== */
 
@@ -9122,9 +9128,10 @@ function AssessmentBody(p, a, ctx){
   <div class="with-toc">
     <div class="content-col">
       ${inWizard && !((state.wizard||{}).data||{}).coachDismissed ? `
-        <div class="coach-note invertedTheme">
-          <span>Оценка завершена и сохранена в проекте. Теперь её можно опубликовать или скачать по клику на кнопку «Публикация»</span>
-          <span class="close" data-action="dismiss-coach">${icon("x")}</span>
+        <div class="inline-alert success" style="margin-bottom:var(--size-spacing-x6);">
+          <span class="ia-ico">${icon("check")}</span>
+          <span class="ia-txt">Оценка завершена и сохранена в проекте. Теперь её можно опубликовать или скачать по клику на кнопку «Публикация»</span>
+          <span class="ia-close" data-action="dismiss-coach">${icon("x")}</span>
         </div>
       ` : ""}
 
