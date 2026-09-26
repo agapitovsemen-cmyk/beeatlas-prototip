@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-125000">
+<meta name="beeatlas-build" content="20260926-125451">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -859,20 +859,6 @@
   .home-chip:hover{background:var(--bg-alt);}
   .home-chip.active{background:var(--yellow);border-color:var(--yellow);color:rgba(0,0,0,.87);font-weight:600;}
   .home-h2{font-size:22px;margin:0 0 var(--space-5);}
-  .home-h2-soon{margin-top:var(--space-9);}
-  .home-tabs{margin-bottom:var(--space-7);}
-  .home-tile-link{cursor:pointer;}
-  .home-tile-link:hover{background:var(--bg-alt);}
-  .home-tiles{margin-bottom:var(--space-6);}
-  .home-block{margin-bottom:var(--space-6);}
-  .home-block-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-5);}
-  .home-block-title{font-weight:700;font-size:16px;}
-  .home-more-row{margin-top:var(--space-4);}
-  .home-empty{color:var(--text-secondary);font-size:15px;}
-  .home-soon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-4);}
-  .home-svc-static{cursor:default;}
-  .home-svc-static:hover{background:transparent;}
-  .home-svc-static .home-svc-title{color:var(--text-secondary);}
   .home-mine-row{margin-bottom:var(--space-9);}
   .home-mine-title{font-weight:700;font-size:16px;margin-bottom:var(--space-4);}
   .home-mine-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);}
@@ -4556,7 +4542,6 @@ const state = {
   sidebarCollapsed:false,
   route: {view:"home"},
   activeSidebar:"home",
-  homeTab:"attention",
   projects: [],
   mainProjectId: null,
   search:"",
@@ -5335,9 +5320,9 @@ const NAV_GROUPS = [
   ]},
 ];
 
-function HomeServiceRow(it, color, static_){
+function HomeServiceRow(it, color){
   return `
-    <div class="home-svc-row ${static_?"home-svc-static":""}" ${static_?"":`data-action="nav" data-nav="${it.id}"`}>
+    <div class="home-svc-row" data-action="nav" data-nav="${it.id}">
       <div class="home-svc-icon home-svc-${color}">${icon(it.icon)}</div>
       <div class="home-svc-body">
         <div class="home-svc-title">${escapeHtml(it.label)}${it.filled?"":' <span class="home-svc-soon">скоро</span>'}</div>
@@ -5372,210 +5357,7 @@ function HomeGroupCard(g){
   `;
 }
 
-const HOME_TABS = [
-  {id:"attention", label:"Требуют внимания"},
-  {id:"mine",      label:"Мои объекты"},
-  {id:"services",  label:"Сервисы"},
-];
-
-/* Главная собирается из тех же данных, что и разделы: приложения берутся из APPS
-   каталога приложений, проекты — из state.projects. Новых сущностей не заводим,
-   меняется только место, где объект виден: раньше он жил внутри раздела, теперь
-   попадает на первый экран вместе с поводом открыть его. */
-const HOME_CRIT_ORDER = ["0-Core","1-Mission Critical","2-Business Critical","3-Business Operation","4-Office Productivity"];
-
-function homeMyApps(){
-  return Object.values(APPS).filter(a => a.architect === ARCHITECT);
-}
-function homeAppsWithFitnessErrors(){
-  return homeMyApps()
-    .filter(a => a.fitness < 100 && a.status !== "Выведено из эксплуатации")
-    .sort((a,b) => {
-      const c = HOME_CRIT_ORDER.indexOf(a.crit) - HOME_CRIT_ORDER.indexOf(b.crit);
-      return c !== 0 ? c : a.fitness - b.fitness;
-    });
-}
-function homeMyProjects(){
-  return state.projects.filter(p => p.mine);
-}
-function homeProjectsWaiting(){
-  return homeMyProjects().filter(p => p.status === "Активен" && p.assessmentScore
-    && (p.assessmentScore.level === "red" || p.assessmentScore.level === "orange"));
-}
-/* Порядок групп берём из NAV_GROUPS, как в боковом меню: масонри-порядок
-   HOME_SERVICES_ORDER был нужен старой раскладке с разновысокими колонками. */
-function homeAvailableGroups(){
-  return NAV_GROUPS
-    .map(g => ({label:g.label, color:g.color, items:g.items.filter(i => i.filled)}))
-    .filter(g => g.items.length);
-}
-function homeSoonItems(){
-  return NAV_GROUPS.flatMap(g => g.items.filter(i => !i.filled).map(i => ({item:i, color:g.color})));
-}
-
-function HomeBlock(title, linkLabel, navId, body){
-  return `
-    <div class="card home-block">
-      <div class="home-block-head">
-        <div class="home-block-title">${escapeHtml(title)}</div>
-        ${linkLabel ? `<span class="proj-link" data-action="nav" data-nav="${navId}">${escapeHtml(linkLabel)}</span>` : ""}
-      </div>
-      ${body}
-    </div>
-  `;
-}
-function HomeEmpty(text){
-  return `<div class="home-empty">${escapeHtml(text)}</div>`;
-}
-
-function HomeAttentionTab(){
-  const errApps  = homeAppsWithFitnessErrors();
-  const waiting  = homeProjectsWaiting();
-  const topApps  = errApps.slice(0,5);
-  const topProj  = waiting.slice(0,5);
-  return `
-    <div class="stat-tiles cols-3 home-tiles">
-      <div class="stat-tile home-tile-link" data-action="nav" data-nav="appcat">
-        <div class="big">${errApps.length}</div>
-        <div class="lbl">Приложений с ошибкой фитнес-функций</div>
-      </div>
-      <div class="stat-tile home-tile-link" data-action="nav" data-nav="projects">
-        <div class="big">${waiting.length}</div>
-        <div class="lbl">Проектов ждут решения по оценке</div>
-      </div>
-      <div class="stat-tile">
-        <div class="big">14</div>
-        <div class="lbl">Заявок в работе</div>
-      </div>
-    </div>
-
-    ${HomeBlock("Приложения с ошибкой фитнес-функций", "Каталог приложений", "appcat",
-      topApps.length ? `
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Приложение</th><th>CMDB Мнемоника</th><th>Критичность</th><th>Владелец</th><th>Статус</th><th>Фитнес-функций</th></tr></thead>
-            <tbody>
-              ${topApps.map(a => `
-                <tr>
-                  <td><div class="proj-link" data-action="home-open-app" data-id="${a.id}" data-tab="fitness">${escapeHtml(a.name)}</div></td>
-                  <td>${escapeHtml(a.cmdb)}</td>
-                  <td>${escapeHtml(a.crit)}</td>
-                  <td>${clampCell(a.owner)}</td>
-                  <td>${appStatusBadge(a.status)}</td>
-                  <td>${a.fitness}%</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-        ${errApps.length > topApps.length
-          ? `<div class="home-more-row"><span class="proj-link" data-action="nav" data-nav="appcat">Ещё ${errApps.length - topApps.length} в каталоге приложений</span></div>`
-          : ""}
-      ` : HomeEmpty("Все ваши приложения проходят проверки"))}
-
-    ${HomeBlock("Проекты, где ждут вашего решения", "Все проекты", "projects",
-      topProj.length ? `
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Проект</th><th>Статус</th><th>Оценка</th><th>Дата изменения</th></tr></thead>
-            <tbody>
-              ${topProj.map(p => `
-                <tr>
-                  <td>
-                    <div class="proj-link" data-action="home-open-assessment" data-id="${p.id}">${escapeHtml(p.name)}</div>
-                    <div class="row-sub">${escapeHtml(p.code)}</div>
-                  </td>
-                  <td>${statusBadge(p.status)}</td>
-                  <td>${scoreBadge(p.assessmentScore)}</td>
-                  <td>${escapeHtml(p.updated)}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-        ${waiting.length > topProj.length
-          ? `<div class="home-more-row"><span class="proj-link" data-action="nav" data-nav="projects">Ещё ${waiting.length - topProj.length} в разделе «Проекты»</span></div>`
-          : ""}
-      ` : HomeEmpty("Ни один проект не ждёт вашего решения"))}
-  `;
-}
-
-function HomeMineTab(){
-  const apps = homeMyApps();
-  const projects = homeMyProjects();
-  const topProjects = projects.slice(0,6);
-  return `
-    ${HomeBlock("Мои приложения", "Каталог приложений", "appcat", `
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Приложение</th><th>CMDB Мнемоника</th><th>Критичность</th><th>Владелец</th><th>Статус</th><th>Фитнес-функций</th></tr></thead>
-          <tbody>
-            ${apps.map(a => `
-              <tr>
-                <td><div class="proj-link" data-action="home-open-app" data-id="${a.id}">${escapeHtml(a.name)}</div></td>
-                <td>${escapeHtml(a.cmdb)}</td>
-                <td>${escapeHtml(a.crit)}</td>
-                <td>${clampCell(a.owner)}</td>
-                <td>${appStatusBadge(a.status)}</td>
-                <td>${a.fitness}%</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    `)}
-
-    ${HomeBlock("Мои проекты", "Все проекты", "projects", `
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Проект</th><th>Статус</th><th>Оценка</th><th>Дата изменения</th></tr></thead>
-          <tbody>
-            ${topProjects.map(p => `
-              <tr>
-                <td>
-                  <div class="proj-link" data-action="home-open-project" data-id="${p.id}">${escapeHtml(p.name)}</div>
-                  <div class="row-sub">${escapeHtml(p.code)}</div>
-                </td>
-                <td>${statusBadge(p.status)}</td>
-                <td>${scoreBadge(p.assessmentScore)}</td>
-                <td>${escapeHtml(p.updated)}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-      ${projects.length > topProjects.length
-        ? `<div class="home-more-row"><span class="proj-link" data-action="nav" data-nav="projects">Ещё ${projects.length - topProjects.length} в разделе «Проекты»</span></div>`
-        : ""}
-    `)}
-
-    <div class="stat-tiles cols-3 home-tiles">
-      <div class="stat-tile"><div class="big">143</div><div class="lbl">Подписки</div></div>
-      <div class="stat-tile"><div class="big">14</div><div class="lbl">Активных заявок</div></div>
-      <div class="stat-tile"><div class="big">10</div><div class="lbl">Завершённых заявок</div></div>
-    </div>
-  `;
-}
-
-function HomeServicesTab(){
-  const soon = homeSoonItems();
-  return `
-    <div class="home-services-columns">
-      ${homeAvailableGroups().map(HomeGroupCard).join("")}
-    </div>
-    ${soon.length ? `
-      <h2 class="home-h2 home-h2-soon">В разработке</h2>
-      <div class="card">
-        <div class="home-soon-grid">
-          ${soon.map(s => HomeServiceRow(s.item, s.color, true)).join("")}
-        </div>
-      </div>
-    ` : ""}
-  `;
-}
-
 function HomePage(){
-  const tab = state.homeTab || "attention";
   return `
     <div class="home-search-row">
       <div class="home-search-box">
@@ -5588,11 +5370,43 @@ function HomePage(){
       ${HOME_SEARCH_CHIPS.map(t=>`<div class="home-chip" data-action="noop-doc">${escapeHtml(t)}</div>`).join("")}
     </div>
 
-    <div class="page-tabs home-tabs">
-      ${HOME_TABS.map(t=>`<div class="page-tab ${tab===t.id?"active":""}" data-action="home-set-tab" data-tab="${t.id}">${escapeHtml(t.label)}</div>`).join("")}
+    <h2 class="home-h2">Моё пространство</h2>
+    <div class="home-mine-row">
+      <div class="card home-mine-card">
+        <div class="home-mine-title">Мои приложения</div>
+        <div class="home-mine-app-row">
+          <a class="proj-link" data-action="noop-doc">beeatlas</a>
+          ${icon("info")}
+        </div>
+        <div class="row-sub">fdmshowcaseapp</div>
+        <div class="home-mine-more" data-action="noop-doc">Показать полностью ${icon("chevronDown")}</div>
+      </div>
+      <div class="card home-mine-card">
+        <div class="home-mine-title-row">
+          <div class="home-mine-title">Мои подписки</div>
+          <span data-action="noop-doc" style="cursor:pointer;color:var(--text-secondary);">${icon("chevronRight")}</span>
+        </div>
+        <div>Всего 143 подписки</div>
+      </div>
+      <div class="card home-mine-card">
+        <div class="home-mine-title-row">
+          <div class="home-mine-title">Мои заявки</div>
+          <span data-action="noop-doc" style="cursor:pointer;color:var(--text-secondary);">${icon("chevronRight")}</span>
+        </div>
+        <ul class="home-mine-list">
+          <li>14 активных заявок</li>
+          <li>10 завершенных заявок</li>
+        </ul>
+      </div>
     </div>
 
-    ${tab==="mine" ? HomeMineTab() : tab==="services" ? HomeServicesTab() : HomeAttentionTab()}
+    <h2 class="home-h2">Сервисы</h2>
+    <div class="home-services-columns">
+      ${homeServiceColumns().map(col => col.length>1
+        ? `<div class="home-group-col">${col.map(HomeGroupCard).join("")}</div>`
+        : HomeGroupCard(col[0])
+      ).join("")}
+    </div>
   `;
 }
 
@@ -11825,22 +11639,6 @@ function handleAction(action, el){
       if(el.dataset.nav==="projects") go("projects"); else go(el.dataset.nav);
       break;
     case "go-home": state.activeSidebar = "home"; go("home"); break;
-    case "home-set-tab": state.homeTab = el.dataset.tab; render(); break;
-    case "home-open-app":
-      state.activeSidebar = "appcat";
-      state.appcat.detailId = el.dataset.id;
-      state.appcat.tab = el.dataset.tab || "general";
-      state.appcat.generalSub = "info";
-      go("appcat");
-      break;
-    case "home-open-project":
-      state.activeSidebar = "projects";
-      go("project", {projectId: el.dataset.id});
-      break;
-    case "home-open-assessment":
-      state.activeSidebar = "projects";
-      openProjectAssessmentTab(el.dataset.id);
-      break;
 
     case "cj-reset-search": state.cjSearch=""; render(); break;
     case "cj-reset-search-all":
