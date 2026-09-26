@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-104309">
+<meta name="beeatlas-build" content="20260926-104715">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1268,7 +1268,10 @@
   .bc-row.hit{border-color:var(--yellow);box-shadow:0 0 0 1px var(--yellow);}
   .bc-row-head{display:flex;align-items:center;gap:var(--size-spacing-x4);padding:var(--size-spacing-x3) var(--size-spacing-x6);min-height:56px;cursor:pointer;}
   .bc-row-head:hover{background:var(--color-background-base-hover);}
-  .bc-row-head .main{flex:1;min-width:0;}
+  /* Имя .main занято колонкой контента приложения (белый фон + overflow-y:auto),
+     поэтому внутренний блок строки ВС называется bc-main — иначе он перекрывал
+     подсветку строки по наведению белым прямоугольником. */
+  .bc-row-head .bc-main{flex:1;min-width:0;}
   .bc-row-head .name{font-weight:500;font-size:15px;line-height:20px;letter-spacing:.2px;display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;}
   .bc-row-head .right{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);color:var(--text-secondary);font-size:15px;line-height:18px;letter-spacing:.2px;}
   .chev{display:flex;transition:transform .15s;}
@@ -9732,7 +9735,7 @@ function TcCandidateCard(c, w){
         ${usefulBc.map(bc=>`
           <div class="bc-row ${activeApp && bcHasApp(bc, activeApp) ? "hit" : ""}">
             <div class="bc-row-head" data-action="tc-toggle-bc-expand" data-cid="${c.id}" data-bc="${bc.code}">
-              <div class="main">
+              <div class="bc-main">
                 <div class="name">${escapeHtml(bc.name)} <span class="badge orange">${bc.match}%</span></div>
                 <div class="row-sub">${bc.code}</div>
               </div>
