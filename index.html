@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-131406">
+<meta name="beeatlas-build" content="20260926-131944">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -5422,7 +5422,7 @@ function HomeServiceGroup(g){
   `;
 }
 
-const HOME_SEARCH_CHIPS = ["Очень длинное название …","beeatlas","Публикация приложения","SparxEA","PATTERN.000022"];
+const HOME_SEARCH_CHIPS = ["beeatlas","Публикация приложения","SparxEA","PATTERN.000022"];
 
 /* Карточка агента и карточки «Моего пространства»: те же три блока главной,
    что были в макете, только с цифрой, иконкой и ссылкой в каждой карточке. */
@@ -5432,7 +5432,7 @@ function HomeAgentCard(){
       <div class="home-agent__head">
         <span class="home-agent__ava">${icon("robot")}</span>
         <div>
-          <div class="home-agent__hi">Добрый день, Юлия</div>
+          <div class="home-agent__hi">Добрый день</div>
           <div class="home-agent__sub">Спросите агента beeatlas: он найдёт приложение, паттерн, проект или систему и покажет их связи</div>
         </div>
       </div>
