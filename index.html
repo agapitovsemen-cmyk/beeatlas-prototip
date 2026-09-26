@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-114334">
+<meta name="beeatlas-build" content="20260926-115441">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1222,13 +1222,17 @@
   .pill-item.active:hover{background:var(--yellow-hover);}
 
 
-  .agent-card-v2{padding:var(--space-6);display:flex;flex-direction:column;}
+  /* Карточки агентов одинаковые: фиксированная высота под заголовок + 4 строки
+     описания + кнопку, разделителя нет, кнопка прижата к правому нижнему углу. */
+  .agent-card-v2{padding:var(--space-6);display:flex;flex-direction:column;height:214px;}
   .agent-card-v2-title{color:var(--blue);font-weight:500;font-size:17px;line-height:22px;letter-spacing:.2px;margin-bottom:var(--space-3);cursor:pointer;}
   .agent-card-v2-title:hover{text-decoration:underline;}
   .agent-card-v2-sub{color:var(--text-secondary);font-size:15px;line-height:18px;letter-spacing:.2px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
-  .agent-card-v2-foot{margin-top:var(--space-5);padding-top:var(--space-4);border-top:1px solid var(--border);}
+  .agent-card-v2-foot{margin-top:auto;display:flex;justify-content:flex-end;}
 
-  .business-block{margin-bottom:var(--space-6);}
+  /* Текст бизнес-постановки — колонкой до 800px: длинная строка во всю ширину
+     страницы нечитаема. Заголовки и ссылки живут в той же колонке. */
+  .business-block{margin-bottom:var(--space-6);max-width:800px;}
   .business-block h3{font-size:15px;margin:0 0 var(--space-2);}
   .business-block p{margin:0;color:var(--text);line-height:1.6;}
   .business-block .muted{color:var(--text-tertiary);}
@@ -8340,13 +8344,13 @@ const AGENT_META = {
   assessment:{name:"Оценка", icon:"gauge", passedSub:"score",
     desc:"Оценка объема изменений в приложениях и процессах ландшафта, автоматизированная по бизнес требованиям"},
   usecase:{name:"Use Case", icon:"doc", passedSub:"Use Case сформирован",
-    desc:"Краткое описание об агенте выводим до 4х строк. Если описание длиннее 4х строк, то сокращаем под … Полное описание выводим в popover по …"},
+    desc:"Собирает Use Case по бизнес-постановке: раскладывает сценарий на шаги, подбирает участников и связывает каждый шаг с технической возможностью из каталога, чтобы описание решения не приходилось писать вручную"},
   hld:{name:"Каркас HLD", icon:"layers", passedSub:"Каркас сформирован",
-    desc:"Краткое описание об агенте выводим до 4х строк. Если описание длиннее 4х строк, то сокращаем под … Полное описание выводим в popover по …"},
+    desc:"Готовит каркас HLD по данным проекта и каталога приложений: раскладывает документ по разделам, подставляет схему интеграций и таблицу затронутых систем, оставляя архитектору только содержательную часть"},
   verification:{name:"Верификация", icon:"shield", passedSub:"Верификация пройдена",
-    desc:"Краткое описание об агенте выводим до 4х строк. Если описание длиннее 4х строк, то сокращаем под … Полное описание выводим в popover по …"},
+    desc:"Сверяет решение с архитектурными принципами и нефункциональными требованиями, показывает расхождения с целевым ландшафтом и собирает замечания в отчёт с указанием, что именно нужно поправить"},
   publication:{name:"Публикация", icon:"send", passedSub:"Опубликовано в Confluence",
-    desc:"Краткое описание об агенте выводим до 4х строк. Если описание длиннее 4х строк, то сокращаем под … Полное описание выводим в popover по …"},
+    desc:"Публикует результаты работы агентов в Confluence: создаёт страницу по нужному шаблону, переносит таблицы и диаграммы и обновляет её при каждом новом прогоне, сохраняя историю версий"},
 };
 function agentStatusBadgeText(key, st){
   if(key==="hld") return st==="passed" ? {text:"Создан", cls:"green"} : {text:"Не создан", cls:"gray"};
