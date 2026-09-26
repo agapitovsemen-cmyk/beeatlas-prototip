@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-105505">
+<meta name="beeatlas-build" content="20260926-111521">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1040,10 +1040,27 @@
   .ds-select.open .ds-select-trigger{background:var(--bg);border-color:var(--text);}
   .ds-select.open .ds-select-trigger .chev{transform:rotate(180deg);}
   .ds-select-menu{
-    position:absolute;top:calc(100% + var(--size-spacing-x1));left:0;width:100%;z-index:60;
+    position:absolute;top:100%;left:0;width:100%;z-index:60;
     background:var(--color-background-medium);border-radius:var(--size-border-radius-x6);
     box-shadow:0 4px 30px rgba(0,0,0,.1), 0 0 10px rgba(0,0,0,.1);
-    padding:var(--size-spacing-x2) 0;max-height:264px;overflow-y:auto;
+    padding:var(--size-spacing-x2) 0;max-height:288px;overflow-y:auto;
+  }
+  /* Снизу не хватает места (мешает Bottom action bar) — меню раскрывается вверх.
+     Сторону и высоту считает positionDsSelectMenus() после каждого рендера. */
+  .ds-select-menu.up{top:auto;bottom:100%;}
+  /* Скроллбар — как на сайте ДС (styles.css): дорожка прозрачная, ползунок шириной 7
+     (15 минус прозрачная рамка 4+4), полностью скруглён, минимум 28, цвет text-inactive.
+     Стандартные scrollbar-width/color заданы только там, где нет webkit-псевдоэлементов:
+     в Chrome они бы их отключили, и на macOS вместо ползунка ДС остался бы системный
+     overlay-скроллбар, который виден только в момент прокрутки. */
+  .ds-select-menu::-webkit-scrollbar{width:15px;}
+  .ds-select-menu::-webkit-scrollbar-track{background-color:transparent;}
+  .ds-select-menu::-webkit-scrollbar-thumb{
+    background-color:var(--color-text-inactive);border:4px solid transparent;
+    background-clip:content-box;border-radius:100px;min-height:28px;
+  }
+  @supports not selector(::-webkit-scrollbar){
+    .ds-select-menu{scrollbar-width:thin;scrollbar-color:var(--color-text-inactive) transparent;}
   }
   .ds-select-item{
     padding:var(--size-spacing-x4);font-size:17px;line-height:22px;letter-spacing:.2px;color:var(--text);
@@ -4302,9 +4319,13 @@ function makeAssessment(name){
   };
 }
 
+/* id проекта порядковый, а не случайный: набор проектов на каждой загрузке
+   собирается одинаково, поэтому такой id переживает обновление страницы — на нём
+   держится восстановление открытой страницы (см. saveLocation/restoreRoute). */
+let projSeq = 0;
 function freshProject(name, code){
   return {
-    id: uid("proj"),
+    id: "proj-" + (++projSeq),
     name, code,
     status:"Активен",
     architect: ARCHITECT,
@@ -7667,6 +7688,41 @@ function DsSelect({id, value, placeholder, options, action, dataAttrs}){
         </div>` : ""}
     </div>
   `;
+}
+
+/* Меню селекта не должно уходить под Bottom action bar (футер визарда или страницы).
+   После каждого рендера считаем свободное место под полем и над ним: если снизу список
+   не помещается, а сверху места больше — раскрываем вверх. Высоту в любом случае
+   ограничиваем доступным местом, чтобы список заканчивался прокруткой, а не обрезкой. */
+const DS_SELECT_MAX_H = 288;  /* 5 пунктов по 54 + паддинги 8/8 */
+const DS_SELECT_MIN_H = 178;  /* 3 пункта — меньше этого раскрываться вниз уже неудобно */
+const DS_SELECT_EDGE = 8;     /* зазор до края экрана и до панели действий */
+
+function dsSelectBottomLimit(){
+  let limit = window.innerHeight - DS_SELECT_EDGE;
+  document.querySelectorAll(".wizard-foot, .footer-bar").forEach(bar=>{
+    const r = bar.getBoundingClientRect();
+    if(r.height > 0) limit = Math.min(limit, r.top - DS_SELECT_EDGE);
+  });
+  return limit;
+}
+
+function positionDsSelectMenus(){
+  document.querySelectorAll(".ds-select-menu").forEach(menu=>{
+    const trigger = menu.parentElement.querySelector(".ds-select-trigger");
+    if(!trigger) return;
+    const t = trigger.getBoundingClientRect();
+    const below = dsSelectBottomLimit() - t.bottom;
+    const above = t.top - DS_SELECT_EDGE;
+    menu.classList.remove("up");
+    menu.style.maxHeight = Math.max(0, Math.min(DS_SELECT_MAX_H, below)) + "px";
+    /* Вниз — поведение по умолчанию: наверх уходим, только если снизу совсем тесно
+       (меньше трёх пунктов) и сверху места больше. Иначе список просто прокручивается. */
+    if(below < DS_SELECT_MIN_H && above > below){
+      menu.classList.add("up");
+      menu.style.maxHeight = Math.max(0, Math.min(DS_SELECT_MAX_H, above)) + "px";
+    }
+  });
 }
 
 function CjBranchDeleteConfirm(branchId){
@@ -11103,20 +11159,27 @@ function Toast(){
 /* ============================= RENDER + EVENTS ============================= */
 function render(){
   renderShell();
+  positionDsSelectMenus();
   saveLocation();
 }
 
-/* Remember which page/tab the user is on, so a browser refresh reopens the same
-   place instead of bouncing back to Home. Only navigation-shaped fields are kept —
-   never modals/wizards/search-in-progress, and never a "projects" deep-link (project
-   IDs are regenerated by seed() on every load, so a remembered project/assessment/
-   report id would point at nothing after a refresh — the projects list is safe). */
+/* Запоминаем, на какой странице пользователь, чтобы обновление браузера открывало
+   то же место, а не отбрасывало к списку проектов. Раньше из раздела «Проекты»
+   сохранялся только сам список: id проектов были случайные (uid) и после перезагрузки
+   указывали в пустоту. Теперь id порядковые (см. freshProject), поэтому храним весь
+   маршрут вместе с вкладками, а restoreRoute при восстановлении проверяет, что проект
+   и вложенная сущность действительно существуют. Сохраняется и открытый визард оценки —
+   без таймеров и без экрана загрузки. */
 const LOCATION_KEY = "beeatlas_location_v1";
 function saveLocation(){
   try{
     const snapshot = {
       activeSidebar: state.activeSidebar,
-      route: state.route && state.route.view==="projects" ? state.route : null,
+      route: state.route ? Object.assign({}, state.route) : null,
+      projectTab: state.projectTab,
+      projectDataSubTab: state.projectDataSubTab,
+      projectAgentsSubTab: state.projectAgentsSubTab,
+      wizard: state.wizard ? Object.assign({}, state.wizard, {loading:false, loadingInfo:null, loadingTimer:null}) : null,
       appcat: {
         detailId: state.appcat.detailId,
         tab: state.appcat.tab,
@@ -11134,6 +11197,22 @@ function saveLocation(){
     };
     sessionStorage.setItem(LOCATION_KEY, JSON.stringify(snapshot));
   } catch(e){}
+}
+/* Маршрут годится к восстановлению, только если всё, на что он ссылается, существует:
+   проект мог быть создан в прошлой сессии (данные не переживают перезагрузку), а
+   оценка/use case/отчёт — появиться уже по ходу работы. Если не нашлось вложенного —
+   откатываемся на страницу проекта, если не нашлось проекта — к списку. */
+function restoreRoute(r){
+  if(!r || !r.view) return {view:"projects"};
+  if(!r.projectId) return r;
+  const p = findProject(r.projectId);
+  if(!p) return {view:"projects"};
+  const ok =
+    r.view==="assessment-detail" ? !!findAssessment(p, r.assessmentId) :
+    r.view==="usecase-detail"    ? !!findUseCase(p, r.ucId) :
+    r.view==="hld-report"        ? ((p.agents.hld.reports[r.reportType]||[]).some(x=>x.id===r.reportId)) :
+    r.view==="hld-skeleton"      ? !!p.agents.hld.skeleton : true;
+  return ok ? r : {view:"project", projectId:r.projectId};
 }
 function loadLocation(){
   try{
@@ -12348,6 +12427,11 @@ function handleAction(action, el){
 }
 
 /* ============================= INIT ============================= */
+/* Прокрутка и смена размера окна сдвигают поле — пересчитываем сторону и высоту
+   открытого меню. Вешается один раз: bindGlobalEvents() зовётся на каждый рендер. */
+window.addEventListener("resize", positionDsSelectMenus);
+document.addEventListener("scroll", positionDsSelectMenus, true);
+
 (function applyDeepLinkFromUrl(){
   try {
     const home = new URLSearchParams(location.search).get("home");
@@ -12361,7 +12445,11 @@ function handleAction(action, el){
   const loc = loadLocation();
   if(loc){
     if(loc.activeSidebar) state.activeSidebar = loc.activeSidebar;
-    if(loc.route) state.route = loc.route;
+    if(loc.route) state.route = restoreRoute(loc.route);
+    if(loc.projectTab) state.projectTab = loc.projectTab;
+    if(loc.projectDataSubTab) state.projectDataSubTab = loc.projectDataSubTab;
+    if(loc.projectAgentsSubTab) state.projectAgentsSubTab = loc.projectAgentsSubTab;
+    if(loc.wizard && findProject(loc.wizard.projectId)) state.wizard = loc.wizard;
     if(loc.appcat) Object.assign(state.appcat, loc.appcat);
     if(loc.cj){
       const o = loc.cj.open;
