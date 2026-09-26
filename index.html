@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-131944">
+<meta name="beeatlas-build" content="20260926-132208">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -5432,8 +5432,8 @@ function HomeAgentCard(){
       <div class="home-agent__head">
         <span class="home-agent__ava">${icon("robot")}</span>
         <div>
-          <div class="home-agent__hi">Добрый день</div>
-          <div class="home-agent__sub">Спросите агента beeatlas: он найдёт приложение, паттерн, проект или систему и покажет их связи</div>
+          <div class="home-agent__hi">Привет!</div>
+          <div class="home-agent__sub">Спроси агента beeatlas: он найдёт приложение, паттерн, проект или систему и покажет связи между ними</div>
         </div>
       </div>
       <div class="home-agent__field">
@@ -5475,14 +5475,14 @@ function HomeMineRow(){
     <div class="home-mine-row">
       ${HomeMineCard({
         color:"blue", icon:"grid", title:"Мои приложения", value:"2",
-        caption:"В вашей зоне ответственности",
+        caption:"В твоей зоне ответственности",
         body:`<div class="home-mine-items">${apps.map(a=>`
           <div class="home-mine-item" data-action="noop-doc">${icon("box")}<span class="proj-link">${escapeHtml(a)}</span></div>
         `).join("")}</div>`,
         link:"Показать полностью"})}
       ${HomeMineCard({
         color:"green", icon:"bell", title:"Мои подписки", value:"143",
-        caption:"Следите за изменениями объектов в каталогах",
+        caption:"Следи за изменениями объектов в каталогах",
         body:`<div class="home-mine-chips">
           <span class="badge gray">Приложения</span>
           <span class="badge gray">Е2Е-сценарии</span>
@@ -5508,7 +5508,7 @@ function HomePage(){
 
     <div class="home-sec-head">
       <h2 class="home-h2">Моё пространство</h2>
-      <div class="home-sec-sub">Объекты, за которые вы отвечаете, и подписки на изменения</div>
+      <div class="home-sec-sub">Объекты, за которые ты отвечаешь, и подписки на изменения</div>
     </div>
     ${HomeMineRow()}
 
