@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-104715">
+<meta name="beeatlas-build" content="20260926-105505">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1016,6 +1016,42 @@
   [data-theme="dark"] .select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-opacity='0.6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");}
   /* У полей с собственной иконкой в обёртке вторая стрелка не нужна */
   .select-wrap .select{background-image:none;}
+
+  /* ═══ Выпадающий список (ДС: components/select) ═══
+     Нативный <select> рисует список средствами ОС: он всплывает поверх поля, с
+     системной подсветкой и мимо токенов ДС. Поэтому меню своё — так же, как уже
+     сделано в Библиотеке CJ (.cj-select-*).
+     Триггер = Text field (48 / радиус 12 / паддинг 16). Меню по токенам компонента:
+     padding по вертикали 8, радиус 12, фон background-medium, тень из спеки,
+     пункт — паддинги 16, одна строка с многоточием, состояния hover/selected/pressed. */
+  .ds-select{position:relative;width:100%;}
+  .ds-select-trigger{
+    display:flex;align-items:center;gap:var(--size-spacing-x3);width:100%;
+    height:var(--size-control-height-medium);
+    border:1px solid transparent;background:var(--input-bg);border-radius:var(--size-border-radius-x6);
+    padding:0 var(--size-spacing-x4);font-size:17px;color:var(--text);text-align:left;cursor:pointer;
+  }
+  .ds-select-trigger:hover{background:var(--color-background-base-hover);}
+  .ds-select-trigger.placeholder .val{color:var(--color-text-inactive);}
+  .ds-select-trigger .val{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ds-select-trigger .chev{flex:0 0 auto;display:flex;color:var(--color-text-inactive);transition:transform .12s ease;}
+  .ds-select-trigger .chev svg{width:20px;height:20px;}
+  .ds-select-trigger .chev .beeline-icons{width:20px;height:20px;font-size:20px;}
+  .ds-select.open .ds-select-trigger{background:var(--bg);border-color:var(--text);}
+  .ds-select.open .ds-select-trigger .chev{transform:rotate(180deg);}
+  .ds-select-menu{
+    position:absolute;top:calc(100% + var(--size-spacing-x1));left:0;width:100%;z-index:60;
+    background:var(--color-background-medium);border-radius:var(--size-border-radius-x6);
+    box-shadow:0 4px 30px rgba(0,0,0,.1), 0 0 10px rgba(0,0,0,.1);
+    padding:var(--size-spacing-x2) 0;max-height:264px;overflow-y:auto;
+  }
+  .ds-select-item{
+    padding:var(--size-spacing-x4);font-size:17px;line-height:22px;letter-spacing:.2px;color:var(--text);
+    cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .ds-select-item:hover{background:var(--color-background-base-hover);}
+  .ds-select-item.selected{background:var(--color-background-base-selected);}
+  .ds-select-item:active{background:var(--color-background-base-pressed);}
 
   .textarea{
     width:100%;border:1px solid transparent;background:var(--input-bg);border-radius:var(--size-border-radius-x6);
@@ -7062,7 +7098,7 @@ function GraphAddRelOverlay(){
         <div class="field-block">
           <label class="field-label">Второй элемент</label>
           <select class="select" id="garOtherSelect">
-            <option value="">— выбери —</option>
+            <option value="">Выбрать элемент</option>
             ${otherOptions.map(o=>`<option value="${o.id}" ${st.draft.otherId===o.id?"selected":""}>${escapeHtml(o.label)} (${escapeHtml(o.type)})</option>`).join("")}
           </select>
         </div>
@@ -7607,6 +7643,27 @@ function CjSelectField({id, branches, activeId, action, excludeId, disabledId, d
               <span class="name">${escapeHtml(b.id)}</span>${b.kind==="user"?`<span class="tag">своя</span>`:""}${b.id===activeId?`<span class="check">${icon("check")}</span>`:""}
             </div>`;
           }).join("")}
+        </div>` : ""}
+    </div>
+  `;
+}
+
+/* Выпадающий список по ДС (components/select). Нативный <select> не годится:
+   его список рисует ОС — поверх поля, с системной подсветкой и мимо токенов.
+   Открытием управляет общий механизм state.popover, поэтому клик вне закрывает меню.
+   dataAttrs — произвольные data-* для обработчика (например, {cid: id кандидата}). */
+function DsSelect({id, value, placeholder, options, action, dataAttrs}){
+  const open = state.popover===id;
+  const attrs = Object.entries(dataAttrs||{}).map(([k,v])=>`data-${k}="${escapeHtml(String(v))}"`).join(" ");
+  return `
+    <div class="ds-select${open?" open":""}">
+      <button type="button" class="ds-select-trigger${value?"":" placeholder"}" data-action="toggle-popover" data-popover="${id}">
+        <span class="val">${escapeHtml(value || placeholder)}</span>
+        <span class="chev">${icon("chevronDown")}</span>
+      </button>
+      ${open ? `
+        <div class="ds-select-menu">
+          ${options.map(o=>`<div class="ds-select-item${o===value?" selected":""}" data-action="${action}" ${attrs} data-value="${escapeHtml(o)}" title="${escapeHtml(o)}">${escapeHtml(o)}</div>`).join("")}
         </div>` : ""}
     </div>
   `;
@@ -9713,10 +9770,7 @@ function TcCandidateCard(c, w){
     ${c.decision==="new" ? `
       <div style="margin-top:var(--space-4);max-width:320px;">
         <label class="field-label">В какой системе создать ТС?</label>
-        <select class="select" data-tc-system="${c.id}">
-          <option value="">— выбрать систему —</option>
-          ${TC_SYSTEM_POOL.map(s=>`<option value="${s}" ${c.system===s?"selected":""}>${s}</option>`).join("")}
-        </select>
+        ${DsSelect({id:`tcsys-${c.id}`, value:c.system||"", placeholder:"Выбрать систему", options:TC_SYSTEM_POOL, action:"tc-set-system", dataAttrs:{cid:c.id}})}
       </div>
     ` : ""}
 
@@ -11330,12 +11384,7 @@ function handleInput(el){
 }
 
 document.addEventListener("change", function(e){
-  if(e.target.dataset.tcSystem){
-    const c = state.wizard && state.wizard.data.tc.find(x=>x.id===e.target.dataset.tcSystem);
-    if(c) c.system = e.target.value;
-    render();
-  }
-  else if(e.target.id==="statusSelect"){
+  if(e.target.id==="statusSelect"){
     state.statusFilter = e.target.value; render();
   }
   else if(e.target.id==="ucSourceSelect"){ state.ucSourceFilter = e.target.value; render(); }
@@ -11852,6 +11901,11 @@ function handleAction(action, el){
         "Шаг перезапущен, данные обновлены"
       );
       break;
+    }
+    case "tc-set-system": {
+      const c = state.wizard && state.wizard.data.tc.find(x=>x.id===el.dataset.cid);
+      if(c) c.system = el.dataset.value;
+      state.popover = null; render(); break;
     }
     case "tc-decide": {
       const c = state.wizard.data.tc.find(x=>x.id===el.dataset.cid);
