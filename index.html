@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-103716">
+<meta name="beeatlas-build" content="20260926-104309">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1371,6 +1371,15 @@
      колонка контента 908px по центру (265…1174), оглавление вынесено в правое поле,
      футер выровнен по правому краю той же колонки, шапка с отступом 24. */
   .wiz-col .wizard-head{padding:var(--size-spacing-x6) var(--size-spacing-x6) var(--size-spacing-x5);}
+  /* Полоса степпера идёт от края до края экрана, поэтому выходит за горизонтальные
+     поля .wizard-body (по 32). Ширина при этом ровно равна ширине тела — переполнения нет. */
+  .wiz-col .wizard-stepper-wrap{
+    margin-left:calc(-1 * var(--size-spacing-x8));
+    margin-right:calc(-1 * var(--size-spacing-x8));
+  }
+  /* Контент любого шага — ровно 32 от полосы степпера: свой отступ у полосы снят,
+     расстояние задаёт только margin-top у .wizard-step-content. */
+  .wiz-col .stepper{margin-bottom:0;}
   .wiz-col .wizard-step-content{
     display:grid;
     grid-template-columns:minmax(0,1fr) min(908px,100%) minmax(0,1fr);
@@ -1393,8 +1402,9 @@
   }
   .wizard-body-center{display:flex;flex-direction:column;}
   .wizard-body-center > .wizard-stepper-wrap{flex:0 0 auto;}
-  .wizard-body-center > *:last-child{flex:1;display:flex;flex-direction:column;justify-content:center;margin-left:auto;margin-right:auto;width:100%;}
-  .wizard-body-center .wizard-step-content{margin-top:0;}
+  .wizard-body-center > *:last-child{flex:1;display:flex;flex-direction:column;margin-left:auto;margin-right:auto;width:100%;}
+  /* Карточка загрузки: 676 в ширину, внутренние отступы 24 (макеты 2026-09) */
+  .wiz-load-card{width:min(676px,100%);padding:var(--size-spacing-x6);}
 
   .uc-wizard-body-center{display:flex;flex-direction:column;}
   .uc-wizard-body-center > .wizard-stepper-wrap{flex:0 0 auto;}
@@ -9775,7 +9785,7 @@ function WizardStepResult(w){
 function WizardLoadingPanel(w){
   const info = w.loadingInfo || {title:"Обработка…", tiles:[]};
   return `
-    <div class="card" style="max-width:900px;">
+    <div class="card wiz-load-card">
       <div style="display:flex;gap:var(--space-4);align-items:center;">
         <div class="spinner"></div>
         <div>
