@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-132208">
+<meta name="beeatlas-build" content="20260926-132605">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -732,10 +732,16 @@
   }
   .brand{display:flex;align-items:center;gap:var(--space-3);font-weight:700;font-size:20px;white-space:nowrap;}
   .header-spacer{flex:1;}
-  .header-right{display:flex;align-items:center;gap:30px;}   /* ДС: header right part gap 30 */
-  .header-link{display:flex;align-items:center;gap:var(--space-2);color:var(--blue);font-size:14.5px;font-weight:500;}
-  .header-link svg{width:17px;height:17px;}
-  .header-link .beeline-icons{width:17px;height:17px;font-size:17px;}
+  /* ДС Header: gap 30 — расстояние между ЗОНАМИ правой части (виджеты, иконочные
+     кнопки, аватар), а не между каждым элементом. Внутри зон шаг мельче, иначе
+     иконки не читаются как группа. */
+  .header-right{display:flex;align-items:center;gap:30px;}
+  .header-widgets{display:flex;align-items:center;gap:var(--size-spacing-x6);}
+  .header-icons{display:flex;align-items:center;gap:var(--size-spacing-x5);}
+  .header-link{display:flex;align-items:center;gap:var(--space-2);color:var(--blue);
+    font-size:15px;line-height:20px;letter-spacing:.2px;}
+  .header-link svg{width:20px;height:20px;}
+  .header-link .beeline-icons{width:20px;height:20px;font-size:20px;}
   .icon-btn{
     width:36px;height:36px;border-radius:50%;border:none;background:transparent;
     display:inline-flex;align-items:center;justify-content:center;color:var(--text);
@@ -744,9 +750,20 @@
   .icon-btn:hover{background:var(--bg-alt);}
   .icon-btn svg{width:20px;height:20px;}
   .icon-btn .beeline-icons{width:20px;height:20px;font-size:20px;}
+  /* ДС Icon button: это сама иконка 24 (large) с радиусом 4 и цветом inactive,
+     активный цвет — только на наведении. Круглой подложки у компонента нет,
+     поэтому в шапке переопределяем общий .icon-btn прототипа. */
+  .header .icon-btn{
+    width:24px;height:24px;border-radius:var(--size-border-radius-x2);color:var(--text-secondary);
+  }
+  .header .icon-btn:hover{background:transparent;color:var(--text);}
+  .header .icon-btn svg{width:24px;height:24px;}
+  .header .icon-btn .beeline-icons{width:24px;height:24px;font-size:24px;}
+  /* ДС Avatar medium: 40×40, круг, текст 15/500/20/0.2, цвет — пара из палитры статусов */
   .avatar{
-    width:36px;height:36px;border-radius:50%;background:#ff7a45;color:#fff;
-    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;
+    width:40px;height:40px;border-radius:50%;background:var(--orange-bg);color:var(--orange-text);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:500;line-height:20px;letter-spacing:.2px;
   }
   /* Дропдаун-меню (ДС: components/menu) — фон background-medium, радиус 12px,
      elevation-medium, вертикальный padding 8, у пунктов высота 46 и padding 16.
@@ -867,7 +884,7 @@
     display:flex;flex-direction:column;gap:var(--space-5);
   }
   .home-agent__head{display:flex;align-items:center;gap:var(--space-4);}
-  .home-agent__ava{width:48px;height:48px;border-radius:var(--size-border-radius-x6);flex:0 0 auto;
+  .home-agent__ava{width:40px;height:40px;border-radius:var(--size-border-radius-x6);flex:0 0 auto;
     background:var(--yellow);color:var(--color-text-black-active);display:flex;align-items:center;justify-content:center;}
   .home-agent__ava .beeline-icons{width:24px;height:24px;font-size:24px;}
   .home-agent__ava svg{width:24px;height:24px;}
@@ -899,7 +916,8 @@
   .home-mine-head .home-mine-title{margin-bottom:0;}
   .home-mine-ico{width:40px;height:40px;border-radius:var(--size-border-radius-x6);flex:0 0 auto;
     display:flex;align-items:center;justify-content:center;}
-  .home-mine-ico .beeline-icons{width:20px;height:20px;font-size:20px;}
+  .home-mine-ico .beeline-icons{width:24px;height:24px;font-size:24px;}
+  .home-mine-ico svg{width:24px;height:24px;}
   .home-mine-num{font-size:34px;line-height:44px;letter-spacing:.3px;font-weight:500;}
   .home-mine-cap{color:var(--text-secondary);font-size:15px;line-height:20px;letter-spacing:.2px;}
   .home-mine-items{display:flex;flex-direction:column;gap:var(--space-2);}
@@ -995,14 +1013,13 @@
   }
 
   .home-svc-icon{width:40px;height:40px;border-radius:var(--size-border-radius-x6);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
-  .home-svc-icon svg{width:20px;height:20px;}
-  .home-svc-icon .beeline-icons{width:20px;height:20px;font-size:20px;}
+  .home-svc-icon svg{width:24px;height:24px;}
+  .home-svc-icon .beeline-icons{width:24px;height:24px;font-size:24px;}
   .home-svc-pink{background:var(--pink-bg);color:var(--pink-text);}
   .home-svc-orange{background:var(--orange-bg);color:var(--orange-text);}
   .home-svc-blue{background:var(--blue-bg);color:var(--blue-text);}
   .home-svc-green{background:var(--green-bg);color:var(--green-text);}
   .home-svc-gray{background:var(--gray-bg);color:var(--gray-text);}
-  .home-svc-soon{font-size:11px;font-weight:600;color:var(--text-tertiary);background:var(--gray-bg);border-radius:6px;padding:2px 6px;margin-left:var(--space-2);vertical-align:middle;}
 
   /* ДС Breadcrumbs: gap 8, текст 15/400/18/0.2 */
   .breadcrumb{display:flex;align-items:center;gap:var(--size-spacing-x2);color:var(--blue);font-size:15px;line-height:18px;letter-spacing:.2px;margin-bottom:var(--space-4);flex-wrap:wrap;}
@@ -5342,12 +5359,16 @@ function Header(){
     </div>
     <div class="header-spacer"></div>
     <div class="header-right">
-      <a class="header-link" data-action="noop-doc" href="#">${icon("doc")} Документация</a>
-      <a class="header-link" data-action="noop-ide" href="#">${icon("code")} WebIDE</a>
+      <div class="header-widgets">
+        <a class="header-link" data-action="noop-doc" href="#">${icon("doc")} Документация</a>
+        <a class="header-link" data-action="noop-ide" href="#">${icon("code")} WebIDE</a>
+      </div>
+      <div class="header-icons">
       <button class="icon-btn" data-action="toggle-theme" title="Тема">${icon("moon")}</button>
       <div style="position:relative;">
         <button class="icon-btn" data-action="toggle-popover" data-popover="bell">${icon("bell")}</button>
         ${state.popover==="bell" ? `<div class="popover"><div class="pv-title">Уведомления</div><div class="pv-muted">Новых уведомлений нет</div></div>` : ""}
+      </div>
       </div>
       <div style="position:relative;">
         <button class="avatar" data-action="toggle-popover" data-popover="user" style="border:none;">ЮС</button>
@@ -5401,7 +5422,7 @@ function HomeServiceTile(it, color){
     <div class="home-tile col-4 ${it.filled?"":"is-soon"}" ${it.filled?`data-action="nav" data-nav="${it.id}"`:""}>
       <div class="home-tile-top">
         <div class="home-svc-icon home-svc-${color}">${icon(it.icon)}</div>
-        ${it.filled?"":'<span class="home-svc-soon">скоро</span>'}
+        ${it.filled?"":'<span class="badge gray">скоро</span>'}
         <span class="home-tile-go">${icon("chevronRight")}</span>
       </div>
       <div class="home-tile-title">${escapeHtml(it.label)}</div>
