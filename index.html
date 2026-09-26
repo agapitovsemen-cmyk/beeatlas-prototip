@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-115441">
+<meta name="beeatlas-build" content="20260926-120227">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1105,6 +1105,12 @@
   .filters-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);flex-wrap:wrap;}
   .filters-row .search-wrap{flex:1;min-width:260px;position:relative;}
   .filters-row .arch-input{width:230px;}
+  /* Use Case: поиск 648, фильтры по 360. Строка не переносится — если всё это в
+     ширину не влезает, поля пропорционально ужимаются, но остаются в одну строку. */
+  .uc-filters{flex-wrap:nowrap;}
+  .uc-filters .search-wrap{flex:0 1 648px;min-width:240px;}
+  .uc-filters .select-wrap{flex:0 1 360px;width:360px;min-width:180px;}
+  .uc-filters .reset-link{flex:0 0 auto;white-space:nowrap;}
   .select-wrap{position:relative;width:180px;}
   .select-wrap select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-top:22px;padding-bottom:6px;padding-right:var(--space-8);line-height:20px;}
   .select-wrap svg{position:absolute;right:var(--space-4);top:50%;transform:translateY(-50%);width:16px;height:16px;pointer-events:none;color:var(--text-secondary);}
@@ -1229,6 +1235,34 @@
   .agent-card-v2-title:hover{text-decoration:underline;}
   .agent-card-v2-sub{color:var(--text-secondary);font-size:15px;line-height:18px;letter-spacing:.2px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
   .agent-card-v2-foot{margin-top:auto;display:flex;justify-content:flex-end;}
+
+  /* Карточка оценки: по три в ряд и фиксированной высоты — раньше растягивалась
+     во всю ширину страницы, и внутри оставалось много пустого места. */
+  .asmt-card{height:256px;display:flex;flex-direction:column;cursor:pointer;padding:var(--size-spacing-x5);}
+  /* Ничего не сжимается: у «Актуальной оценки» три бейджа переносятся на две строки,
+     и без этого заголовок карточки схлопывался до нулевой высоты. */
+  .asmt-card > *{flex:0 0 auto;}
+  .asmt-card .a-badges{display:flex;gap:var(--size-spacing-x2);flex-wrap:wrap;margin-bottom:var(--size-spacing-x3);}
+  .asmt-card .a-name{font-weight:500;font-size:17px;line-height:22px;letter-spacing:.2px;margin-bottom:var(--size-spacing-x3);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .asmt-card .a-stats{display:flex;gap:var(--size-spacing-x5);}
+  .asmt-card .a-meta{margin-top:auto;}
+  .asmt-card .a-meta .lbl{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-secondary);}
+  .asmt-card .a-meta .val{font-size:15px;line-height:18px;letter-spacing:.2px;margin-bottom:var(--size-spacing-x2);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .asmt-card .a-meta .val.last{margin-bottom:0;}
+
+  /* Карточка Use Case — тот же размер, что у карточек оценки */
+  .uc-card{height:230px;display:flex;flex-direction:column;padding:var(--size-spacing-x5);}
+  .uc-card > *{flex:0 0 auto;}
+  .uc-card-head{margin-bottom:var(--size-spacing-x3);}
+  .uc-card-name{color:var(--blue);font-weight:500;font-size:17px;line-height:22px;letter-spacing:.2px;cursor:pointer;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .uc-card-name:hover{text-decoration:underline;}
+  .uc-card-meta{margin-top:auto;}
+  .uc-card-meta .lbl{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-secondary);}
+  .uc-card-meta .val{font-size:15px;line-height:18px;letter-spacing:.2px;margin-bottom:var(--size-spacing-x2);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
   /* Текст бизнес-постановки — колонкой до 800px: длинная строка во всю ширину
      страницы нечитаема. Заголовки и ссылки живут в той же колонке. */
@@ -4519,6 +4553,7 @@ const state = {
 
   cjSearch:"",
   cjView:"grid",
+  ucView:"table",   // вид списка Use Case: "table" | "grid"
   cjFiltersOpen:false,
   cjFilters:{withGrafana:false, product:"", status:"", format:"", channel:"", type:""},
   cjOpen:null,        // {cjId, branch} when the CJ detail overlay is open
@@ -8415,7 +8450,7 @@ function filteredUseCases(p){
 function UseCaseTab(p){
   const list = filteredUseCases(p);
   return `
-    <div class="filters-row">
+    <div class="filters-row uc-filters">
       <div class="search-wrap">
         <div class="field-with-icon">
           ${icon("search")}
@@ -8437,8 +8472,16 @@ function UseCaseTab(p){
         ${icon("chevronDown")}
       </div>
       <span class="reset-link" data-action="reset-uc-filters">Сбросить</span>
+      <div class="view-toggle">
+        <button class="view-toggle-btn ${state.ucView==="grid"?"active":""}" data-action="uc-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
+        <button class="view-toggle-btn ${state.ucView==="table"?"active":""}" data-action="uc-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
+      </div>
     </div>
 
+    ${state.ucView==="grid" ? `
+      ${list.length ? `<div class="agents-grid-v2">${list.map(u=>UseCaseCard(p.id, u)).join("")}</div>`
+        : `<div class="card empty-state" style="padding:var(--space-9) var(--space-5);">${boxIllustration()}<p style="color:var(--text-secondary);margin:0;">Ничего не нашлось. Измени фильтры или сбрось их</p></div>`}
+    ` : `
     <div class="table-wrap">
       <table>
         <thead><tr><th>Use case</th><th>Статус</th><th>Источник</th><th>Дата изменения</th><th>История</th></tr></thead>
@@ -8459,6 +8502,25 @@ function UseCaseTab(p){
           `}
         </tbody>
       </table>
+    </div>
+    `}
+  `;
+}
+
+/* Карточный вид списка Use Case — те же данные, что в таблице */
+function UseCaseCard(projectId, u){
+  return `
+    <div class="card uc-card">
+      <div class="uc-card-head">${ucStatusBadge(u.status)}</div>
+      <div class="uc-card-name" data-action="open-usecase" data-id="${projectId}" data-uc="${u.id}" title="${escapeHtml(u.name)}">${escapeHtml(u.name)}</div>
+      <div class="row-sub">${escapeHtml(u.code)}</div>
+      <div class="uc-card-meta">
+        <div class="lbl">Источник</div>
+        <div class="val">${escapeHtml(u.source)}</div>
+        <div class="lbl">Дата изменения</div>
+        <div class="val">${escapeHtml(u.updated)}</div>
+        <span class="proj-link" data-action="open-usecase-history" data-id="${projectId}" data-uc="${u.id}">Посмотреть историю</span>
+      </div>
     </div>
   `;
 }
@@ -8846,12 +8908,12 @@ function AssessmentTab(p){
   return `
     <div class="section">
       <h2>Актуальная оценка</h2>
-      ${AssessmentSummaryCard(p.id, ag.current, true)}
+      <div class="agents-grid-v2">${AssessmentSummaryCard(p.id, ag.current, true)}</div>
     </div>
     ${ag.history.length ? `
     <div class="section">
       <h2>Прошлые оценки</h2>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-5);">
+      <div class="agents-grid-v2">
         ${ag.history.map(a=>AssessmentSummaryCard(p.id, a, false)).join("")}
       </div>
     </div>` : ""}
@@ -8962,23 +9024,25 @@ function AgentAssessmentPage(projectId){
 
 function AssessmentSummaryCard(projectId, a, isCurrent){
   return `
-    <div class="card" style="cursor:pointer;" data-action="open-assessment" data-id="${projectId}" data-aid="${a.id}">
-      <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-4);flex-wrap:wrap;">
+    <div class="card asmt-card" data-action="open-assessment" data-id="${projectId}" data-aid="${a.id}">
+      <div class="a-badges">
         <span class="badge orange">L–минимальная</span>
         <span class="badge green">Завершено</span>
         ${isCurrent ? '<span class="badge pink">Последняя оценка</span>' : ""}
       </div>
-      <div style="font-weight:500;font-size:17px;margin-bottom:var(--space-4);">${escapeHtml(a.name)}</div>
-      <div style="display:flex;gap:var(--space-7);margin-bottom:var(--space-4);flex-wrap:wrap;">
+      <div class="a-name">${escapeHtml(a.name)}</div>
+      <div class="a-stats">
         ${miniStat("FR", a.fr.length)}
         ${miniStat("NFR", a.nfr.length)}
         ${miniStat("TC", a.bcTc.length*2)}
         ${miniStat("Приложения", 9)}
       </div>
-      <div class="lbl" style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-1);">Автор</div>
-      <div style="margin-bottom:var(--space-4);">${escapeHtml(a.author)}</div>
-      <div class="lbl" style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-1);">Дата проведения</div>
-      <div>${escapeHtml(a.date)}</div>
+      <div class="a-meta">
+        <div class="lbl">Автор</div>
+        <div class="val" title="${escapeHtml(a.author)}">${escapeHtml(a.author)}</div>
+        <div class="lbl">Дата проведения</div>
+        <div class="val last">${escapeHtml(a.date)}</div>
+      </div>
     </div>
   `;
 }
@@ -11536,6 +11600,7 @@ function handleAction(action, el){
       render();
       break;
     case "cj-set-view": state.cjView = el.dataset.mode; render(); break;
+    case "uc-set-view": state.ucView = el.dataset.mode; render(); break;
     case "cj-open-filters": state.cjFiltersOpen = true; render(); break;
     case "cj-close-filters": state.cjFiltersOpen = false; render(); break;
     case "cj-toggle-with-grafana": state.cjFilters.withGrafana = !state.cjFilters.withGrafana; render(); break;
