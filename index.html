@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-113708">
+<meta name="beeatlas-build" content="20260926-114334">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1347,6 +1347,9 @@
   .q-card{border:1px solid var(--border);border-radius:var(--size-border-radius-x6);padding:var(--size-spacing-x4) var(--size-spacing-x6);margin-bottom:var(--space-3);}
   .q-card .q-label{color:var(--text-secondary);font-size:13px;line-height:16px;letter-spacing:.2px;margin-bottom:var(--space-1);}
   .q-card .q-text{font-size:15px;line-height:18px;letter-spacing:.2px;}
+  /* На шаге «Требования» у той же карточки есть удаление — вид карточки не меняется */
+  .q-card.with-del{display:flex;align-items:flex-start;gap:var(--size-spacing-x4);}
+  .q-card.with-del .q-body{flex:1;min-width:0;}
   .empty-inline{color:var(--text-secondary);font-size:15px;line-height:18px;letter-spacing:.2px;padding:var(--space-5);border:1px dashed var(--border);border-radius:var(--size-border-radius-x6);}
 
   .coach-note{display:flex;align-items:flex-start;gap:var(--space-4);border-radius:var(--size-border-radius-x6);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-6);font-size:15px;line-height:18px;letter-spacing:.2px;
@@ -9708,14 +9711,12 @@ function WizardStepRequirements(w){
 
         <div class="section-head-row" id="sec-questions"><h2 style="margin:0;">Вопросы для уточнения</h2></div>
         ${w.data.questions.length ? `
-          <div class="qlist-box">
-            ${w.data.questions.map((q,i)=>`
-              <div class="qlist-item">
-                <div><div class="q-label">Вопрос №${i+1}</div><div class="q-text">${escapeHtml(q.text)}</div></div>
-                <div class="del-x" data-action="del-question" data-qid="${q.id}">${icon("x")}</div>
-              </div>
-            `).join("")}
-          </div>
+          ${w.data.questions.map((q,i)=>`
+            <div class="q-card with-del">
+              <div class="q-body"><div class="q-label">Вопрос №${i+1}</div><div class="q-text">${escapeHtml(q.text)}</div></div>
+              <div class="del-x" data-action="del-question" data-qid="${q.id}">${icon("x")}</div>
+            </div>
+          `).join("")}
         ` : `
           <div class="empty-state">
             ${boxIllustration()}
