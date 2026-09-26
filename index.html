@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-111521">
+<meta name="beeatlas-build" content="20260926-112228">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1570,20 +1570,22 @@
   /* toast */
   /* Snackbar (ДС: components/snackbar) — радиус 12px, padding-left 16 / right 8,
      цвета из токенов темы; показывается в инвертированной теме. */
+  /* ДС (components/snackbar, «Расположение»): внизу страницы, отступ 24 от края экрана;
+     если есть bottom action bar — над ним, и те же 24 считаются от края панели.
+     Нижнюю границу ищет positionToast() — она же учитывает футер визарда и .footer-bar.
+     Размеры по токенам: min 344 / max 660, текст 15/18/0.2, паддинги 16 слева и 8 справа. */
   .toast{
-    position:fixed;left:50%;bottom:var(--size-spacing-x9);transform:translateX(-50%);
+    position:fixed;left:50%;bottom:var(--size-spacing-x6);transform:translateX(-50%);
     background:var(--color-background-base);color:var(--color-text-active);
     padding:var(--size-spacing-x4) var(--size-spacing-x2) var(--size-spacing-x4) var(--size-spacing-x4);
     border-radius:var(--size-border-radius-x6);display:flex;align-items:center;gap:var(--size-spacing-x4);z-index:500;
-    box-shadow:var(--elevation-high);font-size:14.5px;max-width:520px;line-height:1.45;animation:toastin .18s ease;
+    box-shadow:var(--elevation-high);font-size:15px;line-height:18px;letter-spacing:.2px;
+    min-width:344px;max-width:660px;animation:toastin .18s ease;
   }
   @keyframes toastin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
   .toast .t-close{cursor:pointer;color:var(--color-text-inactive);flex:0 0 auto;width:18px;height:18px;}
   .toast .t-close svg{width:18px;height:18px;}
   .toast .t-close .beeline-icons{width:18px;height:18px;font-size:18px;}
-  /* Когда открыт визард, снекбар поднимается над его футером, иначе перекрывает кнопки.
-     Высота .wizard-foot = 1 (рамка) + 16 (x4) + 48 (кнопка) + 24 (x6) = 89, зазор тот же x9. */
-  body:has(.wizard-overlay) .toast{bottom:calc(89px + var(--size-spacing-x9));}
 
   /* FAB (ДС: components/fab, type=standard) — 56×56, padding 16, радиус 50%,
      фон background-low, elevation-high; показывается в инвертированной теме. */
@@ -7698,13 +7700,26 @@ const DS_SELECT_MAX_H = 288;  /* 5 пунктов по 54 + паддинги 8/8
 const DS_SELECT_MIN_H = 178;  /* 3 пункта — меньше этого раскрываться вниз уже неудобно */
 const DS_SELECT_EDGE = 8;     /* зазор до края экрана и до панели действий */
 
-function dsSelectBottomLimit(){
-  let limit = window.innerHeight - DS_SELECT_EDGE;
+/* Верхняя граница нижней панели действий (футер визарда или .footer-bar страницы),
+   а если её нет — низ окна. От неё пляшут и меню селекта, и снекбар. */
+function bottomActionBarTop(){
+  let top = window.innerHeight;
   document.querySelectorAll(".wizard-foot, .footer-bar").forEach(bar=>{
     const r = bar.getBoundingClientRect();
-    if(r.height > 0) limit = Math.min(limit, r.top - DS_SELECT_EDGE);
+    if(r.height > 0) top = Math.min(top, r.top);
   });
-  return limit;
+  return top;
+}
+
+function dsSelectBottomLimit(){
+  return bottomActionBarTop() - DS_SELECT_EDGE;
+}
+
+/* ДС (components/snackbar): снекбар внизу, 24 от края экрана; при наличии bottom
+   action bar — над ней, и те же 24 отсчитываются от её края. */
+function positionToast(){
+  const offset = (window.innerHeight - bottomActionBarTop() + 24) + "px";
+  document.querySelectorAll(".toast").forEach(t=>{ t.style.bottom = offset; });
 }
 
 function positionDsSelectMenus(){
@@ -11160,6 +11175,7 @@ function Toast(){
 function render(){
   renderShell();
   positionDsSelectMenus();
+  positionToast();
   saveLocation();
 }
 
@@ -12096,8 +12112,9 @@ function handleAction(action, el){
           w.data.coachDismissed = false;
           state.assessFilter = {fr:"reuse", nfr:"reuse", tc:"reuse"};
           finishAssessmentAndSave();
-        },
-        "Оценка завершена"
+        }
+        /* без снекбара: на самом шаге «Оценка» уже стоит инлайн-уведомление
+           «Оценка завершена и сохранена в проекте…», дублировать его не нужно */
       );
       break;
     }
@@ -12429,8 +12446,8 @@ function handleAction(action, el){
 /* ============================= INIT ============================= */
 /* Прокрутка и смена размера окна сдвигают поле — пересчитываем сторону и высоту
    открытого меню. Вешается один раз: bindGlobalEvents() зовётся на каждый рендер. */
-window.addEventListener("resize", positionDsSelectMenus);
-document.addEventListener("scroll", positionDsSelectMenus, true);
+window.addEventListener("resize", ()=>{ positionDsSelectMenus(); positionToast(); });
+document.addEventListener("scroll", ()=>{ positionDsSelectMenus(); positionToast(); }, true);
 
 (function applyDeepLinkFromUrl(){
   try {
