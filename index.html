@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-120227">
+<meta name="beeatlas-build" content="20260926-121259">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1111,6 +1111,13 @@
   .uc-filters .search-wrap{flex:0 1 648px;min-width:240px;}
   .uc-filters .select-wrap{flex:0 1 360px;width:360px;min-width:180px;}
   .uc-filters .reset-link{flex:0 0 auto;white-space:nowrap;}
+  /* Проекты: поиск 648, фильтры по 260 — та же логика, строка не переносится */
+  .proj-filters{flex-wrap:nowrap;}
+  .proj-filters .search-wrap{flex:0 1 648px;min-width:240px;}
+  .proj-filters .arch-input,
+  .proj-filters .select-wrap{flex:0 1 260px;width:260px;min-width:170px;}
+  .proj-filters .toggle-wrap,
+  .proj-filters .reset-link{flex:0 0 auto;white-space:nowrap;}
   .select-wrap{position:relative;width:180px;}
   .select-wrap select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-top:22px;padding-bottom:6px;padding-right:var(--space-8);line-height:20px;}
   .select-wrap svg{position:absolute;right:var(--space-4);top:50%;transform:translateY(-50%);width:16px;height:16px;pointer-events:none;color:var(--text-secondary);}
@@ -1262,6 +1269,18 @@
   .uc-card-meta{margin-top:auto;}
   .uc-card-meta .lbl{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-secondary);}
   .uc-card-meta .val{font-size:15px;line-height:18px;letter-spacing:.2px;margin-bottom:var(--size-spacing-x2);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* Карточка проекта — того же размера, что карточки Use Case */
+  .proj-card{height:230px;display:flex;flex-direction:column;padding:var(--size-spacing-x5);}
+  .proj-card > *{flex:0 0 auto;}
+  .proj-card .p-badges{display:flex;gap:var(--size-spacing-x2);flex-wrap:wrap;margin-bottom:var(--size-spacing-x3);}
+  .proj-card .p-name{color:var(--blue);font-weight:500;font-size:17px;line-height:22px;letter-spacing:.2px;cursor:pointer;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .proj-card .p-name:hover{text-decoration:underline;}
+  .proj-card .p-meta{margin-top:auto;}
+  .proj-card .p-meta .lbl{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--text-secondary);}
+  .proj-card .p-meta .val{font-size:15px;line-height:18px;letter-spacing:.2px;margin-bottom:var(--size-spacing-x2);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
   /* Текст бизнес-постановки — колонкой до 800px: длинная строка во всю ширину
@@ -4554,6 +4573,7 @@ const state = {
   cjSearch:"",
   cjView:"grid",
   ucView:"table",   // вид списка Use Case: "table" | "grid"
+  projView:"table", // вид списка проектов: "table" | "grid"
   cjFiltersOpen:false,
   cjFilters:{withGrafana:false, product:"", status:"", format:"", channel:"", type:""},
   cjOpen:null,        // {cjId, branch} when the CJ detail overlay is open
@@ -8207,7 +8227,7 @@ function ProjectsListPage(){
       </div>
     </div>
 
-    <div class="filters-row">
+    <div class="filters-row proj-filters">
       <div class="search-wrap">
         <div class="field-with-icon">
           ${icon("search")}
@@ -8237,8 +8257,16 @@ function ProjectsListPage(){
         Мои проекты
       </div>
       <span class="reset-link" data-action="reset-filters">Сбросить</span>
+      <div class="view-toggle">
+        <button class="view-toggle-btn ${state.projView==="grid"?"active":""}" data-action="proj-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
+        <button class="view-toggle-btn ${state.projView==="table"?"active":""}" data-action="proj-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
+      </div>
     </div>
 
+    ${state.projView==="grid" ? `
+      ${list.length ? `<div class="agents-grid-v2">${list.map(ProjectCard).join("")}</div>`
+        : `<div class="card empty-state" style="padding:var(--space-9) var(--space-5);">${boxIllustration()}<p style="color:var(--text-secondary);margin:0;">Ничего не нашлось. Измени фильтры или сбрось их</p></div>`}
+    ` : `
     <div class="table-wrap-fit">
       <table>
         <thead><tr>
@@ -8263,6 +8291,7 @@ function ProjectsListPage(){
         </tbody>
       </table>
     </div>
+    `}
     <div class="pagination-row">
       <span>Строки на странице: 10</span>
       <span>1–${Math.min(list.length,10)} из ${list.length}</span>
@@ -8270,6 +8299,24 @@ function ProjectsListPage(){
       <button class="pg-btn" disabled>${icon("chevronLeft")}</button>
       <button class="pg-btn" ${list.length<=10?"disabled":""}>${icon("chevronRight")}</button>
       <button class="pg-btn" ${list.length<=10?"disabled":""}>${icon("chevronsRight")}</button>
+    </div>
+  `;
+}
+
+/* Карточный вид списка проектов — те же данные, что в таблице */
+function ProjectCard(p){
+  return `
+    <div class="card proj-card">
+      <div class="p-badges">${statusBadge(p.status)}${p.assessmentScore ? scoreBadge(p.assessmentScore) : ""}</div>
+      <div class="p-name" data-action="open-project" data-id="${p.id}" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</div>
+      <div class="row-sub">${escapeHtml(p.code)}</div>
+      <div class="p-meta">
+        <div class="lbl">Архитектор</div>
+        <div class="val" title="${escapeHtml(p.architect)}">${escapeHtml(p.architect)}</div>
+        <div class="lbl">Дата изменения</div>
+        <div class="val">${escapeHtml(p.updated)}</div>
+        <span class="proj-link">${escapeHtml(p.jira)}</span>
+      </div>
     </div>
   `;
 }
@@ -11601,6 +11648,7 @@ function handleAction(action, el){
       break;
     case "cj-set-view": state.cjView = el.dataset.mode; render(); break;
     case "uc-set-view": state.ucView = el.dataset.mode; render(); break;
+    case "proj-set-view": state.projView = el.dataset.mode; render(); break;
     case "cj-open-filters": state.cjFiltersOpen = true; render(); break;
     case "cj-close-filters": state.cjFiltersOpen = false; render(); break;
     case "cj-toggle-with-grafana": state.cjFilters.withGrafana = !state.cjFilters.withGrafana; render(); break;
