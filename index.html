@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260928-135727">
+<meta name="beeatlas-build" content="20260928-142014">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -7863,6 +7863,24 @@ function DsSelect({id, value, placeholder, options, action, dataAttrs}){
   `;
 }
 
+/* Тот же принцип, что у DsSelect (своё меню, не нативный <select>), но триггер —
+   поле с плавающей подписью внутри рамки (.select-wrap/.ffield-label), как у
+   фильтров списков. Список опций фиксированный, поэтому value===placeholder не бывает. */
+function FilterSelect({id, label, value, options, action}){
+  const open = state.popover===id;
+  return `
+    <div class="select-wrap">
+      <label class="ffield-label" style="opacity:1;">${escapeHtml(label)}</label>
+      <button type="button" class="select" style="text-align:left;cursor:pointer;" data-action="toggle-popover" data-popover="${id}">${escapeHtml(value)}</button>
+      ${icon("chevronDown")}
+      ${open ? `
+        <div class="ds-select-menu" style="top:100%;left:0;">
+          ${options.map(o=>`<div class="ds-select-item${o===value?" selected":""}" data-action="${action}" data-value="${escapeHtml(o)}">${escapeHtml(o)}</div>`).join("")}
+        </div>` : ""}
+    </div>
+  `;
+}
+
 /* Меню селекта не должно уходить под Bottom action bar (футер визарда или страницы).
    После каждого рендера считаем свободное место под полем и над ним: если снизу список
    не помещается, а сверху места больше — раскрываем вверх. Высоту в любом случае
@@ -8613,20 +8631,8 @@ function UseCaseTab(p){
           <input class="input" id="ucListSearch" placeholder="Поиск по названию или коду uc" value="${escapeHtml(state.ucSearch)}" autocomplete="off"/>
         </div>
       </div>
-      <div class="select-wrap">
-        <label class="ffield-label" style="opacity:1;">Источник</label>
-        <select class="select" id="ucSourceSelect">
-          ${["Все","Ручной импорт","Автоматический импорт"].map(s=>`<option ${state.ucSourceFilter===s?"selected":""}>${s}</option>`).join("")}
-        </select>
-        ${icon("chevronDown")}
-      </div>
-      <div class="select-wrap">
-        <label class="ffield-label" style="opacity:1;">Статус</label>
-        <select class="select" id="ucStatusSelect">
-          ${["Все","Опубликован","Черновик"].map(s=>`<option ${state.ucStatusFilter===s?"selected":""}>${s}</option>`).join("")}
-        </select>
-        ${icon("chevronDown")}
-      </div>
+      ${FilterSelect({id:"uc-filter-source", label:"Источник", value:state.ucSourceFilter, options:["Все","Ручной импорт","Автоматический импорт"], action:"uc-source-filter-set"})}
+      ${FilterSelect({id:"uc-filter-status", label:"Статус", value:state.ucStatusFilter, options:["Все","Опубликован","Черновик"], action:"uc-status-filter-set"})}
       <span class="reset-link" data-action="reset-uc-filters">Сбросить</span>
       <div class="view-toggle">
         <button class="view-toggle-btn ${state.ucListView==="grid"?"active":""}" data-action="uc-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
@@ -8868,15 +8874,25 @@ function UcScenarioDiagramPanel(){
 
 function UcCjLinkPanel(){
   const sp = state.sidePanel;
+  const label = st => `${st.cjName} → ${st.name} (${st.code})`;
+  const current = CJ_STEP_POOL.find(st=>st.code===sp.stepCode);
+  const open = state.popover==="ucCjLinkStep";
   return `
     <div class="side-head"><h2>Привязка к CJ</h2><button class="wizard-close" data-action="close-side">${icon("x")}</button></div>
     <div class="side-body">
       <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-5);">Выбери BI Step, к которому относится этот Use Case. От привязки зависит, в какой CJ и на каком шаге путешествия клиента будет учтён сценарий.</p>
       <div class="field-block">
         <label class="field-label">BI Step Code</label>
-        <select class="select" id="ucCjLinkStep">
-          ${CJ_STEP_POOL.map(st=>`<option value="${st.code}" ${sp.stepCode===st.code?"selected":""}>${escapeHtml(st.cjName)} → ${escapeHtml(st.name)} (${st.code})</option>`).join("")}
-        </select>
+        <div class="ds-select${open?" open":""}">
+          <button type="button" class="ds-select-trigger${current?"":" placeholder"}" data-action="toggle-popover" data-popover="ucCjLinkStep">
+            <span class="val">${current ? escapeHtml(label(current)) : "Выбрать BI Step"}</span>
+            <span class="chev">${icon("chevronDown")}</span>
+          </button>
+          ${open ? `
+            <div class="ds-select-menu">
+              ${CJ_STEP_POOL.map(st=>`<div class="ds-select-item${st.code===sp.stepCode?" selected":""}" data-action="uc-cj-link-set-step" data-value="${st.code}" title="${escapeHtml(label(st))}">${escapeHtml(label(st))}</div>`).join("")}
+            </div>` : ""}
+        </div>
       </div>
     </div>
     <div class="side-foot">
@@ -8902,6 +8918,7 @@ function UseCaseDetailPage(projectId, ucId){
       <a data-action="nav" data-nav="projects">Проекты</a><span class="sep">${icon("chevronRight")}</span>
       <a data-action="open-project" data-id="${p.id}">${escapeHtml(p.name)}</a><span class="sep">${icon("chevronRight")}</span>
       <a data-action="open-project-usecase" data-id="${p.id}">Use Case</a><span class="sep">${icon("chevronRight")}</span>
+      <span class="current">${escapeHtml(u.name)}</span>
     </div>
     <div class="with-toc">
       <div class="content-col">
@@ -10545,17 +10562,44 @@ function UcStepSetup(w){
       ` : `
         <div class="field-block">
           <label class="field-label">Существующий сценарий</label>
-          <select class="select" id="ucWizExisting">
-            ${(p.useCases||[]).map(u=>`<option value="${u.id}" ${d.existingUcId===u.id?"selected":""}>${escapeHtml(u.code)} — ${escapeHtml(u.name)}</option>`).join("")}
-          </select>
+          ${(()=>{
+            const label = u => `${u.code} — ${u.name}`;
+            const current = (p.useCases||[]).find(u=>u.id===d.existingUcId);
+            const open = state.popover==="ucWizExisting";
+            return `
+              <div class="ds-select${open?" open":""}">
+                <button type="button" class="ds-select-trigger${current?"":" placeholder"}" data-action="toggle-popover" data-popover="ucWizExisting">
+                  <span class="val">${current ? escapeHtml(label(current)) : "Выбрать сценарий"}</span>
+                  <span class="chev">${icon("chevronDown")}</span>
+                </button>
+                ${open ? `
+                  <div class="ds-select-menu">
+                    ${(p.useCases||[]).map(u=>`<div class="ds-select-item${d.existingUcId===u.id?" selected":""}" data-action="uc-wiz-set-existing" data-value="${u.id}" title="${escapeHtml(label(u))}">${escapeHtml(label(u))}</div>`).join("")}
+                  </div>` : ""}
+              </div>
+            `;
+          })()}
         </div>
       `}
       <div class="field-block">
         <label class="field-label">BI step для привязки к CJ (опционально)</label>
-        <select class="select" id="ucWizCjStep">
-          <option value="">Без привязки к CJ</option>
-          ${CJ_STEP_POOL.map(s=>`<option value="${s.code}" ${d.cjStepCode===s.code?"selected":""}>${escapeHtml(s.cjName)} → ${escapeHtml(s.name)} (${s.code})</option>`).join("")}
-        </select>
+        ${(()=>{
+          const options = [{code:"", label:"Без привязки к CJ"}].concat(CJ_STEP_POOL.map(s=>({code:s.code, label:`${s.cjName} → ${s.name} (${s.code})`})));
+          const current = options.find(o=>o.code===d.cjStepCode) || options[0];
+          const open = state.popover==="ucWizCjStep";
+          return `
+            <div class="ds-select${open?" open":""}">
+              <button type="button" class="ds-select-trigger" data-action="toggle-popover" data-popover="ucWizCjStep">
+                <span class="val">${escapeHtml(current.label)}</span>
+                <span class="chev">${icon("chevronDown")}</span>
+              </button>
+              ${open ? `
+                <div class="ds-select-menu">
+                  ${options.map(o=>`<div class="ds-select-item${o.code===d.cjStepCode?" selected":""}" data-action="uc-wiz-set-cjstep" data-value="${o.code}" title="${escapeHtml(o.label)}">${escapeHtml(o.label)}</div>`).join("")}
+                </div>` : ""}
+            </div>
+          `;
+        })()}
       </div>
 
       <div class="field-block">
@@ -10689,9 +10733,7 @@ function UcUnmappedPartCard(x){
           ${choice==="planned" ? `
             <div class="field-block">
               <label class="field-label">Протокол</label>
-              <select class="select" data-part-field="protocol" data-id="${x.id}">
-                ${["REST","gRPC","Kafka","SOAP"].map(pr=>`<option ${x.protocol===pr?"selected":""}>${pr}</option>`).join("")}
-              </select>
+              ${DsSelect({id:`ucpf-protocol-${x.id}`, value:x.protocol||"", placeholder:"Выбрать протокол", options:["REST","gRPC","Kafka","SOAP"], action:"uc-part-set-protocol", dataAttrs:{id:x.id}})}
             </div>
           ` : ""}
         </div>
@@ -11521,8 +11563,6 @@ function handleInput(el){
   else if(el.id==="hldPubTitle"){ state.hldWizard.data.pageTitle = el.value; render(); reFocus("hldPubTitle"); }
   else if(el.id==="hldPubParent"){ state.hldWizard.data.parentUrl = el.value; render(); reFocus("hldPubParent"); }
   else if(el.id==="ucListSearch"){ state.ucSearch = el.value; render(); reFocus("ucListSearch"); }
-  else if(el.id==="ucSourceSelect"){ state.ucSourceFilter = el.value; render(); }
-  else if(el.id==="ucStatusSelect"){ state.ucStatusFilter = el.value; render(); }
   else if(el.id==="ucWizName"){ state.ucWizard.data.ucName = el.value; render(); reFocus("ucWizName"); }
   else if(el.id==="ucWizPlantUml"){ state.ucWizard.data.plantUml = el.value; render(); reFocus("ucWizPlantUml"); }
   else if(el.id==="ucWizExisting"){ state.ucWizard.data.existingUcId = el.value; render(); }
@@ -11574,11 +11614,6 @@ document.addEventListener("change", function(e){
   if(e.target.id==="statusSelect"){
     state.statusFilter = e.target.value; render();
   }
-  else if(e.target.id==="ucSourceSelect"){ state.ucSourceFilter = e.target.value; render(); }
-  else if(e.target.id==="ucStatusSelect"){ state.ucStatusFilter = e.target.value; render(); }
-  else if(e.target.id==="ucWizExisting"){ state.ucWizard.data.existingUcId = e.target.value; render(); }
-  else if(e.target.id==="ucWizCjStep"){ state.ucWizard.data.cjStepCode = e.target.value; render(); }
-  else if(e.target.id==="ucCjLinkStep"){ state.sidePanel.stepCode = e.target.value; render(); }
   else if(e.target.dataset.partField){
     const part = state.ucWizard && state.ucWizard.data.parts.find(x=>x.id===e.target.dataset.id);
     if(part){ part[e.target.dataset.partField] = e.target.value; render(); }
@@ -11887,6 +11922,8 @@ function handleAction(action, el){
       break;
     }
     case "reset-uc-filters": state.ucSearch=""; state.ucSourceFilter="Все"; state.ucStatusFilter="Все"; render(); break;
+    case "uc-source-filter-set": state.ucSourceFilter = el.dataset.value; state.popover=null; render(); break;
+    case "uc-status-filter-set": state.ucStatusFilter = el.dataset.value; state.popover=null; render(); break;
     case "noop-uc-edit": showToast("Редактирование Use Case не входит в состав переданных макетов"); break;
     case "open-hub-interface": showToast(`Переход в карточку интерфейса «${el.dataset.call}» в Хабе приложений — вне периметра прототипа`); break;
     case "open-uc-dynamic": {
@@ -11911,6 +11948,7 @@ function handleAction(action, el){
       render();
       break;
     }
+    case "uc-cj-link-set-step": state.sidePanel.stepCode = el.dataset.value; state.popover = null; render(); break;
     case "save-uc-cj-link": {
       const sp = state.sidePanel;
       const p = findProject(sp.projectId);
@@ -11945,6 +11983,8 @@ function handleAction(action, el){
       break;
     }
     case "uc-set-mode": state.ucWizard.data.mode = el.dataset.mode; render(); break;
+    case "uc-wiz-set-existing": state.ucWizard.data.existingUcId = el.dataset.value; state.popover = null; render(); break;
+    case "uc-wiz-set-cjstep": state.ucWizard.data.cjStepCode = el.dataset.value; state.popover = null; render(); break;
     case "uc-wiz-back": { const w=state.ucWizard; w.stepIndex = Math.max(0, w.stepIndex-1); render(); break; }
     case "uc-fill-sample": state.ucWizard.data.plantUml = UC_SAMPLE_PLANTUML; render(); break;
     case "uc-wiz-to-import": ucWizardRunImport(); break;
@@ -11958,6 +11998,11 @@ function handleAction(action, el){
     case "uc-part-set-app": {
       const part = state.ucWizard.data.parts.find(x=>x.id===el.dataset.id);
       if(part) part.bc = el.dataset.value;
+      state.popover = null; render(); break;
+    }
+    case "uc-part-set-protocol": {
+      const part = state.ucWizard.data.parts.find(x=>x.id===el.dataset.id);
+      if(part) part.protocol = el.dataset.value;
       state.popover = null; render(); break;
     }
     case "uc-save-part-decision": {
