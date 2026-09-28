@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260928-142014">
+<meta name="beeatlas-build" content="20260928-143627">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -8691,12 +8691,6 @@ function findUseCase(p, ucId){
   return (p.useCases||[]).find(u=>u.id===ucId);
 }
 
-const UC_TOC = [
-  {id:"cj", label:"Связь с CJ"},
-  {id:"scenarios", label:"Сценарии"},
-  {id:"history", label:"История импорта"},
-];
-
 function scenarioStatusBadge(status){
   if(status==="planned") return '<span class="badge gray">Планируется</span>';
   if(status==="confirmed") return '<span class="badge green">Подтверждено</span>';
@@ -8920,46 +8914,39 @@ function UseCaseDetailPage(projectId, ucId){
       <a data-action="open-project-usecase" data-id="${p.id}">Use Case</a><span class="sep">${icon("chevronRight")}</span>
       <span class="current">${escapeHtml(u.name)}</span>
     </div>
-    <div class="with-toc">
-      <div class="content-col">
-        <div class="page-title-row">
-          <h1>${escapeHtml(u.name)}</h1>
-          ${ucStatusBadge(u.status)}
-          <div class="actions">
-            <div style="position:relative;">
-              <button class="btn btn-outline btn-icon-only" data-action="toggle-popover" data-popover="uc-export" title="Экспорт">${icon("upload")}</button>
-              ${state.popover==="uc-export" ? `
-                <div class="popover" style="min-width:180px;">
-                  <div class="pv-item" data-action="export-uc" data-format="puml" data-id="${p.id}" data-uc="${u.id}">Экспорт в PUML</div>
-                  <div class="pv-item" data-action="export-uc" data-format="markdown" data-id="${p.id}" data-uc="${u.id}">Экспорт в Markdown</div>
-                </div>
-              ` : ""}
+    <div class="page-title-row">
+      <h1>${escapeHtml(u.name)}</h1>
+      ${ucStatusBadge(u.status)}
+      <div class="actions">
+        <div style="position:relative;">
+          <button class="btn btn-outline btn-icon-only" data-action="toggle-popover" data-popover="uc-export" title="Экспорт">${icon("upload")}</button>
+          ${state.popover==="uc-export" ? `
+            <div class="popover" style="min-width:180px;">
+              <div class="pv-item" data-action="export-uc" data-format="puml" data-id="${p.id}" data-uc="${u.id}">Экспорт в PUML</div>
+              <div class="pv-item" data-action="export-uc" data-format="markdown" data-id="${p.id}" data-uc="${u.id}">Экспорт в Markdown</div>
             </div>
-            <button class="btn btn-outline btn-icon-only" data-action="noop-uc-edit" title="Редактировать">${icon("pencil")}</button>
-          </div>
+          ` : ""}
         </div>
-        ${UseCaseMetaRow(u, lastRun)}
-        ${UseCaseCjCard(u, p.id)}
+        <button class="btn btn-outline btn-icon-only" data-action="noop-uc-edit" title="Редактировать">${icon("pencil")}</button>
+      </div>
+    </div>
+    ${UseCaseMetaRow(u, lastRun)}
+    ${UseCaseCjCard(u, p.id)}
 
-        <div class="section" id="sec-scenarios">
-          <div class="section-head-row">
-            <h2 style="margin:0;">Сценарии</h2>
-            <div class="view-toggle">
-              <button class="view-toggle-btn active" title="Табличный вид">${icon("menu")}</button>
-              <button class="view-toggle-btn" data-action="open-uc-scenario-diagram" data-id="${p.id}" data-uc="${u.id}" title="Открыть диаграмму (PlantUML)">${icon("flow")}</button>
-            </div>
-          </div>
-          ${UseCaseScenariosTable(u, p.id, u.id)}
-        </div>
-
-        <div class="section" id="sec-history">
-          <h2>История импорта</h2>
-          ${UseCaseHistoryList(runs)}
+    <div class="section" id="sec-scenarios">
+      <div class="section-head-row">
+        <h2 style="margin:0;">Сценарии</h2>
+        <div class="view-toggle">
+          <button class="view-toggle-btn active" title="Табличный вид">${icon("menu")}</button>
+          <button class="view-toggle-btn" data-action="open-uc-scenario-diagram" data-id="${p.id}" data-uc="${u.id}" title="Открыть диаграмму (PlantUML)">${icon("flow")}</button>
         </div>
       </div>
-      <div class="toc-col">
-        ${UC_TOC.map((t,i)=>`<div class="toc-item ${i===0?"active":""}" data-action="toc-scroll" data-target="sec-${t.id}">${t.label}</div>`).join("")}
-      </div>
+      ${UseCaseScenariosTable(u, p.id, u.id)}
+    </div>
+
+    <div class="section" id="sec-history">
+      <h2>История импорта</h2>
+      ${UseCaseHistoryList(runs)}
     </div>
   `;
 }
@@ -10548,7 +10535,7 @@ function UcStepSetup(w){
   const p = findProject(w.projectId);
   const d = w.data;
   return `
-    <div style="width:100%;max-width:760px;">
+    <div style="width:100%;max-width:909px;margin:0 auto;">
       <h3 style="font-size:17px;margin:0 0 var(--space-5);">Данные UseCase</h3>
       <div class="pill-toggle">
         <div class="pill-item ${d.mode==="new"?"active":""}" data-action="uc-set-mode" data-mode="new">Новый сценарий</div>
@@ -10633,10 +10620,9 @@ function UcStepResult(w){
   const unresolvedParts = parts.filter(x=>!x.mapped && !x.decision);
   const resolvedParts = parts.filter(x=>x.mapped || x.decision);
   return `
-    <div style="width:100%;max-width:1100px;">
-    ${UseCaseMetaRow(preview, null)}
+    <div style="width:100%;max-width:909px;margin:0 auto;">
     ${UseCaseCjCard(preview)}
-    <div class="section-head-row"><h2 style="margin:0;">Staging собрал сценарии из PlantUML</h2></div>
+    <div class="section-head-row"><h2 style="margin:0;font-size:19px;line-height:24px;letter-spacing:.2px;font-weight:500;">Staging собрал сценарии из PlantUML</h2></div>
     <p style="color:var(--text-secondary);font-size:15px;margin:calc(-1 * var(--space-2)) 0 var(--space-5);">${parts.length} вызовов: ${confirmedCount} подтверждены, ${unresolvedParts.length} требуют решения</p>
     <div class="uc-stat-cards">
       <div class="uc-stat-card"><div class="val">${confirmedCount}</div><div class="lbl"><span class="dot green"></span>Подтверждено</div></div>
