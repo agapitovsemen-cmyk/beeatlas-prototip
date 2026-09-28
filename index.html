@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260928-145613">
+<meta name="beeatlas-build" content="20260928-153002">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1178,6 +1178,13 @@
      (это уже margin-bottom чипов .pill-toggle по умолчанию) — плотнее вертикали здесь
      не нужно, но это отдельный масштаб от остальных форм, поэтому переопределяем локально. */
   .uc-step-setup .field-block{margin-bottom:var(--size-spacing-x8);}
+  .uc-step-setup-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--size-spacing-x8);margin-bottom:var(--size-spacing-x8);}
+  .uc-step-setup-row .field-block{margin-bottom:0;}
+  /* Диаграмма вызовов сценария — SVG из buildSequenceSvgGeneric, тот же рендерер,
+     что у Dynamic-диаграммы BI Step в каталоге, но вне его CSS-скоупа. */
+  .uc-diagram-toolbar{display:flex;justify-content:flex-end;margin-bottom:var(--space-4);}
+  .uc-diagram-scroll{overflow:auto;border:1px solid var(--border);border-radius:var(--size-border-radius-x6);background:var(--bg-alt);}
+  .uc-diagram-scroll svg{display:block;width:auto;height:auto;flex:none;}
   .field-with-icon{position:relative;}
   .field-with-icon svg{position:absolute;left:var(--space-4);top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-tertiary);}
   .field-with-icon .beeline-icons{position:absolute;left:var(--space-4);top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-tertiary);font-size:18px;}
@@ -7875,12 +7882,27 @@ function FilterSelect({id, label, value, options, action}){
   return `
     <div class="select-wrap">
       <label class="ffield-label" style="opacity:1;">${escapeHtml(label)}</label>
-      <button type="button" class="select" style="text-align:left;cursor:pointer;" data-action="toggle-popover" data-popover="${id}">${escapeHtml(value)}</button>
+      <button type="button" class="select" style="text-align:left;cursor:pointer;padding-top:22px;padding-bottom:6px;line-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-action="toggle-popover" data-popover="${id}">${escapeHtml(value)}</button>
       ${icon("chevronDown")}
       ${open ? `
         <div class="ds-select-menu" style="top:100%;left:0;">
           ${options.map(o=>`<div class="ds-select-item${o===value?" selected":""}" data-action="${action}" data-value="${escapeHtml(o)}">${escapeHtml(o)}</div>`).join("")}
         </div>` : ""}
+    </div>
+  `;
+}
+
+/* Тот же компонент, что FilterSelect (подпись плавает внутри рамки), но для случаев,
+   когда отображаемый текст пункта отличается от его значения (например, BI Step
+   показывает «CJ → Шаг (код)», а хранит только код) — меню передаётся уже готовым. */
+function FloatingSelect({id, label, valueLabel, menuHtml}){
+  const open = state.popover===id;
+  return `
+    <div class="select-wrap" style="width:100%;">
+      <label class="ffield-label" style="opacity:1;">${escapeHtml(label)}</label>
+      <button type="button" class="select" style="text-align:left;cursor:pointer;padding-top:22px;padding-bottom:6px;line-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-action="toggle-popover" data-popover="${id}">${escapeHtml(valueLabel)}</button>
+      ${icon("chevronDown")}
+      ${open ? `<div class="ds-select-menu" style="top:100%;left:0;">${menuHtml}</div>` : ""}
     </div>
   `;
 }
@@ -8770,13 +8792,13 @@ function UseCaseScenariosTable(u, projectId, ucId){
             const pp = splitParticipant(s.participant);
             return `
             <tr>
-              <td>${escapeHtml(s.part)}</td>
+              <td style="white-space:nowrap;">${escapeHtml(s.part)}</td>
               <td>${participantCell(pp.caller)}</td>
               <td>${participantCell(pp.callee)}</td>
               <td>${clampCell(s.action, "clamp-5")}</td>
               <td>${scenarioCallCell(s, projectId, ucId)}</td>
               <td>${s.tcName ? clampNameCell(s.tcName, s.tcCode) : '<span class="empty-cell">—</span>'}</td>
-              <td>${scenarioDynamicCell(s, projectId, ucId)}</td>
+              <td style="white-space:nowrap;">${scenarioDynamicCell(s, projectId, ucId)}</td>
               <td>${scenarioStatusBadge(s.status)}</td>
             </tr>
           `;}).join("")}
@@ -8831,28 +8853,24 @@ function UcDynamicPanel(){
   `;
 }
 
-function ucPumlAlias(name){
-  return "p_" + String(name||"").replace(/[^a-zA-Zа-яА-Я0-9]+/g,"_").slice(0,24);
-}
-function buildUcPlantUml(u){
-  const participants = [];
+/* Диаграмма вызовов по данным сценария — тот же рендерер (buildSequenceSvgGeneric),
+   что уже используется для Dynamic-диаграммы BI Step в каталоге (глобальная функция
+   из первого <script> — e2ecat-scope, но сама функция вне его CSS-скоупа и не зависит
+   от него: параметры цвета заданы через var(...,#fallback)). */
+function buildUcSequenceData(u){
+  const lifelines = [];
   const seen = new Set();
   u.scenarios.forEach(s=>{
     const pp = splitParticipant(s.participant);
     [pp.caller, pp.callee].forEach(name=>{
-      if(name && !seen.has(name)){ seen.add(name); participants.push(name); }
+      if(name && !seen.has(name)){ seen.add(name); lifelines.push(name); }
     });
   });
-  const lines = ["@startuml"];
-  participants.forEach(name=>{
-    lines.push(`${isHumanParticipant(name)?"actor":"participant"} "${name}" as ${ucPumlAlias(name)}`);
-  });
-  u.scenarios.forEach(s=>{
+  const messages = u.scenarios.map(s=>{
     const pp = splitParticipant(s.participant);
-    lines.push(`${ucPumlAlias(pp.caller)} -> ${ucPumlAlias(pp.callee)}: ${s.action}`);
+    return {from: pp.caller, to: pp.callee, label: s.call || s.action};
   });
-  lines.push("@enduml");
-  return lines.join("\n");
+  return {lifelines, messages};
 }
 
 function UcScenarioDiagramPanel(){
@@ -8860,8 +8878,10 @@ function UcScenarioDiagramPanel(){
   return `
     <div class="side-head"><h2>Диаграмма сценария «${escapeHtml(sp.name)}»</h2><button class="wizard-close" data-action="close-side">${icon("x")}</button></div>
     <div class="side-body">
-      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-4);">Диаграмма последовательности вызовов по данным сценария (не исходный PlantUML, а то, что получилось после разбора), в нотации PlantUML</p>
-      <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:13px;line-height:22px;overflow-x:auto;white-space:pre;">${escapeHtml(sp.plantUml||"—")}</pre>
+      <div class="uc-diagram-toolbar">
+        <button class="btn btn-outline btn-sm" data-action="download-uc-diagram">${icon("download")} Скачать</button>
+      </div>
+      <div class="uc-diagram-scroll">${buildSequenceSvgGeneric(sp.lifelines, null, sp.messages, {large:true})}</div>
     </div>
     <div class="side-foot">
       <button class="btn btn-outline" data-action="close-side">Закрыть</button>
@@ -10488,7 +10508,7 @@ function UcWizardOverlay(){
 }
 
 function UcStepper(activeIndex){
-  return `<div class="stepper">
+  return `<div class="stepper stepper-inline">
     ${UC_WIZARD_STEPS.map((s,i)=>{
       const cls = i<activeIndex ? "done" : (i===activeIndex ? "active" : "");
       return `<div class="step ${cls}">
@@ -10532,61 +10552,47 @@ function UcWizardStepFooter(w){
 function UcStepSetup(w){
   const p = findProject(w.projectId);
   const d = w.data;
+  const existingLabel = u => `${u.code} — ${u.name}`;
+  const currentExisting = (p.useCases||[]).find(u=>u.id===d.existingUcId);
+  const cjOptions = [{code:"", label:"Без привязки к CJ"}].concat(CJ_STEP_POOL.map(s=>({code:s.code, label:`${s.cjName} → ${s.name} (${s.code})`})));
+  const currentCj = cjOptions.find(o=>o.code===d.cjStepCode) || cjOptions[0];
   return `
     <div class="uc-step-setup" style="width:100%;max-width:909px;margin:0 auto;">
       <div class="pill-toggle">
         <div class="pill-item ${d.mode==="new"?"active":""}" data-action="uc-set-mode" data-mode="new">Новый сценарий</div>
         <div class="pill-item ${d.mode==="existing"?"active":""}" data-action="uc-set-mode" data-mode="existing">Существующий сценарий</div>
       </div>
-      ${d.mode==="new" ? `
+      <div class="uc-step-setup-row">
         <div class="field-block">
-          <input class="input" id="ucWizName" placeholder="Название сценария" value="${escapeHtml(d.ucName)}"/>
-        </div>
-      ` : `
-        <div class="field-block">
-          <label class="field-label">Существующий сценарий</label>
-          ${(()=>{
-            const label = u => `${u.code} — ${u.name}`;
-            const current = (p.useCases||[]).find(u=>u.id===d.existingUcId);
-            const open = state.popover==="ucWizExisting";
-            return `
-              <div class="ds-select${open?" open":""}">
-                <button type="button" class="ds-select-trigger${current?"":" placeholder"}" data-action="toggle-popover" data-popover="ucWizExisting">
-                  <span class="val">${current ? escapeHtml(label(current)) : "Выбрать сценарий"}</span>
-                  <span class="chev">${icon("chevronDown")}</span>
-                </button>
-                ${open ? `
-                  <div class="ds-select-menu">
-                    ${(p.useCases||[]).map(u=>`<div class="ds-select-item${d.existingUcId===u.id?" selected":""}" data-action="uc-wiz-set-existing" data-value="${u.id}" title="${escapeHtml(label(u))}">${escapeHtml(label(u))}</div>`).join("")}
-                  </div>` : ""}
+          ${d.mode==="new" ? `
+            <div class="ffield filled">
+              <div class="ffield-box">
+                <input class="input ffield-input" id="ucWizName" value="${escapeHtml(d.ucName)}"/>
               </div>
-            `;
-          })()}
-        </div>
-      `}
-      <div class="field-block">
-        <label class="field-label">BI step для привязки к CJ (опционально)</label>
-        ${(()=>{
-          const options = [{code:"", label:"Без привязки к CJ"}].concat(CJ_STEP_POOL.map(s=>({code:s.code, label:`${s.cjName} → ${s.name} (${s.code})`})));
-          const current = options.find(o=>o.code===d.cjStepCode) || options[0];
-          const open = state.popover==="ucWizCjStep";
-          return `
-            <div class="ds-select${open?" open":""}">
-              <button type="button" class="ds-select-trigger" data-action="toggle-popover" data-popover="ucWizCjStep">
-                <span class="val">${escapeHtml(current.label)}</span>
-                <span class="chev">${icon("chevronDown")}</span>
-              </button>
-              ${open ? `
-                <div class="ds-select-menu">
-                  ${options.map(o=>`<div class="ds-select-item${o.code===d.cjStepCode?" selected":""}" data-action="uc-wiz-set-cjstep" data-value="${o.code}" title="${escapeHtml(o.label)}">${escapeHtml(o.label)}</div>`).join("")}
-                </div>` : ""}
+              <label class="ffield-label">Название сценария</label>
             </div>
-          `;
-        })()}
+          ` : FloatingSelect({
+              id:"ucWizExisting",
+              label:"Существующий сценарий",
+              valueLabel: currentExisting ? existingLabel(currentExisting) : "Выбрать сценарий",
+              menuHtml: (p.useCases||[]).map(u=>`<div class="ds-select-item${d.existingUcId===u.id?" selected":""}" data-action="uc-wiz-set-existing" data-value="${u.id}" title="${escapeHtml(existingLabel(u))}">${escapeHtml(existingLabel(u))}</div>`).join("")
+            })}
+        </div>
+        <div class="field-block">
+          ${FloatingSelect({
+            id:"ucWizCjStep",
+            label:"BI step для привязки к CJ (опционально)",
+            valueLabel: currentCj.label,
+            menuHtml: cjOptions.map(o=>`<div class="ds-select-item${o.code===d.cjStepCode?" selected":""}" data-action="uc-wiz-set-cjstep" data-value="${o.code}" title="${escapeHtml(o.label)}">${escapeHtml(o.label)}</div>`).join("")
+          })}
+        </div>
       </div>
 
       <div class="field-block">
-        <textarea class="textarea" id="ucWizPlantUml" placeholder="PlantUml" style="min-height:220px;font-family:ui-monospace,monospace;font-size:13px;">${escapeHtml(d.plantUml)}</textarea>
+        <div class="ffield filled" style="position:relative;">
+          <textarea class="textarea" id="ucWizPlantUml" style="min-height:220px;padding-top:28px;font-family:ui-monospace,monospace;font-size:13px;">${escapeHtml(d.plantUml)}</textarea>
+          <label class="ffield-label">PlantUml</label>
+        </div>
       </div>
       <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-5);">Вставь текст диаграммы последовательности в нотации PlantUML. Используй названия систем/контейнеров, соответствующие существующим в ландшафте BeeAtlas — так части сценария будут сопоставлены автоматически.</p>
       <button class="btn btn-outline btn-sm" data-action="uc-fill-sample">Подставить пример</button>
@@ -10640,14 +10646,14 @@ function UcStepResult(w){
               const confirmed = x.mapped || x.decision==="specified";
               return `
               <tr>
-                <td>${x.part}</td>
+                <td style="white-space:nowrap;">${x.part}</td>
                 <td>${participantCell(pp.caller)}</td>
                 <td>${participantCell(pp.callee)}</td>
                 <td>${clampCell(x.action)}</td>
                 <td>${clampCell(x.api)}</td>
                 <td>${clampCell(x.call)}</td>
                 <td>${x.tcCode ? `<span class="req-chip">${escapeHtml(x.tcCode)}</span>` : '<span class="empty-cell">—</span>'}</td>
-                <td>${escapeHtml(x.dynamic||"—")}</td>
+                <td style="white-space:nowrap;">${escapeHtml(x.dynamic||"—")}</td>
                 <td>
                   ${confirmed ? scenarioStatusBadge("confirmed") : scenarioStatusBadge(x.decision)}
                   ${x.mapped ? "" : `<div><span class="reset-link" data-action="uc-reset-part" data-id="${x.id}">Изменить</span></div>`}
@@ -11916,8 +11922,22 @@ function handleAction(action, el){
     case "open-uc-scenario-diagram": {
       const p = findProject(el.dataset.id);
       const u = findUseCase(p, el.dataset.uc);
-      state.sidePanel = {type:"uc-scenario-diagram", name: u.name, plantUml: buildUcPlantUml(u)};
+      const seq = buildUcSequenceData(u);
+      state.sidePanel = {type:"uc-scenario-diagram", name: u.name, lifelines: seq.lifelines, messages: seq.messages};
       render();
+      break;
+    }
+    case "download-uc-diagram": {
+      const svg = document.querySelector(".uc-diagram-scroll svg");
+      if(!svg){ showToast("Диаграмма не найдена"); break; }
+      const xml = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob(['<?xml version="1.0" standalone="no"?>\r\n'+xml], {type:"image/svg+xml"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "diagram.svg";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+      showToast("Диаграмма скачана");
       break;
     }
     case "open-uc-cj-link": {
