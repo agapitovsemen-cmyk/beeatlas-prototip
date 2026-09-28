@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260928-143627">
+<meta name="beeatlas-build" content="20260928-145613">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1174,6 +1174,10 @@
   .textarea{resize:vertical;min-height:110px;line-height:1.5;}
   .char-counter{font-size:12px;color:var(--text-tertiary);text-align:right;margin-top:var(--space-2);}
   .field-block{margin-bottom:var(--space-5);}
+  /* Визард импорта сценария: 32px между полями, 24px от чипсов режима до первого поля
+     (это уже margin-bottom чипов .pill-toggle по умолчанию) — плотнее вертикали здесь
+     не нужно, но это отдельный масштаб от остальных форм, поэтому переопределяем локально. */
+  .uc-step-setup .field-block{margin-bottom:var(--size-spacing-x8);}
   .field-with-icon{position:relative;}
   .field-with-icon svg{position:absolute;left:var(--space-4);top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-tertiary);}
   .field-with-icon .beeline-icons{position:absolute;left:var(--space-4);top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-tertiary);font-size:18px;}
@@ -8707,9 +8711,8 @@ function isHumanParticipant(name){
   return UC_HUMAN_MARKERS.some(m=>n.includes(m));
 }
 function participantCell(name){
-  const human = isHumanParticipant(name);
   const t = escapeHtml(name);
-  return `<div class="cell-clamp-wrap"><div class="cell-clamp">${t} <span class="badge ${human?"blue":"gray"} uc-role-badge">${human?"Человек":"Система"}</span></div><div class="cell-tooltip">${t}</div></div>`;
+  return `<div class="cell-clamp-wrap"><div class="cell-clamp">${t}</div><div class="cell-tooltip">${t}</div></div>`;
 }
 
 function UseCaseMetaRow(u, lastRun){
@@ -10518,12 +10521,7 @@ function UcWizardStepFooter(w){
     if(w.importing){
       return `<button class="btn btn-outline" data-action="uc-abort-import">Прервать импорт</button>`;
     }
-    const unresolvedCount = w.data.parts.filter(x=>!x.mapped && !x.decision).length;
-    const hint = unresolvedCount
-      ? `Осталось ${unresolvedCount} ${ruPlural(unresolvedCount,"часть","части","частей")} без решения`
-      : "Все части разрешены";
     return `
-      <span style="margin-right:auto;font-size:13px;color:var(--text-secondary);align-self:center;">${hint}</span>
       <button class="btn btn-outline" data-action="uc-wiz-restart">Переделать сценарий</button>
       <button class="btn btn-primary" data-action="uc-confirm-apply">Применить сценарий</button>
     `;
@@ -10535,16 +10533,14 @@ function UcStepSetup(w){
   const p = findProject(w.projectId);
   const d = w.data;
   return `
-    <div style="width:100%;max-width:909px;margin:0 auto;">
-      <h3 style="font-size:17px;margin:0 0 var(--space-5);">Данные UseCase</h3>
+    <div class="uc-step-setup" style="width:100%;max-width:909px;margin:0 auto;">
       <div class="pill-toggle">
         <div class="pill-item ${d.mode==="new"?"active":""}" data-action="uc-set-mode" data-mode="new">Новый сценарий</div>
         <div class="pill-item ${d.mode==="existing"?"active":""}" data-action="uc-set-mode" data-mode="existing">Существующий сценарий</div>
       </div>
       ${d.mode==="new" ? `
         <div class="field-block">
-          <label class="field-label">Название сценария</label>
-          <input class="input" id="ucWizName" placeholder="Например, Онлайн заказ: применение промокода" value="${escapeHtml(d.ucName)}"/>
+          <input class="input" id="ucWizName" placeholder="Название сценария" value="${escapeHtml(d.ucName)}"/>
         </div>
       ` : `
         <div class="field-block">
@@ -10590,8 +10586,7 @@ function UcStepSetup(w){
       </div>
 
       <div class="field-block">
-        <label class="field-label">PlantUml</label>
-        <textarea class="textarea" id="ucWizPlantUml" placeholder="@startuml ..." style="min-height:220px;font-family:ui-monospace,monospace;font-size:13px;">${escapeHtml(d.plantUml)}</textarea>
+        <textarea class="textarea" id="ucWizPlantUml" placeholder="PlantUml" style="min-height:220px;font-family:ui-monospace,monospace;font-size:13px;">${escapeHtml(d.plantUml)}</textarea>
       </div>
       <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-5);">Вставь текст диаграммы последовательности в нотации PlantUML. Используй названия систем/контейнеров, соответствующие существующим в ландшафте BeeAtlas — так части сценария будут сопоставлены автоматически.</p>
       <button class="btn btn-outline btn-sm" data-action="uc-fill-sample">Подставить пример</button>
@@ -10620,10 +10615,9 @@ function UcStepResult(w){
   const unresolvedParts = parts.filter(x=>!x.mapped && !x.decision);
   const resolvedParts = parts.filter(x=>x.mapped || x.decision);
   return `
-    <div style="width:100%;max-width:909px;margin:0 auto;">
+    <div style="width:100%;">
     ${UseCaseCjCard(preview)}
     <div class="section-head-row"><h2 style="margin:0;font-size:19px;line-height:24px;letter-spacing:.2px;font-weight:500;">Staging собрал сценарии из PlantUML</h2></div>
-    <p style="color:var(--text-secondary);font-size:15px;margin:calc(-1 * var(--space-2)) 0 var(--space-5);">${parts.length} вызовов: ${confirmedCount} подтверждены, ${unresolvedParts.length} требуют решения</p>
     <div class="uc-stat-cards">
       <div class="uc-stat-card"><div class="val">${confirmedCount}</div><div class="lbl"><span class="dot green"></span>Подтверждено</div></div>
       <div class="uc-stat-card"><div class="val">${plannedCount}</div><div class="lbl"><span class="dot gray"></span>Планируется</div></div>
@@ -10632,7 +10626,6 @@ function UcStepResult(w){
     ${resolvedParts.length ? `
       <div class="section-head-row" style="margin-bottom:var(--space-4);">
         <h3 style="margin:0;font-size:15px;">Смаппированные части</h3>
-        <span style="font-size:13px;color:var(--text-secondary);">подтверждены по канонической модели (is_current)</span>
       </div>
       <div class="table-wrap-fit" style="margin-bottom:var(--space-7);">
         <table class="fixed-table">
