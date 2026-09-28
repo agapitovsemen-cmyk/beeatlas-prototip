@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260928-134210">
+<meta name="beeatlas-build" content="20260928-135727">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -10398,9 +10398,7 @@ function hldFlowDoneMsg(type, r){
 /* ============================= WIZARD: ИМПОРТ USECASE ============================= */
 const UC_WIZARD_STEPS = [
   {key:"setup", label:"Данные сценария"},
-  {key:"import", label:"Процесс импорта"},
   {key:"result", label:"Разбор и решения"},
-  {key:"outcome", label:"Результат"},
 ];
 
 function startUcWizard(projectId){
@@ -10438,7 +10436,7 @@ function closeUcWizard(){
   const w = state.ucWizard;
   if(!w) return;
   const step = UC_WIZARD_STEPS[w.stepIndex].key;
-  if(step==="import" || step==="result" || step==="outcome") logUcInterruptedRun(w, step);
+  if(step==="result") logUcInterruptedRun(w, w.importing ? "import" : "result");
   if(w.timer) clearInterval(w.timer);
   state.ucWizard = null;
   render();
@@ -10453,13 +10451,11 @@ function logUcInterruptedRun(w, step){
   if(step==="import"){
     const runningStage = w.data.stages.find(s=>s.status==="running") || w.data.stages.slice().reverse().find(s=>s.status==="done") || w.data.stages[0];
     notices = ["Импорт прерван пользователем на этапе «" + runningStage.label + "»"];
-  } else if(step==="result"){
+  } else {
     const unresolvedCount = w.data.parts.filter(x=>!x.mapped && !x.decision).length;
     notices = [unresolvedCount
       ? `Импорт прерван пользователем на этапе «Разбор и решения» — ${unresolvedCount} ${ruPlural(unresolvedCount,"часть","части","частей")} без решения`
       : "Импорт прерван пользователем на этапе «Разбор и решения» до подтверждения применения"];
-  } else {
-    notices = ["Импорт прерван пользователем на этапе «Результат» до подтверждения применения сценария"];
   }
   p.ucImportRuns = p.ucImportRuns || [];
   p.ucImportRuns.push({
@@ -10502,9 +10498,7 @@ function UcWizardStepContent(w){
     return `<div class="search-loading" style="padding-top:var(--space-10);"><div class="spinner"></div><div>Обработка…</div></div>`;
   }
   if(step==="setup") return UcStepSetup(w);
-  if(step==="import") return UcStepImport(w);
-  if(step==="result") return UcStepResult(w);
-  if(step==="outcome") return UcStepOutcome(w);
+  if(step==="result") return w.importing ? UcStepImport(w) : UcStepResult(w);
   return "";
 }
 
@@ -10516,22 +10510,16 @@ function UcWizardStepFooter(w){
     const canGo = modeOk && w.data.plantUml.trim().length>0;
     return WizardFooter(null, "Импорт в Staging", "uc-wiz-to-import", !canGo);
   }
-  if(step==="import"){
-    return `<button class="btn btn-outline" data-action="uc-abort-import">Прервать импорт</button>`;
-  }
   if(step==="result"){
+    if(w.importing){
+      return `<button class="btn btn-outline" data-action="uc-abort-import">Прервать импорт</button>`;
+    }
     const unresolvedCount = w.data.parts.filter(x=>!x.mapped && !x.decision).length;
     const hint = unresolvedCount
       ? `Осталось ${unresolvedCount} ${ruPlural(unresolvedCount,"часть","части","частей")} без решения`
-      : "Все части разрешены — можно перейти к результату";
+      : "Все части разрешены";
     return `
       <span style="margin-right:auto;font-size:13px;color:var(--text-secondary);align-self:center;">${hint}</span>
-      <button class="btn btn-outline" data-action="uc-wiz-restart">Переделать сценарий</button>
-      <button class="btn btn-primary" data-action="uc-wiz-to-outcome" ${unresolvedCount?"disabled":""}>Далее</button>
-    `;
-  }
-  if(step==="outcome"){
-    return `
       <button class="btn btn-outline" data-action="uc-wiz-restart">Переделать сценарий</button>
       <button class="btn btn-primary" data-action="uc-confirm-apply">Применить сценарий</button>
     `;
@@ -10592,6 +10580,7 @@ function UcStepImport(w){
 }
 
 function UcStepResult(w){
+  const preview = ucPreviewFromWizard(w);
   const parts = w.data.parts;
   const mappedCount = parts.filter(x=>x.mapped).length;
   const manualConfirmedCount = parts.filter(x=>x.decision==="specified").length;
@@ -10601,6 +10590,8 @@ function UcStepResult(w){
   const resolvedParts = parts.filter(x=>x.mapped || x.decision);
   return `
     <div style="width:100%;max-width:1100px;">
+    ${UseCaseMetaRow(preview, null)}
+    ${UseCaseCjCard(preview)}
     <div class="section-head-row"><h2 style="margin:0;">Staging собрал сценарии из PlantUML</h2></div>
     <p style="color:var(--text-secondary);font-size:15px;margin:calc(-1 * var(--space-2)) 0 var(--space-5);">${parts.length} вызовов: ${confirmedCount} подтверждены, ${unresolvedParts.length} требуют решения</p>
     <div class="uc-stat-cards">
@@ -10746,25 +10737,6 @@ function ucPreviewFromWizard(w){
   };
 }
 
-function UcStepOutcome(w){
-  const preview = ucPreviewFromWizard(w);
-  return `
-    <div style="width:100%;max-width:1100px;">
-      <div class="page-title-row" style="margin-bottom:var(--space-4);">
-        <h1 style="font-size:26px;">${escapeHtml(preview.name)}</h1>
-        <span class="badge gray">Черновик</span>
-      </div>
-      ${UseCaseMetaRow(preview, null)}
-      ${UseCaseCjCard(preview)}
-
-      <div class="section">
-        <h2>Сценарии</h2>
-        ${UseCaseScenariosTable(preview)}
-      </div>
-    </div>
-  `;
-}
-
 function ucWizardRestart(){
   const w = state.ucWizard;
   w.data.parts = [];
@@ -10775,7 +10747,7 @@ function ucWizardRestart(){
 
 function ucWizardRunImport(){
   const w = state.ucWizard;
-  w.stepIndex = UC_WIZARD_STEPS.findIndex(s=>s.key==="import");
+  w.stepIndex = UC_WIZARD_STEPS.findIndex(s=>s.key==="result");
   w.data.stages = UC_IMPORT_STAGES.map(s=>Object.assign({status:"pending"}, s));
   w.data.stages[0].status = "running";
   w.importing = true;
@@ -10792,7 +10764,6 @@ function ucWizardRunImport(){
       w.timer = null;
       w.importing = false;
       w.data.parts = UC_IMPORT_PART_POOL.map((x,idx)=>Object.assign({id:uid("part"), part:"P-0"+(idx+1)}, x));
-      w.stepIndex = UC_WIZARD_STEPS.findIndex(s=>s.key==="result");
       render();
       setTimeout(bindTocScroll,30);
     }
@@ -10802,13 +10773,6 @@ function ucWizardRunImport(){
 function ucAbortImport(){
   closeUcWizard();
   showToast("Импорт прерван. Запуск сохранён в истории импорта");
-}
-
-function ucWizardGoOutcome(){
-  const w = state.ucWizard;
-  w.stepIndex = UC_WIZARD_STEPS.findIndex(s=>s.key==="outcome");
-  render();
-  setTimeout(bindTocScroll,30);
 }
 
 function ucConfirmApply(){
@@ -11975,7 +11939,7 @@ function handleAction(action, el){
     }
 
     case "close-uc-wizard": {
-      const wasActive = state.ucWizard && ["import","result","outcome"].includes(UC_WIZARD_STEPS[state.ucWizard.stepIndex].key);
+      const wasActive = state.ucWizard && UC_WIZARD_STEPS[state.ucWizard.stepIndex].key==="result";
       closeUcWizard();
       if(wasActive) showToast("Импорт прерван. Запуск сохранён в истории импорта");
       break;
@@ -11986,7 +11950,6 @@ function handleAction(action, el){
     case "uc-wiz-to-import": ucWizardRunImport(); break;
     case "uc-abort-import": ucAbortImport(); break;
     case "uc-wiz-restart": ucWizardRestart(); break;
-    case "uc-wiz-to-outcome": ucWizardGoOutcome(); break;
     case "uc-part-choice": {
       const part = state.ucWizard.data.parts.find(x=>x.id===el.dataset.id);
       if(part) part.choice = el.dataset.choice;
