@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260926-132605">
+<meta name="beeatlas-build" content="20260928-132729">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1683,20 +1683,6 @@
   .spinner{width:44px;height:44px;border-radius:50%;border:6px solid var(--color-divider);border-top-color:var(--yellow);animation:spin .8s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  .uc-stage-list{display:flex;flex-direction:column;}
-  .uc-stage{display:flex;align-items:center;gap:var(--size-spacing-x3);padding:var(--space-4) var(--space-1);}
-  /* ДС Stepper (vertical): номер 24×24, соединитель 2px */
-  .uc-stage-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto;border:1px solid var(--border);color:var(--text-secondary);position:relative;font-size:13px;line-height:16px;}
-  .uc-stage-icon svg{width:16px;height:16px;}
-  .uc-stage-icon .beeline-icons{width:16px;height:16px;font-size:16px;}
-  .uc-stage:not(:last-child) .uc-stage-icon::after{content:"";position:absolute;top:100%;left:50%;width:2px;height:var(--space-4);border-radius:var(--size-border-radius-x2);background:var(--border);transform:translateX(-50%);margin-top:8px;}
-  .uc-stage.done .uc-stage-icon{background:var(--color-status-success-background);border-color:var(--color-status-success);color:var(--color-status-success);}
-  .uc-stage.running .uc-stage-icon{border-color:var(--yellow);}
-  .uc-stage .mini-spinner{width:20px;height:20px;}
-  .uc-stage-label{font-size:15px;line-height:18px;letter-spacing:.2px;color:var(--text-tertiary);flex:1;}
-  .uc-stage-status{flex:0 0 auto;}
-  .uc-stage.running .uc-stage-label{color:var(--text);font-weight:500;}
-  .uc-stage.done .uc-stage-label{color:var(--text);}
 
   .uc-stat-cards{margin-bottom:var(--space-6);}
   .uc-stat-card{border:1px solid var(--border);border-radius:var(--size-border-radius-x6);padding:var(--size-spacing-x6);background:var(--bg);}
@@ -4506,18 +4492,9 @@ const UC_SCENARIOS_TEMPLATE = [
   {part:"P-03", participant:"app — pricing_service", action:"calc_price", api:"pricing_api", call:"POST /api/v1/price/calc", tcName:"Возможность расчёта стоимости", tcCode:"TC-114", dynamic:"SEQ-88", status:"confirmed"},
   {part:"P-04", participant:"app — order_service", action:"Приложение формирует заказ на основании содержимого корзины и рассчитанной стоимости. Сервис заказов проверяет остатки на складе, резервирует их и создаёт заказ со статусом «Новый», возвращая его идентификатор обратно в приложение.", api:"orders_api", call:"POST /api/v1/orders", tcName:"Возможность создания заказа", tcCode:"TC-142", dynamic:"SEQ-88", status:"confirmed"},
   {part:"P-05", participant:"order_service — billing", action:"reserve_payment", api:"billing_api", call:"POST /api/v1/payments/reserve", tcName:"Возможность резервирования оплаты", tcCode:"TC-150", dynamic:"SEQ-88", status:"confirmed"},
-  {part:"P-06", participant:"order_service — notification", action:"send_confirmation", api:"notify_api", call:"POST /api/v1/notify/send", tcName:"Возможность отправки уведомления", tcCode:"TC-163", status:"specified"},
+  {part:"P-06", participant:"order_service — notification", action:"send_confirmation", api:"notify_api", call:"POST /api/v1/notify/send", tcName:"Возможность отправки уведомления", tcCode:"TC-163", status:"confirmed"},
   {part:"P-07", participant:"app — order_service", action:"get_order_status", api:"orders_api", call:"GET /api/v1/orders/{id}", status:"planned"},
   {part:"P-08", participant:"order_service — loyalty_service", action:"apply_bonus_points", api:"loyalty_api", call:"POST /api/v1/loyalty/apply"},
-];
-
-const UC_INTERFACES_TEMPLATE = [
-  {name:"users_api", bc:"Личный кабинет", containerName:"ext_gateway", part:"P-01", check:"Не сверено"},
-  {name:"cart_api", bc:"Личный кабинет", containerName:"cart_service", part:"P-02", check:"Найден в архитектуре v2.4"},
-  {name:"pricing_api", bc:"Тарификация", containerName:"pricing_service", part:"P-03", check:"Не сверено"},
-  {name:"orders_api", bc:"Заказы", containerName:"order_service", part:"P-04", check:"Найден в архитектуре v1.9"},
-  {name:"billing_api", bc:"Биллинг", containerName:"billing", part:"P-05", check:"Не найден в архитектуре"},
-  {name:"notify_api", bc:"Уведомления", containerName:"notification", part:"P-06", check:"Не сверено"},
 ];
 
 /* pool of candidate parts produced by a simulated UC import run; some resolve
@@ -4531,6 +4508,10 @@ const UC_IMPORT_PART_POOL = [
   {mapped:false, participant:"order_service — fraud_check", action:"check_fraud_score", api:"fraud_api", call:"POST /api/v1/fraud/check", note:"Интерфейс «fraud_api» не описан ни в одной из известных систем"},
   {mapped:true, participant:"order_service — notification", action:"send_confirmation", api:"notify_api", call:"POST /api/v1/notify/send", tcName:"Возможность отправки уведомления", tcCode:"TC-163"},
 ];
+
+/* Приложения, которые уже рассматривались архитектором — руками выбираем только из них,
+   а не из произвольной мнемоники, см. решение по use-case импорту 2026-09-28 */
+const UC_APP_POOL = ["Личный кабинет","Тарификация","Заказы","Биллинг","Уведомления","Лояльность","CRM"];
 
 const CJ_STEP_POOL = [
   {code:"Step-00.00.02.08", name:"Пользователь оформляет заказ", cjCode:"CJ-0042", cjName:"Онлайн заказ: выбор и оплата"},
@@ -4580,7 +4561,6 @@ function makeUseCases(){
     cj:{code:"CJ-0042", name:"Онлайн заказ: выбор и оплата"},
     cjStep:{code:"Step-00.00.02.08", name:"Пользователь оформляет заказ"},
     scenarios: UC_SCENARIOS_TEMPLATE.map(s=>Object.assign({},s)),
-    interfaces: UC_INTERFACES_TEMPLATE.map(x=>Object.assign({},x)),
     rawPlantUml:"",
   }, x));
 }
@@ -4661,11 +4641,10 @@ const state = {
   ucStatusFilter:"Все",
   ucHistoryOpenId:null,
   ucWizard:null,
-  ucView:{scenarios:"table", interfaces:"table"},
 
   cjSearch:"",
   cjView:"grid",
-  ucView:"table",   // вид списка Use Case: "table" | "grid"
+  ucListView:"table",   // вид списка Use Case: "table" | "grid"
   projView:"table", // вид списка проектов: "table" | "grid"
   cjFiltersOpen:false,
   cjFilters:{withGrafana:false, product:"", status:"", format:"", channel:"", type:""},
@@ -8650,12 +8629,12 @@ function UseCaseTab(p){
       </div>
       <span class="reset-link" data-action="reset-uc-filters">Сбросить</span>
       <div class="view-toggle">
-        <button class="view-toggle-btn ${state.ucView==="grid"?"active":""}" data-action="uc-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
-        <button class="view-toggle-btn ${state.ucView==="table"?"active":""}" data-action="uc-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
+        <button class="view-toggle-btn ${state.ucListView==="grid"?"active":""}" data-action="uc-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
+        <button class="view-toggle-btn ${state.ucListView==="table"?"active":""}" data-action="uc-set-view" data-mode="table" title="Таблица">${icon("menu")}</button>
       </div>
     </div>
 
-    ${state.ucView==="grid" ? `
+    ${state.ucListView==="grid" ? `
       ${list.length ? `<div class="agents-grid-v2">${list.map(u=>UseCaseCard(p.id, u)).join("")}</div>`
         : `<div class="card empty-state" style="padding:var(--space-9) var(--space-5);">${boxIllustration()}<p style="color:var(--text-secondary);margin:0;">Ничего не нашлось. Измени фильтры или сбрось их</p></div>`}
     ` : `
@@ -8709,15 +8688,28 @@ function findUseCase(p, ucId){
 const UC_TOC = [
   {id:"cj", label:"Связь с CJ"},
   {id:"scenarios", label:"Сценарии"},
-  {id:"interfaces", label:"Плановые интерфейсы"},
   {id:"history", label:"История импорта"},
 ];
 
 function scenarioStatusBadge(status){
-  if(status==="specified") return '<span class="badge orange">Указан архитектором</span>';
   if(status==="planned") return '<span class="badge gray">Планируется</span>';
   if(status==="confirmed") return '<span class="badge green">Подтверждено</span>';
   return '<span class="badge red">Не смаппирован</span>';
+}
+
+function splitParticipant(str){
+  const parts = String(str||"").split(/\s*[—–]\s*/);
+  return {caller: parts[0]||"", callee: parts.length>1 ? parts[1] : (parts[0]||"")};
+}
+const UC_HUMAN_MARKERS = ["пользователь","user","клиент","оператор","актор","actor"];
+function isHumanParticipant(name){
+  const n = String(name||"").toLowerCase();
+  return UC_HUMAN_MARKERS.some(m=>n.includes(m));
+}
+function participantCell(name){
+  const human = isHumanParticipant(name);
+  const t = escapeHtml(name);
+  return `<div class="cell-clamp-wrap"><div class="cell-clamp">${t} <span class="badge ${human?"blue":"gray"} uc-role-badge">${human?"Человек":"Система"}</span></div><div class="cell-tooltip">${t}</div></div>`;
 }
 
 function UseCaseMetaRow(u, lastRun){
@@ -8766,100 +8758,25 @@ function UseCaseScenariosTable(u, projectId, ucId){
     <div class="table-wrap-fit">
       <table class="fixed-table">
         <colgroup>
-          <col style="width:6%"><col style="width:15%"><col style="width:23%">
-          <col style="width:19%"><col style="width:15%"><col style="width:8%"><col style="width:14%">
+          <col style="width:5%"><col style="width:13%"><col style="width:13%"><col style="width:20%">
+          <col style="width:16%"><col style="width:13%"><col style="width:7%"><col style="width:13%">
         </colgroup>
-        <thead><tr><th>Часть</th><th>Участник</th><th>Действие</th><th>Вызов</th><th>TC</th><th>Dynamyc</th><th>Статус вызова</th></tr></thead>
+        <thead><tr><th>Шаг</th><th>Вызывающий</th><th>Вызываемый</th><th>Действие</th><th>Вызов</th><th>TC</th><th>Dynamyc</th><th>Статус вызова</th></tr></thead>
         <tbody>
-          ${u.scenarios.map(s=>`
+          ${u.scenarios.map(s=>{
+            const pp = splitParticipant(s.participant);
+            return `
             <tr>
               <td>${escapeHtml(s.part)}</td>
-              <td>${clampCell(s.participant)}</td>
+              <td>${participantCell(pp.caller)}</td>
+              <td>${participantCell(pp.callee)}</td>
               <td>${clampCell(s.action, "clamp-5")}</td>
               <td>${scenarioCallCell(s, projectId, ucId)}</td>
               <td>${s.tcName ? clampNameCell(s.tcName, s.tcCode) : '<span class="empty-cell">—</span>'}</td>
               <td>${scenarioDynamicCell(s, projectId, ucId)}</td>
               <td>${scenarioStatusBadge(s.status)}</td>
             </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-function UcViewToggle(section, mode){
-  return `
-    <div class="view-toggle">
-      <button class="view-toggle-btn ${mode==="table"?"active":""}" data-action="set-uc-view" data-section="${section}" data-mode="table" title="Табличный вид">${icon("menu")}</button>
-      <button class="view-toggle-btn ${mode==="card"?"active":""}" data-action="set-uc-view" data-section="${section}" data-mode="card" title="Карточный вид">${icon("grid")}</button>
-    </div>
-  `;
-}
-
-function UseCaseScenariosCards(u, projectId, ucId){
-  return `
-    <div class="req-card-grid">
-      ${u.scenarios.map(s=>`
-        <div class="card">
-          <div class="uc-card-head">
-            <span class="req-name">${escapeHtml(s.part)}</span>
-            ${scenarioStatusBadge(s.status)}
-          </div>
-          <div class="uc-card-body">
-            <div><div class="field-label">Участник</div><div>${escapeHtml(s.participant)}</div></div>
-            <div><div class="field-label">Действие</div><div style="color:var(--text-secondary);font-size:15px;line-height:18px;">${escapeHtml(s.action)}</div></div>
-            <div><div class="field-label">Вызов</div>${scenarioCallCell(s, projectId, ucId)}</div>
-            <div><div class="field-label">TC</div>${s.tcName ? clampNameCell(s.tcName, s.tcCode) : '<span class="empty-cell">—</span>'}</div>
-            <div><div class="field-label">Dynamyc</div>${scenarioDynamicCell(s, projectId, ucId)}</div>
-          </div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function UseCaseInterfacesCards(u){
-  if(!u.interfaces || !u.interfaces.length){
-    return `<div class="card empty-state" style="padding:var(--space-8) var(--space-5);"><p style="color:var(--text-secondary);margin:0;">Плановые интерфейсы не добавлены</p></div>`;
-  }
-  return `
-    <div class="req-card-grid">
-      ${u.interfaces.map(x=>`
-        <div class="card">
-          <div class="uc-card-head">
-            <span class="req-name">${escapeHtml(x.name)}</span>
-            ${interfaceCheckBadge(x.check)}
-          </div>
-          <div class="uc-card-body">
-            <div><div class="field-label">Продукт</div><div>${x.bc?escapeHtml(x.bc):'<span class="empty-cell">—</span>'}</div></div>
-            <div><div class="field-label">Контейнер</div><div>${x.containerName?escapeHtml(x.containerName):'<span class="empty-cell">—</span>'}</div></div>
-            <div><div class="field-label">Часть</div><div>${escapeHtml(x.part)}</div></div>
-          </div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function UseCaseInterfacesTable(u){
-  return `
-    <div class="table-wrap-fit">
-      <table class="fixed-table">
-        <colgroup>
-          <col style="width:26%"><col style="width:16%"><col style="width:26%"><col style="width:12%"><col style="width:20%">
-        </colgroup>
-        <thead><tr><th>Интерфейс</th><th>Продукт</th><th>Контейнер</th><th>Часть</th><th>Сверка</th></tr></thead>
-        <tbody>
-          ${(u.interfaces&&u.interfaces.length) ? u.interfaces.map(x=>`
-            <tr>
-              <td>${clampCell(x.name)}</td>
-              <td>${x.bc?escapeHtml(x.bc):'<span class="empty-cell">—</span>'}</td>
-              <td>${x.containerName?clampCell(x.containerName):'<span class="empty-cell">—</span>'}</td>
-              <td>${escapeHtml(x.part)}</td>
-              <td>${interfaceCheckBadge(x.check)}</td>
-            </tr>
-          `).join("") : `<tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Плановые интерфейсы не добавлены</td></tr>`}
+          `;}).join("")}
         </tbody>
       </table>
     </div>
@@ -8911,6 +8828,44 @@ function UcDynamicPanel(){
   `;
 }
 
+function ucPumlAlias(name){
+  return "p_" + String(name||"").replace(/[^a-zA-Zа-яА-Я0-9]+/g,"_").slice(0,24);
+}
+function buildUcPlantUml(u){
+  const participants = [];
+  const seen = new Set();
+  u.scenarios.forEach(s=>{
+    const pp = splitParticipant(s.participant);
+    [pp.caller, pp.callee].forEach(name=>{
+      if(name && !seen.has(name)){ seen.add(name); participants.push(name); }
+    });
+  });
+  const lines = ["@startuml"];
+  participants.forEach(name=>{
+    lines.push(`${isHumanParticipant(name)?"actor":"participant"} "${name}" as ${ucPumlAlias(name)}`);
+  });
+  u.scenarios.forEach(s=>{
+    const pp = splitParticipant(s.participant);
+    lines.push(`${ucPumlAlias(pp.caller)} -> ${ucPumlAlias(pp.callee)}: ${s.action}`);
+  });
+  lines.push("@enduml");
+  return lines.join("\n");
+}
+
+function UcScenarioDiagramPanel(){
+  const sp = state.sidePanel;
+  return `
+    <div class="side-head"><h2>Диаграмма сценария «${escapeHtml(sp.name)}»</h2><button class="wizard-close" data-action="close-side">${icon("x")}</button></div>
+    <div class="side-body">
+      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-4);">Диаграмма последовательности вызовов по данным сценария (не исходный PlantUML, а то, что получилось после разбора), в нотации PlantUML</p>
+      <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:13px;line-height:22px;overflow-x:auto;white-space:pre;">${escapeHtml(sp.plantUml||"—")}</pre>
+    </div>
+    <div class="side-foot">
+      <button class="btn btn-outline" data-action="close-side">Закрыть</button>
+    </div>
+  `;
+}
+
 function UcCjLinkPanel(){
   const sp = state.sidePanel;
   return `
@@ -8929,43 +8884,6 @@ function UcCjLinkPanel(){
       <button class="btn btn-primary" data-action="save-uc-cj-link">Сохранить</button>
     </div>
   `;
-}
-
-function interfaceCheckBadge(check){
-  if(check==="Не сверено") return '<span class="badge gray">Не сверено</span>';
-  if(check==="Не найден в архитектуре") return '<span class="badge red">Не найден в архитектуре</span>';
-  return '<span class="badge green">'+escapeHtml(check)+'</span>';
-}
-
-function ucVerifyInterfaces(pid, ucId){
-  const p = findProject(pid);
-  const u = findUseCase(p, ucId);
-  if(!u || !u.interfaces || !u.interfaces.length){
-    showToast("Нет плановых интерфейсов для сверки");
-    return;
-  }
-  u.verifying = true;
-  render();
-  setTimeout(()=>{
-    let foundCount = 0;
-    u.interfaces.forEach((iface, i)=>{
-      if(iface.check !== "Не сверено") return;
-      if(i % 2 === 0){
-        iface.check = "Найден в архитектуре v2." + (4 + i);
-        foundCount++;
-        const scenario = u.scenarios.find(s=>s.api===iface.name && s.part===iface.part);
-        if(scenario) scenario.status = "confirmed";
-      } else {
-        iface.check = "Не найден в архитектуре";
-      }
-    });
-    u.verifying = false;
-    render();
-    setTimeout(bindTocScroll, 30);
-    showToast(foundCount>0
-      ? `Сверка завершена: ${foundCount} из ${u.interfaces.length} интерфейсов найдено в продуктовых архитектурах`
-      : "Сверка завершена: совпадений с продуктовыми архитектурами не найдено");
-  }, 900);
 }
 
 function ucImportRuns(p, code){
@@ -9009,20 +8927,12 @@ function UseCaseDetailPage(projectId, ucId){
         <div class="section" id="sec-scenarios">
           <div class="section-head-row">
             <h2 style="margin:0;">Сценарии</h2>
-            ${UcViewToggle("scenarios", state.ucView.scenarios)}
-          </div>
-          ${state.ucView.scenarios==="card" ? UseCaseScenariosCards(u, p.id, u.id) : UseCaseScenariosTable(u, p.id, u.id)}
-        </div>
-
-        <div class="section" id="sec-interfaces">
-          <div class="section-head-row">
-            <h2 style="margin:0;">Плановые интерфейсы</h2>
-            <div style="display:flex;align-items:center;gap:var(--space-4);">
-              ${UcViewToggle("interfaces", state.ucView.interfaces)}
-              <button class="btn btn-outline btn-sm" data-action="uc-verify-interfaces" data-id="${p.id}" data-uc="${u.id}" ${(!u.interfaces||!u.interfaces.length||u.verifying)?"disabled":""}>${u.verifying?"Сверяется…":"Сверка"}</button>
+            <div class="view-toggle">
+              <button class="view-toggle-btn active" title="Табличный вид">${icon("menu")}</button>
+              <button class="view-toggle-btn" data-action="open-uc-scenario-diagram" data-id="${p.id}" data-uc="${u.id}" title="Открыть диаграмму (PlantUML)">${icon("flow")}</button>
             </div>
           </div>
-          ${state.ucView.interfaces==="card" ? UseCaseInterfacesCards(u) : UseCaseInterfacesTable(u)}
+          ${UseCaseScenariosTable(u, p.id, u.id)}
         </div>
 
         <div class="section" id="sec-history">
@@ -10512,6 +10422,7 @@ function startUcWizard(projectId){
       plantUml:"",
       stages: UC_IMPORT_STAGES.map(s=>Object.assign({status:"pending"}, s)),
       parts: [],
+      appOverrides: {},
     },
   };
   render();
@@ -10670,25 +10581,13 @@ function UcStepSetup(w){
   `;
 }
 
-function ucStageStatusPill(status){
-  if(status==="done") return '<span class="badge green">Готово</span>';
-  if(status==="running") return '<span class="badge blue">В процессе</span>';
-  return '<span class="badge gray">Не начат</span>';
-}
-
 function UcStepImport(w){
+  const running = w.data.stages.find(s=>s.status==="running");
   return `
-    <div style="width:100%;max-width:760px;">
-      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-6);">Процесс можно прервать в любой момент — уже сохранённые данные останутся доступны в истории импорта</p>
-      <div class="uc-stage-list">
-        ${w.data.stages.map(s=>`
-          <div class="uc-stage ${s.status}">
-            <div class="uc-stage-icon">${s.status==="done" ? icon("check") : s.status==="running" ? '<div class="mini-spinner"></div>' : "—"}</div>
-            <div class="uc-stage-label">${escapeHtml(s.label)}</div>
-            <div class="uc-stage-status">${ucStageStatusPill(s.status)}</div>
-          </div>
-        `).join("")}
-      </div>
+    <div class="search-loading" style="padding-top:var(--space-10);">
+      <div class="spinner"></div>
+      <div>${running ? escapeHtml(running.label) : "Импорт сценария…"}</div>
+      <p style="color:var(--text-secondary);font-size:15px;text-align:center;max-width:420px;margin:0;">Процесс можно прервать в любой момент — уже сохранённые данные останутся доступны в истории импорта</p>
     </div>
   `;
 }
@@ -10696,20 +10595,21 @@ function UcStepImport(w){
 function UcStepResult(w){
   const parts = w.data.parts;
   const mappedCount = parts.filter(x=>x.mapped).length;
-  const specifiedCount = parts.filter(x=>x.decision==="specified").length;
+  const manualConfirmedCount = parts.filter(x=>x.decision==="specified").length;
+  const confirmedCount = mappedCount + manualConfirmedCount;
   const plannedCount = parts.filter(x=>x.decision==="planned").length;
   const unresolvedParts = parts.filter(x=>!x.mapped && !x.decision);
   const resolvedParts = parts.filter(x=>x.mapped || x.decision);
   return `
     <div style="width:100%;max-width:1100px;">
     <div class="section-head-row"><h2 style="margin:0;">Staging собрал сценарии из PlantUML</h2></div>
-    <p style="color:var(--text-secondary);font-size:15px;margin:calc(-1 * var(--space-2)) 0 var(--space-5);">${parts.length} вызовов: ${mappedCount} подтверждены, ${specifiedCount} указано архитектором, ${unresolvedParts.length} требуют решения</p>
+    <p style="color:var(--text-secondary);font-size:15px;margin:calc(-1 * var(--space-2)) 0 var(--space-5);">${parts.length} вызовов: ${confirmedCount} подтверждены, ${unresolvedParts.length} требуют решения</p>
     <div class="uc-stat-cards">
-      <div class="uc-stat-card"><div class="val">${mappedCount}</div><div class="lbl"><span class="dot green"></span>Подтверждено</div></div>
-      <div class="uc-stat-card"><div class="val">${specifiedCount}</div><div class="lbl"><span class="dot blue"></span>Указан архитектором</div></div>
+      <div class="uc-stat-card"><div class="val">${confirmedCount}</div><div class="lbl"><span class="dot green"></span>Подтверждено</div></div>
       <div class="uc-stat-card"><div class="val">${plannedCount}</div><div class="lbl"><span class="dot gray"></span>Планируется</div></div>
       <div class="uc-stat-card"><div class="val">${unresolvedParts.length}</div><div class="lbl"><span class="dot orange"></span>Требуют решения</div></div>
     </div>
+    ${UcAppRecognitionBlock(w)}
     ${resolvedParts.length ? `
       <div class="section-head-row" style="margin-bottom:var(--space-4);">
         <h3 style="margin:0;font-size:15px;">Смаппированные части</h3>
@@ -10718,26 +10618,30 @@ function UcStepResult(w){
       <div class="table-wrap-fit" style="margin-bottom:var(--space-7);">
         <table class="fixed-table">
           <colgroup>
-            <col style="width:6%"><col style="width:15%"><col style="width:13%"><col style="width:11%">
-            <col style="width:17%"><col style="width:14%"><col style="width:8%"><col style="width:16%">
+            <col style="width:4%"><col style="width:11%"><col style="width:11%"><col style="width:13%">
+            <col style="width:10%"><col style="width:15%"><col style="width:12%"><col style="width:7%"><col style="width:17%">
           </colgroup>
-          <thead><tr><th>Часть</th><th>Участники</th><th>Действие</th><th>API</th><th>Вызов</th><th>TC</th><th>Dynamic</th><th>Статус</th></tr></thead>
+          <thead><tr><th>Шаг</th><th>Вызывающий</th><th>Вызываемый</th><th>Действие</th><th>API</th><th>Вызов</th><th>TC</th><th>Dynamic</th><th>Статус</th></tr></thead>
           <tbody>
-            ${resolvedParts.map(x=>`
+            ${resolvedParts.map(x=>{
+              const pp = splitParticipant(x.participant);
+              const confirmed = x.mapped || x.decision==="specified";
+              return `
               <tr>
                 <td>${x.part}</td>
-                <td>${clampCell(x.participant)}</td>
+                <td>${participantCell(pp.caller)}</td>
+                <td>${participantCell(pp.callee)}</td>
                 <td>${clampCell(x.action)}</td>
                 <td>${clampCell(x.api)}</td>
                 <td>${clampCell(x.call)}</td>
                 <td>${x.tcCode ? `<span class="req-chip">${escapeHtml(x.tcCode)}</span>` : '<span class="empty-cell">—</span>'}</td>
                 <td>${escapeHtml(x.dynamic||"—")}</td>
                 <td>
-                  ${x.mapped ? scenarioStatusBadge("confirmed") : scenarioStatusBadge(x.decision)}
+                  ${confirmed ? scenarioStatusBadge("confirmed") : scenarioStatusBadge(x.decision)}
                   ${x.mapped ? "" : `<div><span class="reset-link" data-action="uc-reset-part" data-id="${x.id}">Изменить</span></div>`}
                 </td>
               </tr>
-            `).join("")}
+            `;}).join("")}
           </tbody>
         </table>
       </div>
@@ -10752,7 +10656,6 @@ function UcStepResult(w){
 }
 
 function ucPartCanSave(x){
-  if(x.choice==="redo") return true;
   if(x.choice==="specified") return !!((x.bc||"").trim() && (x.containerName||"").trim() && (x.interfaceCode||"").trim());
   if(x.choice==="planned") return !!((x.bc||"").trim() && (x.containerName||"").trim() && (x.interfaceCode||"").trim() && (x.protocol||"").trim());
   return false;
@@ -10770,10 +10673,6 @@ function UcUnmappedPartCard(x){
       <div class="row-sub" style="margin-bottom:var(--space-4);">${escapeHtml(x.note||"")}</div>
 
       <div class="uc-choice-group">
-        <label class="uc-choice ${choice==="redo"?"active":""}">
-          <input type="radio" name="uc-choice-${x.id}" data-action="uc-part-choice" data-id="${x.id}" data-choice="redo" ${choice==="redo"?"checked":""}/>
-          <div><b>Переделать сценарий</b><div class="row-sub">Правлю PlantUML и запускаю импорт заново</div></div>
-        </label>
         <label class="uc-choice ${choice==="specified"?"active":""}">
           <input type="radio" name="uc-choice-${x.id}" data-action="uc-part-choice" data-id="${x.id}" data-choice="specified" ${choice==="specified"?"checked":""}/>
           <div><b>Указать существующие</b><div class="row-sub">Смаппить на интерфейс/контейнер из ландшафта</div></div>
@@ -10787,8 +10686,8 @@ function UcUnmappedPartCard(x){
       ${showFields ? `
         <div class="uc-field-grid">
           <div class="field-block">
-            <label class="field-label">Продукт (мнемоника)</label>
-            <input class="input" id="pf-bc-${x.id}" data-part-field="bc" data-id="${x.id}" placeholder="Например, LOY" value="${escapeHtml(x.bc||"")}"/>
+            <label class="field-label">Приложение</label>
+            ${DsSelect({id:`ucpf-app-${x.id}`, value:x.bc||"", placeholder:"Выбрать приложение", options:UC_APP_POOL, action:"uc-part-set-app", dataAttrs:{id:x.id}})}
           </div>
           <div class="field-block">
             <label class="field-label">Контейнер / интерфейс</label>
@@ -10807,11 +10706,57 @@ function UcUnmappedPartCard(x){
             </div>
           ` : ""}
         </div>
+        ${choice==="planned" ? `
+          <div class="field-block" style="margin-top:var(--space-4);">
+            <label class="field-label">Требования к методу</label>
+            <textarea class="textarea" id="pf-requirements-${x.id}" data-part-field="requirements" data-id="${x.id}" placeholder="Что должен принимать и возвращать метод, какие атрибуты нужны" style="min-height:80px;">${escapeHtml(x.requirements||"")}</textarea>
+          </div>
+        ` : ""}
       ` : ""}
 
       <div class="uc-card-foot">
         <button class="btn btn-primary btn-sm" data-action="uc-save-part-decision" data-id="${x.id}" ${ucPartCanSave(x)?"":"disabled"}>Сохранить решение</button>
       </div>
+    </div>
+  `;
+}
+
+/* Распознанные системы-участники по всей диаграмме — аналог блока распознанных систем
+   в импорте Юттуе, но с ручным сопоставлением для тех, что не нашлись в ландшафте */
+function ucDerivedAppRecognition(parts, overrides){
+  const map = new Map();
+  parts.forEach(x=>{
+    const pp = splitParticipant(x.participant);
+    [pp.caller, pp.callee].forEach(name=>{
+      if(!name || isHumanParticipant(name)) return;
+      const cur = map.get(name) || {name, found:false};
+      if(x.mapped) cur.found = true;
+      map.set(name, cur);
+    });
+  });
+  return Array.from(map.values()).map(a=>({...a, override: (overrides||{})[a.name] || null}));
+}
+
+function UcAppRecognitionBlock(w){
+  const apps = ucDerivedAppRecognition(w.data.parts, w.data.appOverrides);
+  if(!apps.length) return "";
+  return `
+    <div class="section-head-row" style="margin-bottom:var(--space-4);">
+      <h3 style="margin:0;font-size:15px;">Распознанные приложения</h3>
+      <span style="font-size:13px;color:var(--text-secondary);">систем-участников: ${apps.length}</span>
+    </div>
+    <div class="qlist-box" style="margin-bottom:var(--space-7);">
+      ${apps.map(a=>`
+        <div class="qlist-item">
+          <div class="q-label">${escapeHtml(a.name)}</div>
+          ${a.found || a.override
+            ? `<span class="badge green">${a.override ? "Найдено (указано вручную): "+escapeHtml(a.override) : "Найдено в ландшафте"}</span>`
+            : `<div style="display:flex;align-items:center;gap:var(--space-3);">
+                <span class="badge red">Не распознано</span>
+                ${DsSelect({id:`ucapp-${a.name}`, value:"", placeholder:"Указать систему вручную", options:TC_SYSTEM_POOL, action:"uc-app-override", dataAttrs:{name:a.name}})}
+              </div>`}
+        </div>
+      `).join("")}
     </div>
   `;
 }
@@ -10824,16 +10769,9 @@ function ucDerivedScenarios(parts){
       tcName: x.mapped ? x.tcName : (x.tcName || null),
       tcCode: x.mapped ? x.tcCode : (x.tcCode || null),
       dynamic: x.mapped ? x.dynamicCode : (x.dynamic || null),
-      status: x.mapped ? "confirmed" : x.decision,
+      status: (x.mapped || x.decision==="specified") ? "confirmed" : x.decision,
     };
   });
-}
-
-function ucDerivedPlannedInterfaces(parts){
-  return parts.filter(x=>x.decision==="planned").map(x=>({
-    name: x.api, part: x.part, check:"Не сверено",
-    bc: x.bc || null, containerName: x.containerName || null, interfaceCode: x.interfaceCode || null, protocol: x.protocol || null,
-  }));
 }
 
 function ucPreviewFromWizard(w){
@@ -10847,7 +10785,6 @@ function ucPreviewFromWizard(w){
     cj: stepMeta ? {code:stepMeta.cjCode, name:stepMeta.cjName} : {code:"—", name:"Без привязки к CJ"},
     cjStep: stepMeta ? {code:stepMeta.code, name:stepMeta.name} : {code:"—", name:"—"},
     scenarios: ucDerivedScenarios(d.parts),
-    interfaces: (d.mode==="existing" && existing ? (existing.interfaces||[]) : []).concat(ucDerivedPlannedInterfaces(d.parts)),
   };
 }
 
@@ -10862,14 +10799,9 @@ function UcStepOutcome(w){
       ${UseCaseMetaRow(preview, null)}
       ${UseCaseCjCard(preview)}
 
-      <div class="section" style="margin-bottom:var(--space-6);">
+      <div class="section">
         <h2>Сценарии</h2>
         ${UseCaseScenariosTable(preview)}
-      </div>
-
-      <div class="section">
-        <h2>Плановые интерфейсы</h2>
-        ${UseCaseInterfacesTable(preview)}
       </div>
     </div>
   `;
@@ -10879,6 +10811,7 @@ function ucWizardRestart(){
   const w = state.ucWizard;
   w.data.parts = [];
   w.data.stages = UC_IMPORT_STAGES.map(s=>Object.assign({status:"pending"}, s));
+  w.data.appOverrides = {};
   w.stepIndex = UC_WIZARD_STEPS.findIndex(s=>s.key==="setup");
   render();
 }
@@ -10928,7 +10861,6 @@ function ucConfirmApply(){
   const stepMeta = d.cjStepCode ? CJ_STEP_POOL.find(s=>s.code===d.cjStepCode) : null;
 
   const scenarios = ucDerivedScenarios(d.parts);
-  const newInterfaces = ucDerivedPlannedInterfaces(d.parts);
 
   const notices = d.parts.filter(x=>!x.mapped).map(x=>{
     if(x.decision==="specified") return `${x.part}: указан существующий интерфейс архитектором (${x.api})`;
@@ -10941,7 +10873,6 @@ function ucConfirmApply(){
   if(d.mode==="existing"){
     uc = findUseCase(p, d.existingUcId);
     uc.scenarios = scenarios;
-    uc.interfaces = (uc.interfaces||[]).concat(newInterfaces);
     uc.updated = NOW_DATE;
     uc.rawPlantUml = d.plantUml;
     if(stepMeta){ uc.cj = {code:stepMeta.cjCode, name:stepMeta.cjName}; uc.cjStep = {code:stepMeta.code, name:stepMeta.name}; }
@@ -10953,7 +10884,7 @@ function ucConfirmApply(){
       updated: NOW_DATE,
       cj: stepMeta ? {code:stepMeta.cjCode, name:stepMeta.cjName} : {code:"—", name:"Без привязки к CJ"},
       cjStep: stepMeta ? {code:stepMeta.code, name:stepMeta.name} : {code:"—", name:"—"},
-      scenarios, interfaces:newInterfaces, rawPlantUml:d.plantUml,
+      scenarios, rawPlantUml:d.plantUml,
     };
     p.useCases = p.useCases || [];
     p.useCases.unshift(uc);
@@ -11358,6 +11289,7 @@ function SidePanelWrap(){
   else if(sp.type==="publish") inner = PublishPanel();
   else if(sp.type==="usecase") inner = UsecasePanel();
   else if(sp.type==="uc-dynamic") inner = UcDynamicPanel();
+  else if(sp.type==="uc-scenario-diagram") inner = UcScenarioDiagramPanel();
   else if(sp.type==="uc-cj-link") inner = UcCjLinkPanel();
   else if(sp.type && sp.type.indexOf("hld-")===0) inner = HldFlowPanel();
   const enterCls = sp._entered ? "" : " enter";
@@ -11777,7 +11709,7 @@ function handleAction(action, el){
       render();
       break;
     case "cj-set-view": state.cjView = el.dataset.mode; render(); break;
-    case "uc-set-view": state.ucView = el.dataset.mode; render(); break;
+    case "uc-set-view": state.ucListView = el.dataset.mode; render(); break;
     case "proj-set-view": state.projView = el.dataset.mode; render(); break;
     case "cj-open-filters": state.cjFiltersOpen = true; render(); break;
     case "cj-close-filters": state.cjFiltersOpen = false; render(); break;
@@ -12035,14 +11967,19 @@ function handleAction(action, el){
     }
     case "reset-uc-filters": state.ucSearch=""; state.ucSourceFilter="Все"; state.ucStatusFilter="Все"; render(); break;
     case "noop-uc-edit": showToast("Редактирование Use Case не входит в состав переданных макетов"); break;
-    case "uc-verify-interfaces": ucVerifyInterfaces(el.dataset.id, el.dataset.uc); break;
-    case "set-uc-view": state.ucView[el.dataset.section] = el.dataset.mode; render(); break;
     case "open-hub-interface": showToast(`Переход в карточку интерфейса «${el.dataset.call}» в Хабе приложений — вне периметра прототипа`); break;
     case "open-uc-dynamic": {
       const p = findProject(el.dataset.id);
       const u = findUseCase(p, el.dataset.uc);
       const s = u.scenarios.find(x=>x.part===el.dataset.part);
       state.sidePanel = {type:"uc-dynamic", seq: s.dynamic, plantUml: u.rawPlantUml || UC_SAMPLE_PLANTUML};
+      render();
+      break;
+    }
+    case "open-uc-scenario-diagram": {
+      const p = findProject(el.dataset.id);
+      const u = findUseCase(p, el.dataset.uc);
+      state.sidePanel = {type:"uc-scenario-diagram", name: u.name, plantUml: buildUcPlantUml(u)};
       render();
       break;
     }
@@ -12098,14 +12035,18 @@ function handleAction(action, el){
       if(part) part.choice = el.dataset.choice;
       render(); break;
     }
+    case "uc-part-set-app": {
+      const part = state.ucWizard.data.parts.find(x=>x.id===el.dataset.id);
+      if(part) part.bc = el.dataset.value;
+      state.popover = null; render(); break;
+    }
+    case "uc-app-override": {
+      state.ucWizard.data.appOverrides[el.dataset.name] = el.dataset.value;
+      state.popover = null; render(); break;
+    }
     case "uc-save-part-decision": {
       const part = state.ucWizard.data.parts.find(x=>x.id===el.dataset.id);
       if(!part || !ucPartCanSave(part)) break;
-      if(part.choice==="redo"){
-        ucWizardRestart();
-        showToast("Отредактируй PlantUML и запусти импорт заново");
-        break;
-      }
       part.decision = part.choice;
       if(part.decision==="specified"){
         part.tcName = "Уточнено архитектором: " + part.api;
@@ -12122,7 +12063,7 @@ function handleAction(action, el){
       const part = state.ucWizard.data.parts.find(x=>x.id===el.dataset.id);
       if(part){
         part.decision=null; part.choice=null; part.tcName=null; part.tcCode=null; part.dynamic=null;
-        part.bc=null; part.containerName=null; part.interfaceCode=null; part.protocol=null;
+        part.bc=null; part.containerName=null; part.interfaceCode=null; part.protocol=null; part.requirements=null;
       }
       render(); break;
     }
