@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260928-132729">
+<meta name="beeatlas-build" content="20260928-134210">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -10422,7 +10422,6 @@ function startUcWizard(projectId){
       plantUml:"",
       stages: UC_IMPORT_STAGES.map(s=>Object.assign({status:"pending"}, s)),
       parts: [],
-      appOverrides: {},
     },
   };
   render();
@@ -10609,7 +10608,6 @@ function UcStepResult(w){
       <div class="uc-stat-card"><div class="val">${plannedCount}</div><div class="lbl"><span class="dot gray"></span>Планируется</div></div>
       <div class="uc-stat-card"><div class="val">${unresolvedParts.length}</div><div class="lbl"><span class="dot orange"></span>Требуют решения</div></div>
     </div>
-    ${UcAppRecognitionBlock(w)}
     ${resolvedParts.length ? `
       <div class="section-head-row" style="margin-bottom:var(--space-4);">
         <h3 style="margin:0;font-size:15px;">Смаппированные части</h3>
@@ -10721,46 +10719,6 @@ function UcUnmappedPartCard(x){
   `;
 }
 
-/* Распознанные системы-участники по всей диаграмме — аналог блока распознанных систем
-   в импорте Юттуе, но с ручным сопоставлением для тех, что не нашлись в ландшафте */
-function ucDerivedAppRecognition(parts, overrides){
-  const map = new Map();
-  parts.forEach(x=>{
-    const pp = splitParticipant(x.participant);
-    [pp.caller, pp.callee].forEach(name=>{
-      if(!name || isHumanParticipant(name)) return;
-      const cur = map.get(name) || {name, found:false};
-      if(x.mapped) cur.found = true;
-      map.set(name, cur);
-    });
-  });
-  return Array.from(map.values()).map(a=>({...a, override: (overrides||{})[a.name] || null}));
-}
-
-function UcAppRecognitionBlock(w){
-  const apps = ucDerivedAppRecognition(w.data.parts, w.data.appOverrides);
-  if(!apps.length) return "";
-  return `
-    <div class="section-head-row" style="margin-bottom:var(--space-4);">
-      <h3 style="margin:0;font-size:15px;">Распознанные приложения</h3>
-      <span style="font-size:13px;color:var(--text-secondary);">систем-участников: ${apps.length}</span>
-    </div>
-    <div class="qlist-box" style="margin-bottom:var(--space-7);">
-      ${apps.map(a=>`
-        <div class="qlist-item">
-          <div class="q-label">${escapeHtml(a.name)}</div>
-          ${a.found || a.override
-            ? `<span class="badge green">${a.override ? "Найдено (указано вручную): "+escapeHtml(a.override) : "Найдено в ландшафте"}</span>`
-            : `<div style="display:flex;align-items:center;gap:var(--space-3);">
-                <span class="badge red">Не распознано</span>
-                ${DsSelect({id:`ucapp-${a.name}`, value:"", placeholder:"Указать систему вручную", options:TC_SYSTEM_POOL, action:"uc-app-override", dataAttrs:{name:a.name}})}
-              </div>`}
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
 function ucDerivedScenarios(parts){
   return parts.map(x=>{
     if(x.mapped && !x.dynamicCode) x.dynamicCode = "SEQ-" + Math.floor(10+Math.random()*89);
@@ -10811,7 +10769,6 @@ function ucWizardRestart(){
   const w = state.ucWizard;
   w.data.parts = [];
   w.data.stages = UC_IMPORT_STAGES.map(s=>Object.assign({status:"pending"}, s));
-  w.data.appOverrides = {};
   w.stepIndex = UC_WIZARD_STEPS.findIndex(s=>s.key==="setup");
   render();
 }
@@ -12038,10 +11995,6 @@ function handleAction(action, el){
     case "uc-part-set-app": {
       const part = state.ucWizard.data.parts.find(x=>x.id===el.dataset.id);
       if(part) part.bc = el.dataset.value;
-      state.popover = null; render(); break;
-    }
-    case "uc-app-override": {
-      state.ucWizard.data.appOverrides[el.dataset.name] = el.dataset.value;
       state.popover = null; render(); break;
     }
     case "uc-save-part-decision": {
