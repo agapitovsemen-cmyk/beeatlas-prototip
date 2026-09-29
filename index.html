@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260929-094441">
+<meta name="beeatlas-build" content="20260929-104608">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -5645,6 +5645,8 @@ function renderPage(){
     html = HldReportPage(r.projectId, r.reportType, r.reportId);
   } else if(r.view==="usecase-detail"){
     html = UseCaseDetailPage(r.projectId, r.ucId);
+  } else if(r.view==="usecase-history"){
+    html = UseCaseHistoryPage(r.projectId, r.ucId);
   } else {
     html = ProjectsListPage();
   }
@@ -8763,6 +8765,68 @@ function participantCell(name){
   return `<div class="cell-clamp-wrap"><div class="cell-clamp">${t}</div><div class="cell-tooltip">${t}</div></div>`;
 }
 
+// Alias → человекочитаемое название системы, для блока "Системы-участники".
+// Только те системы, что фигурируют в шаблонном сценарии UC (UC_SCENARIOS_TEMPLATE) —
+// не общий каталог приложений (APPS): алиасы из PlantUML снапшота ("ext_gateway" и т.п.)
+// с ним не пересекаются, так как это разные ландшафты данных прототипа.
+const UC_SYSTEM_ALIAS_META = {
+  app: {name:"Мобильное приложение"},
+  ext_gateway: {name:"Внешний шлюз авторизации"},
+  cart_service: {name:"Сервис корзины"},
+  pricing_service: {name:"Сервис расчёта стоимости"},
+  order_service: {name:"Сервис заказов"},
+  billing: {name:"Биллинг"},
+  notification: {name:"Сервис уведомлений"},
+  loyalty_service: {name:"Сервис бонусов"},
+  fraud_check: {name:"Сервис проверки мошенничества"},
+};
+// items принимает оба шаблона данных сценария части: w.data.parts визарда несёт
+// mapped:true/false, а u.scenarios карточки UC (см. makeUseCases → UC_SCENARIOS_TEMPLATE)
+// вместо этого несёт status:"confirmed"/"planned" (и вовсе ничего для несмаппированной
+// части) — known учитывает оба варианта, иначе "Системы-участники" на карточке UC
+// показывал бы всё как распознанное.
+function ucParticipantSystems(items){
+  const rows = [];
+  const seen = new Set();
+  items.forEach(x=>{
+    const pp = splitParticipant(x.participant);
+    [pp.caller, pp.callee].forEach(alias=>{
+      if(!alias || seen.has(alias)) return;
+      seen.add(alias);
+      const meta = UC_SYSTEM_ALIAS_META[alias] || {name:alias};
+      rows.push({alias, name:meta.name, type:"system", recognized:true});
+    });
+  });
+  items.forEach(x=>{
+    const known = x.mapped===true || x.status==="confirmed" || x.status==="planned";
+    if(!known){
+      const row = rows.find(r=>r.alias===splitParticipant(x.participant).callee);
+      if(row) row.recognized = false;
+    }
+  });
+  return rows;
+}
+function UcParticipantSystemsTable(rows){
+  if(!rows.length) return "";
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Alias</th><th>Название</th><th>Тип</th><th>Статус</th></tr></thead>
+        <tbody>
+          ${rows.map(r=>`
+            <tr>
+              <td>${escapeHtml(r.alias)}</td>
+              <td>${escapeHtml(r.name)}</td>
+              <td>${escapeHtml(r.type)}</td>
+              <td>${r.recognized ? '<span class="badge green">Распознана</span>' : '<span class="badge orange">Не распознана</span>'}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 function UseCaseMetaRow(u, lastRun){
   return `
     <div style="display:flex;gap:var(--space-9);flex-wrap:wrap;align-items:flex-start;margin-bottom:var(--space-7);">
@@ -8834,37 +8898,6 @@ function UseCaseScenariosTable(u, projectId, ucId){
   `;
 }
 
-function UseCaseHistoryList(runs){
-  if(!runs.length) return `<div class="card empty-state" style="padding:var(--space-8) var(--space-5);"><p style="color:var(--text-secondary);margin:0;">История импорта пока пуста</p></div>`;
-  return `
-    <div class="qlist-box">
-      ${runs.map(r=>`
-        <div>
-          <div class="qlist-item" style="cursor:pointer;" data-action="toggle-uc-run" data-id="${r.id}">
-            <div>
-              <div class="q-label">${escapeHtml(r.date)} · ${escapeHtml(r.source)}</div>
-              <div class="q-text">Запуск ${escapeHtml(r.id)}</div>
-            </div>
-            <span class="badge ${r.status==="Применён"?"green":r.status==="Прерван"?"gray":"red"}">${escapeHtml(r.status)}</span>
-          </div>
-          ${state.ucHistoryOpenId===r.id ? `
-            <div style="padding:0 var(--space-1) var(--space-5);">
-              ${r.notices && r.notices.length ? `
-                <div class="lbl" style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Реестр замечаний</div>
-                <ul style="margin:0 0 var(--space-4);padding-left:var(--space-5);font-size:15px;line-height:22px;">
-                  ${r.notices.map(n=>`<li>${escapeHtml(n)}</li>`).join("")}
-                </ul>
-              ` : ""}
-              <div class="lbl" style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Исходный артефакт (PlantUML)</div>
-              <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:13px;line-height:22px;overflow-x:auto;white-space:pre;">${escapeHtml(r.rawPlantUml||"—")}</pre>
-            </div>
-          ` : ""}
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
 function UcDynamicPanel(){
   const sp = state.sidePanel;
   return `
@@ -8926,7 +8959,7 @@ function UcDiagramModal(u){
         <div style="display:flex;gap:var(--space-3);">
           <button class="btn btn-outline btn-sm" data-action="collapse-uc-diagram">${ic("expand",16)} Свернуть</button>
           <button class="btn btn-outline btn-sm" data-action="download-uc-diagram">${ic("download",16)} Скачать</button>
-          <button class="btn btn-outline btn-icon-only" data-action="collapse-uc-diagram">${icon("x")}</button>
+          <button class="wizard-close" data-action="collapse-uc-diagram">${icon("x")}</button>
         </div>
       </div>
       <div class="uc-diagram-scroll uc-diagram-scroll-modal">${buildSequenceSvgGeneric(seq.lifelines, null, seq.messages, {large:true})}</div>
@@ -8968,6 +9001,58 @@ function ucImportRuns(p, code){
   return (p.ucImportRuns||[]).filter(r=>r.ucCode===code).slice().reverse();
 }
 
+// Отдельная страница (не секция внизу карточки UC) — по образцу скрина реального
+// продукта: "История импорта" открывается по клику на кнопку в шапке UC, со своим
+// хлебным крошем "Агент: {имя UC}". Клик по ID строки разворачивает то же самое
+// (реестр замечаний + исходный PlantUML), что раньше жило в UseCaseHistoryList.
+function UseCaseHistoryPage(projectId, ucId){
+  const p = findProject(projectId);
+  if(!p) return `<div class="placeholder-page">Проект не найден</div>`;
+  const u = findUseCase(p, ucId);
+  if(!u) return `<div class="placeholder-page">Use case не найден</div>`;
+  const runs = ucImportRuns(p, u.code);
+  return `
+    <div class="breadcrumb">
+      <a data-action="nav" data-nav="projects">Проекты</a><span class="sep">${icon("chevronRight")}</span>
+      <a data-action="open-project" data-id="${p.id}">${escapeHtml(p.name)}</a><span class="sep">${icon("chevronRight")}</span>
+      <a data-action="open-usecase" data-id="${p.id}" data-uc="${u.id}">Агент: ${escapeHtml(u.name)}</a><span class="sep">${icon("chevronRight")}</span>
+      <span class="current">История импорта</span>
+    </div>
+    <h1>История импорта</h1>
+    <div class="table-wrap" style="margin-top:var(--space-6);">
+      <table>
+        <thead><tr><th>ID</th><th>Дата</th><th>Источник</th><th>Статус</th></tr></thead>
+        <tbody>
+          ${runs.length ? runs.map(r=>`
+            <tr>
+              <td>
+                <span class="proj-link" style="cursor:pointer;" data-action="toggle-uc-run" data-id="${r.id}">${escapeHtml(r.id)}</span>
+              </td>
+              <td>${escapeHtml(r.date)}</td>
+              <td>${escapeHtml(r.source)}</td>
+              <td><span class="badge ${r.status==="Применён"?"green":r.status==="Прерван"?"gray":"red"}">${escapeHtml(r.status)}</span></td>
+            </tr>
+            ${state.ucHistoryOpenId===r.id ? `
+              <tr>
+                <td colspan="4" style="padding-top:0;">
+                  ${r.notices && r.notices.length ? `
+                    <div class="lbl" style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Реестр замечаний</div>
+                    <ul style="margin:0 0 var(--space-4);padding-left:var(--space-5);font-size:15px;line-height:22px;">
+                      ${r.notices.map(n=>`<li>${escapeHtml(n)}</li>`).join("")}
+                    </ul>
+                  ` : ""}
+                  <div class="lbl" style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Исходный артефакт (PlantUML)</div>
+                  <pre style="background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-4);font-size:13px;line-height:22px;overflow-x:auto;white-space:pre;">${escapeHtml(r.rawPlantUml||"—")}</pre>
+                </td>
+              </tr>
+            ` : ""}
+          `).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">История импорта пока пуста</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 function UseCaseDetailPage(projectId, ucId){
   const p = findProject(projectId);
   if(!p) return `<div class="placeholder-page">Проект не найден</div>`;
@@ -9001,6 +9086,11 @@ function UseCaseDetailPage(projectId, ucId){
     ${UseCaseMetaRow(u, lastRun)}
     ${UseCaseCjCard(u, p.id)}
 
+    <div class="section" id="sec-systems">
+      <h2>Системы-участники</h2>
+      ${UcParticipantSystemsTable(ucParticipantSystems(u.scenarios))}
+    </div>
+
     <div class="section" id="sec-scenarios">
       <div class="section-head-row">
         <h2 style="margin:0;">Сценарий</h2>
@@ -9012,11 +9102,6 @@ function UseCaseDetailPage(projectId, ucId){
       ${state.ucScenariosView==="diagram" ? UcDiagramCard(u) : UseCaseScenariosTable(u, p.id, u.id)}
     </div>
     ${state.ucDiagramModalOpen ? UcDiagramModal(u) : ""}
-
-    <div class="section" id="sec-history">
-      <h2>История импорта</h2>
-      ${UseCaseHistoryList(runs)}
-    </div>
   `;
 }
 
@@ -10684,6 +10769,10 @@ function UcStepResult(w){
       <div class="uc-stat-card"><div class="val">${plannedCount}</div><div class="lbl"><span class="dot gray"></span>Планируется</div></div>
       <div class="uc-stat-card"><div class="val">${unresolvedParts.length}</div><div class="lbl"><span class="dot orange"></span>Требуют решения</div></div>
     </div>
+    <div class="section-head-row" style="margin-bottom:var(--space-4);">
+      <h3 style="margin:0;font-size:15px;">Системы-участники</h3>
+    </div>
+    <div style="margin-bottom:var(--space-7);">${UcParticipantSystemsTable(ucParticipantSystems(parts))}</div>
     ${resolvedParts.length ? `
       <div class="section-head-row" style="margin-bottom:var(--space-4);">
         <h3 style="margin:0;font-size:15px;">Смаппированные части</h3>
@@ -11967,16 +12056,7 @@ function handleAction(action, el){
     case "open-project-assessment": openProjectAssessmentTab(el.dataset.id); break;
     case "open-project-usecase": openProjectUseCaseTab(el.dataset.id); break;
     case "open-usecase": openUseCase(el.dataset.id, el.dataset.uc); break;
-    case "open-usecase-history": {
-      openUseCase(el.dataset.id, el.dataset.uc);
-      setTimeout(()=>{
-        bindTocScroll();
-        const target = document.getElementById("sec-history");
-        const scrollEl = document.getElementById("mainScroll");
-        if(target && scrollEl) scrollEl.scrollTo({top: target.offsetTop - 100, behavior:"smooth"});
-      }, 30);
-      break;
-    }
+    case "open-usecase-history": go("usecase-history", {projectId: el.dataset.id, ucId: el.dataset.uc}); break;
     case "reset-uc-filters": state.ucSearch=""; state.ucSourceFilter="Все"; state.ucStatusFilter="Все"; render(); break;
     case "uc-source-filter-set": state.ucSourceFilter = el.dataset.value; state.popover=null; render(); break;
     case "uc-status-filter-set": state.ucStatusFilter = el.dataset.value; state.popover=null; render(); break;
