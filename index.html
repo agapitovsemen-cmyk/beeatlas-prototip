@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260929-084517">
+<meta name="beeatlas-build" content="20260929-090214">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1983,6 +1983,13 @@
   .cj-source-back{display:flex;align-items:center;gap:var(--space-1);color:var(--blue);font-size:12.5px;cursor:pointer;margin-bottom:var(--space-1);}
   .cj-source-back svg{width:14px;height:14px;}
   .cj-source-back .beeline-icons{width:14px;height:14px;font-size:14px;}
+  .cj-call-card{border:1px solid var(--border);border-radius:10px;padding:var(--space-3) var(--space-4);background:var(--bg-alt);}
+  .cj-call-card-title{font-size:11px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.03em;margin-bottom:var(--space-2);}
+  .cj-call-card .row{display:flex;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-2);}
+  .cj-call-card .row:last-child{margin-bottom:0;}
+  .cj-call-card .lbl{font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px;}
+  .cj-call-card .val{font-size:13px;color:var(--text);}
+  .cj-call-card .val.link{color:var(--blue);}
   .readonly-note{display:flex;align-items:center;gap:var(--space-2);font-size:12px;color:var(--text-tertiary);}
   .readonly-note svg{width:14px;height:14px;flex:0 0 auto;}
   .readonly-note .beeline-icons{width:14px;height:14px;flex:0 0 auto;font-size:14px;}
@@ -3776,8 +3783,8 @@ function buildSequenceSvgGeneric(lifelineNames,lifelineOkMap,messages,opts){
   opts=opts||{};
   var colW=opts.large?280:240;
   var n=Math.max(lifelineNames.length,1);
-  var headerH=54, rowH=44, topPad=20, botPad=24, rightPad=100;
-  var width=n*colW+rightPad;
+  var headerH=54, rowH=44, topPad=20, botPad=24;
+  var width=n*colW;
   var height=headerH+topPad+Math.max(messages.length,1)*rowH+botPad;
   var idx={}; lifelineNames.forEach(function(nm,i){ idx[nm]=i; });
   var s='<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" font-family="ui-monospace,Menlo,Consolas,monospace">';
@@ -4683,8 +4690,7 @@ const state = {
   cjBpmnStage:null,   // stage id when drilled into a stage's internal flow; null = top-level stage sequence
   cjCreatePanel:null, // {name,portrait,owner,tags,techOwners:[],bpmnFile:null,dragOver}
   cjExpanded:{},        // {["stageId:scenarioId"]: bool} — is a given scenario's source list expanded
-  cjSourcePanel:null,   // {stageId, scenarioId, sourceId, creating, draft} — the source edit/create side sheet
-  cjCallsDiagram:null,  // {stageId, scenarioId, sourceId} — read-only calls view, shown as a sequence diagram modal
+  cjSourcePanel:null,   // {stageId, scenarioId, sourceId, editing, draft} — the source side sheet
   cjBranchPanel:null,    // {name, parent} — create-branch side panel
   cjMergePanel:null,     // {source, target, strategy, description, conflicts} — merge side panel
   cjBranchDeleteConfirm:null, // branch id pending delete confirmation
@@ -7557,7 +7563,6 @@ function CjOverlay(){
   </div>
   ${state.cjVersionsOpen ? CjVersionsPanel() : ""}
   ${state.cjSourcePanel ? CjSourcePanel() : ""}
-  ${state.cjCallsDiagram ? CjCallsDiagramModal() : ""}
   ${state.cjBpmnOpen ? CjBpmnOverlay() : ""}
   ${state.cjBranchPanel ? CjBranchCreatePanel() : ""}
   ${state.cjMergePanel ? CjMergePanel() : ""}
@@ -7642,11 +7647,9 @@ function CjStageFieldCell(stage, key){
 // chains, e.g. "Сценарий 1"/"Сценарий 2" — not just one). Each scenario in turn can have
 // up to 3 sources (Ручная привязка / Use Case / E2E). Expanding a scenario chip always
 // reveals its source list (even when there's only one source, for a consistent model);
-// clicking any source opens its calls as a read-only sequence diagram (CjCallsDiagramModal,
-// same chrome as UcDiagramModal) rather than a side sheet — a call chain reads better as a
-// diagram than as a stack of field cards. Editing (manual sources only) still goes through
-// the side sheet (CjSourcePanel), reached via "Редактировать" in the diagram modal's footer,
-// since a diagram isn't itself an edit surface.
+// clicking any source opens its call data in a side sheet (CjSourcePanel) rather than
+// inline, so editing the manual source and viewing a read-only source both go through
+// the same side-sheet flow instead of two different UI shapes.
 function CjScenarioCell(stage){
   const numbered = stage.scenarios.length>1;
   return stage.scenarios.map((sc,i)=>CjScenarioRow(stage, sc, i, numbered)).join("");
@@ -7745,8 +7748,11 @@ function CjSourcePanel(){
     </div>`;
   }
 
-  // Only the editing form lives here now — the read-only view is CjCallsDiagramModal.
-  return `
+  const src = findCjSource(p.stageId, p.scenarioId, p.sourceId);
+  const meta = CJ_SOURCE_META[src.type];
+
+  if(p.editing){
+    return `
     <div class="backdrop enter" data-action="cj-source-cancel-edit"></div>
     <div class="side-panel enter">
       <div class="side-head">
@@ -7762,50 +7768,31 @@ function CjSourcePanel(){
         <button class="btn btn-primary" data-action="cj-source-save">Сохранить</button>
       </div>
     </div>`;
-}
+  }
 
-// Chain model: a call only carries its own app (the callee), not an explicit caller, so
-// the caller of call[i] is taken to be call[i-1]'s app (the previous hop), and the very
-// first call's caller is a generic "Клиент" entry point. Consecutive calls on the same
-// app collapse into a self-loop (buildSequenceSvgGeneric already draws from===to as one),
-// which is also what naturally happens when a source lists several calls into one system.
-function buildCjCallSequenceData(calls){
-  const lifelines = [];
-  const seen = new Set();
-  function addLifeline(name){ if(name && !seen.has(name)){ seen.add(name); lifelines.push(name); } }
-  const INITIATOR = "Клиент";
-  addLifeline(INITIATOR);
-  let prev = INITIATOR;
-  const messages = calls.map(c=>{
-    addLifeline(c.app);
-    const m = {from: prev, to: c.app, label: c.endpoint || c.capability};
-    prev = c.app;
-    return m;
-  });
-  return {lifelines, messages};
-}
-
-// Same modal chrome as UcDiagramModal (.uc-diagram-* classes are generic, not UC-specific).
-function CjCallsDiagramModal(){
-  const d = state.cjCallsDiagram;
-  const src = findCjSource(d.stageId, d.scenarioId, d.sourceId);
-  const meta = CJ_SOURCE_META[src.type];
-  const seq = buildCjCallSequenceData(src.calls);
   return `
-    <div class="uc-diagram-backdrop" data-action="close-cj-calls-diagram"></div>
-    <div class="uc-diagram-modal">
-      <div class="uc-diagram-toolbar" style="justify-content:space-between;">
-        <div style="font-weight:700;font-size:15px;padding-left:6px;">${escapeHtml(meta.label)}</div>
-        <div style="display:flex;gap:var(--space-3);">
-          <button class="btn btn-outline btn-sm" data-action="download-cj-calls-diagram">${ic("download",16)} Скачать</button>
-          ${src.type==="manual" ? `<button class="btn btn-outline btn-sm" data-action="cj-calls-diagram-edit">${ic("pencil",16)} Редактировать</button>` : ""}
-          <button class="btn btn-outline btn-icon-only" data-action="close-cj-calls-diagram">${icon("x")}</button>
-        </div>
+    <div class="backdrop enter" data-action="cj-close-source-panel"></div>
+    <div class="side-panel enter">
+      <div class="side-head">
+        <h2>${escapeHtml(meta.label)}</h2>
+        <button class="wizard-close" data-action="cj-close-source-panel">${icon("x")}</button>
       </div>
-      <div class="uc-diagram-scroll uc-diagram-scroll-modal">${buildSequenceSvgGeneric(seq.lifelines, null, seq.messages, {large:true})}</div>
-      ${src.type!=="manual" ? `<div class="readonly-note" style="margin-top:var(--space-3);">${icon("info")} Только чтение — изменить можно в источнике: <a data-action="cj-noop">${escapeHtml(src.sourceLink||"связанный артефакт")}</a></div>` : ""}
-    </div>
-  `;
+      <div class="side-body">
+        ${src.calls.map((c,i)=>`
+          <div class="cj-call-card" style="${i>0?"margin-top:var(--space-3);":""}">
+            <div class="cj-call-card-title">Вызов ${i+1}</div>
+            <div class="row"><div><div class="lbl">Приложение</div><div class="val">${escapeHtml(c.app)}</div></div></div>
+            <div class="row"><div><div class="lbl">Техническая возможность</div><div class="val">${escapeHtml(c.capability)}</div></div></div>
+            <div class="row">
+              <div><div class="lbl">Endpoint</div><div class="val">${escapeHtml(c.endpoint)}</div></div>
+              <div><div class="lbl">Интерфейс</div><div class="val">${escapeHtml(c.iface)}</div></div>
+            </div>
+          </div>
+        `).join("")}
+        ${src.type!=="manual" ? `<div class="readonly-note" style="margin-top:var(--space-3);">${icon("info")} Только чтение — изменить можно в источнике: <a data-action="cj-noop">${escapeHtml(src.sourceLink||"связанный артефакт")}</a></div>` : ""}
+      </div>
+      ${src.type==="manual" ? `<div class="side-foot"><button class="btn btn-primary" data-action="cj-source-edit-start">${icon("pencil")} Редактировать</button></div>` : ""}
+    </div>`;
 }
 
 function CjVersionsPanel(){
@@ -11458,8 +11445,7 @@ function bindGlobalEvents(){
   };
   document.body.onkeydown = function(e){
     if(e.key === "Escape"){
-      if(state.cjCallsDiagram){ state.cjCallsDiagram=null; render(); }
-      else if(state.cjSourcePanel){ state.cjSourcePanel=null; render(); }
+      if(state.cjSourcePanel){ state.cjSourcePanel=null; render(); }
       else if(state.cjMergePanel){ state.cjMergePanel=null; render(); }
       else if(state.cjBranchPanel){ state.cjBranchPanel=null; render(); }
       else if(state.cjBranchDeleteConfirm){ state.cjBranchDeleteConfirm=null; render(); }
@@ -11896,43 +11882,32 @@ function handleAction(action, el){
       break;
     }
     case "cj-open-source": {
-      state.cjCallsDiagram = {stageId: el.dataset.stage, scenarioId: el.dataset.scenario, sourceId: el.dataset.source};
-      render();
-      break;
-    }
-    case "close-cj-calls-diagram": state.cjCallsDiagram=null; render(); break;
-    case "download-cj-calls-diagram": {
-      const svg = document.querySelector(".uc-diagram-scroll-modal svg");
-      if(!svg){ showToast("Диаграмма не найдена"); break; }
-      const xml = new XMLSerializer().serializeToString(svg);
-      const blob = new Blob(['<?xml version="1.0" standalone="no"?>\r\n'+xml], {type:"image/svg+xml"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = "diagram.svg";
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(()=>URL.revokeObjectURL(url), 1000);
-      showToast("Диаграмма скачана");
-      break;
-    }
-    case "cj-calls-diagram-edit": {
-      if(cjBranchLocked(state.cjOpen.cjId, state.cjOpen.branch)){ showToast("Ветка обновляется, дождитесь завершения объединения"); break; }
-      const d = state.cjCallsDiagram;
-      const src = findCjSource(d.stageId, d.scenarioId, d.sourceId);
-      state.cjCallsDiagram = null;
-      state.cjSourcePanel = {
-        stageId: d.stageId, scenarioId: d.scenarioId, sourceId: d.sourceId,
-        draft: {calls: src.calls.map(c=>({app:c.app, capability:c.capability, endpoint:c.endpoint, iface:c.iface}))},
-      };
+      state.cjSourcePanel = {stageId: el.dataset.stage, scenarioId: el.dataset.scenario, sourceId: el.dataset.source, editing:false, draft:null};
       render();
       break;
     }
     case "cj-close-source-panel": state.cjSourcePanel=null; render(); break;
-    case "cj-source-cancel-edit": state.cjSourcePanel = null; render(); break;
+    case "cj-source-edit-start": {
+      if(cjBranchLocked(state.cjOpen.cjId, state.cjOpen.branch)){ showToast("Ветка обновляется, дождитесь завершения объединения"); break; }
+      const p = state.cjSourcePanel;
+      const src = findCjSource(p.stageId, p.scenarioId, p.sourceId);
+      p.editing = true;
+      p.draft = {calls: src.calls.map(c=>({app:c.app, capability:c.capability, endpoint:c.endpoint, iface:c.iface}))};
+      render();
+      break;
+    }
+    case "cj-source-cancel-edit": {
+      const p = state.cjSourcePanel;
+      if(p.creating){ state.cjSourcePanel = null; }
+      else { p.editing = false; p.draft = null; }
+      render();
+      break;
+    }
     case "cj-add-manual-source": {
       if(cjBranchLocked(state.cjOpen.cjId, state.cjOpen.branch)){ showToast("Ветка обновляется, дождитесь завершения объединения"); break; }
       state.cjSourcePanel = {
         stageId: el.dataset.stage, scenarioId: el.dataset.scenario, sourceId: null,
-        creating: true,
+        editing: true, creating: true,
         draft: { calls: [{app:"", capability:"", endpoint:"", iface:""}] },
       };
       render();
@@ -11953,14 +11928,14 @@ function handleAction(action, el){
       if(p.creating){
         const sc = findCjScenario(p.stageId, p.scenarioId);
         sc.sources.unshift({id:"m", type:"manual", label:"Ручная привязка", calls:p.draft.calls});
+        state.cjSourcePanel = {stageId:p.stageId, scenarioId:p.scenarioId, sourceId:"m", editing:false, draft:null};
         showToast("Ручная привязка добавлена");
       } else {
         const src = findCjSource(p.stageId, p.scenarioId, p.sourceId);
         src.calls = p.draft.calls;
+        p.editing = false; p.draft = null;
         showToast("Ручная привязка сохранена");
       }
-      state.cjCallsDiagram = {stageId:p.stageId, scenarioId:p.scenarioId, sourceId:"m"};
-      state.cjSourcePanel = null;
       render();
       break;
     }
