@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260929-104608">
+<meta name="beeatlas-build" content="20260929-124108">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -10593,14 +10593,20 @@ function ruPlural(n, one, few, many){
   return many;
 }
 
+// Закрытие визарда (крестик/отмена, без применения сценария) возвращает на список
+// Use Case, а не оставляет на карточке агента, откуда визард запущен — иначе после
+// закрытия страница выглядит так, будто ничего не произошло, и обновление браузера
+// (которое восстанавливает последний сохранённый route, см. saveLocation) снова и
+// снова открывает вкладку «Агенты» вместо того места, где реально идёт работа.
 function closeUcWizard(){
   const w = state.ucWizard;
   if(!w) return;
   const step = UC_WIZARD_STEPS[w.stepIndex].key;
   if(step==="result") logUcInterruptedRun(w, w.importing ? "import" : "result");
   if(w.timer) clearInterval(w.timer);
+  const projectId = w.projectId;
   state.ucWizard = null;
-  render();
+  openProjectUseCaseTab(projectId);
 }
 
 function logUcInterruptedRun(w, step){
@@ -10628,7 +10634,10 @@ function logUcInterruptedRun(w, step){
 function UcWizardOverlay(){
   const w = state.ucWizard;
   const centerCls = !w.loading ? " uc-wizard-body-center" : "";
-  return `<div class="wizard-overlay">
+  // wiz-col — тот же модификатор, что у визарда «Проведение оценки»: без него у
+  // .wizard-body остаются горизонтальные поля x8, и полоса степпера получает те же
+  // отступы, что и контент, вместо разметки от края до края (см. .wiz-col .wizard-stepper-wrap).
+  return `<div class="wizard-overlay wiz-col">
     <div class="wizard-head">
       <h2>Импортирование сценария</h2>
       <button class="wizard-close" data-action="close-uc-wizard">${icon("x")}</button>
