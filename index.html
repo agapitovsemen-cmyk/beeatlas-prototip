@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260929-090214">
+<meta name="beeatlas-build" content="20260929-094441">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1364,7 +1364,8 @@
   /* Карточки агентов одинаковые: фиксированная высота под заголовок + 4 строки
      описания + кнопку, разделителя нет, кнопка прижата к правому нижнему углу. */
   .agent-card-v2{padding:var(--space-6);display:flex;flex-direction:column;height:214px;}
-  .agent-card-v2-title{color:var(--blue);font-weight:500;font-size:17px;line-height:22px;letter-spacing:.2px;margin-bottom:var(--space-3);cursor:pointer;}
+  .agent-card-v2-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-3);}
+  .agent-card-v2-title{color:var(--blue);font-weight:500;font-size:17px;line-height:22px;letter-spacing:.2px;cursor:pointer;}
   .agent-card-v2-title:hover{text-decoration:underline;}
   .agent-card-v2-sub{color:var(--text-secondary);font-size:15px;line-height:18px;letter-spacing:.2px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
   .agent-card-v2-foot{margin-top:auto;display:flex;justify-content:flex-end;}
@@ -5266,6 +5267,7 @@ const ICONS = {
   gitBranch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>',
   gitMerge:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+  history:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
 };
 /* Соответствие иконок прототипа иконочному шрифту Yellowbe.
    Имена проверены по ../дизайн-система/docs/icons.md (461 лигатура BeelineIcons).
@@ -5281,7 +5283,7 @@ const DS_ICONS = {
   send:'send', box:'safebox', pencil:'edit', alertTriangle:'warning_triangle',
   moreVertical:'more_vert', info:'info_circled', download:'download', gear:'settings',
   externalLink:'open_in_window', eye:'eye', zoomIn:'zoom_in', zoomOut:'zoom_out',
-  minimize:'collapse', gitBranch:'split', gitMerge:'merge', trash:'delete'
+  minimize:'collapse', gitBranch:'split', gitMerge:'merge', trash:'delete', history:'clock'
 };
 function icon(name){
   const ds = DS_ICONS[name];
@@ -8602,14 +8604,14 @@ function submitCreate(){
 const AGENT_META = {
   assessment:{name:"Оценка", icon:"gauge", passedSub:"score",
     desc:"Оценка объема изменений в приложениях и процессах ландшафта, автоматизированная по бизнес требованиям"},
-  usecase:{name:"Use Case", icon:"doc", passedSub:"Use Case сформирован",
-    desc:"Собирает Use Case по бизнес-постановке: раскладывает сценарий на шаги, подбирает участников и связывает каждый шаг с технической возможностью из каталога, чтобы описание решения не приходилось писать вручную"},
   hld:{name:"Каркас HLD", icon:"layers", passedSub:"Каркас сформирован",
     desc:"Готовит каркас HLD по данным проекта и каталога приложений: раскладывает документ по разделам, подставляет схему интеграций и таблицу затронутых систем, оставляя архитектору только содержательную часть"},
   verification:{name:"Верификация", icon:"shield", passedSub:"Верификация пройдена",
     desc:"Сверяет решение с архитектурными принципами и нефункциональными требованиями, показывает расхождения с целевым ландшафтом и собирает замечания в отчёт с указанием, что именно нужно поправить"},
   publication:{name:"Публикация", icon:"send", passedSub:"Опубликовано в Confluence",
     desc:"Публикует результаты работы агентов в Confluence: создаёт страницу по нужному шаблону, переносит таблицы и диаграммы и обновляет её при каждом новом прогоне, сохраняя историю версий"},
+  usecase:{name:"Use Case", icon:"doc", passedSub:"Use Case сформирован",
+    desc:"Собирает Use Case по бизнес-постановке: раскладывает сценарий на шаги, подбирает участников и связывает каждый шаг с технической возможностью из каталога, чтобы описание решения не приходилось писать вручную"},
 };
 function agentStatusBadgeText(key, st){
   if(key==="hld") return st==="passed" ? {text:"Создан", cls:"green"} : {text:"Не создан", cls:"gray"};
@@ -8678,7 +8680,7 @@ function UseCaseTab(p){
       <div class="search-wrap">
         <div class="field-with-icon">
           ${icon("search")}
-          <input class="input" id="ucListSearch" placeholder="Поиск по названию или коду uc" value="${escapeHtml(state.ucSearch)}" autocomplete="off"/>
+          <input class="input" id="ucListSearch" placeholder="Поиск по названию или коду сценария" value="${escapeHtml(state.ucSearch)}" autocomplete="off"/>
         </div>
       </div>
       ${FilterSelect({id:"uc-filter-source", label:"Источник", value:state.ucSourceFilter, options:["Все","Ручной импорт","Автоматический импорт"], action:"uc-source-filter-set"})}
@@ -8696,7 +8698,7 @@ function UseCaseTab(p){
     ` : `
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Use case</th><th>Статус</th><th>Источник</th><th>Дата изменения</th><th>История</th></tr></thead>
+        <thead><tr><th>Сценарий</th><th>Статус</th><th>Источник</th><th>Дата изменения</th><th>История</th></tr></thead>
         <tbody>
           ${list.length ? list.map(u=>`
             <tr>
@@ -8985,7 +8987,7 @@ function UseCaseDetailPage(projectId, ucId){
       ${ucStatusBadge(u.status)}
       <div class="actions">
         <div style="position:relative;">
-          <button class="btn btn-outline btn-icon-only" data-action="toggle-popover" data-popover="uc-export" title="Экспорт">${icon("upload")}</button>
+          <button class="btn btn-outline" data-action="toggle-popover" data-popover="uc-export">${icon("upload")} Экспорт</button>
           ${state.popover==="uc-export" ? `
             <div class="popover" style="min-width:180px;">
               <div class="pv-item" data-action="export-uc" data-format="puml" data-id="${p.id}" data-uc="${u.id}">Экспорт в PUML</div>
@@ -8993,7 +8995,7 @@ function UseCaseDetailPage(projectId, ucId){
             </div>
           ` : ""}
         </div>
-        <button class="btn btn-outline btn-icon-only" data-action="noop-uc-edit" title="Редактировать">${icon("pencil")}</button>
+        <button class="btn btn-outline" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}">${icon("history")} История импорта</button>
       </div>
     </div>
     ${UseCaseMetaRow(u, lastRun)}
@@ -9001,7 +9003,7 @@ function UseCaseDetailPage(projectId, ucId){
 
     <div class="section" id="sec-scenarios">
       <div class="section-head-row">
-        <h2 style="margin:0;">Сценарии</h2>
+        <h2 style="margin:0;">Сценарий</h2>
         <div class="view-toggle">
           <button class="view-toggle-btn ${state.ucScenariosView==="table"?"active":""}" data-action="set-uc-scenarios-view" data-mode="table" title="Табличный вид">${icon("menu")}</button>
           <button class="view-toggle-btn ${state.ucScenariosView==="diagram"?"active":""}" data-action="set-uc-scenarios-view" data-mode="diagram" title="Диаграмма">${icon("flow")}</button>
@@ -9094,7 +9096,10 @@ function InternalAgentsGrid(p){
       const meta = AGENT_META[key];
       return `
         <div class="card agent-card-v2">
-          <div class="agent-card-v2-title" data-action="open-agent" data-agent="${key}" data-id="${p.id}">${escapeHtml(meta.name)}</div>
+          <div class="agent-card-v2-head">
+            <div class="agent-card-v2-title" data-action="open-agent" data-agent="${key}" data-id="${p.id}">${escapeHtml(meta.name)}</div>
+            <span class="badge blue">В процессе</span>
+          </div>
           <div class="cell-clamp-wrap"><div class="agent-card-v2-sub cell-clamp">${escapeHtml(meta.desc)}</div><div class="cell-tooltip">${escapeHtml(meta.desc)}</div></div>
           <div class="agent-card-v2-foot">
             <button class="btn btn-outline btn-sm" data-action="launch-agent" data-agent="${key}" data-id="${p.id}">Запустить агента</button>
@@ -10669,6 +10674,7 @@ function UcStepResult(w){
   const plannedCount = parts.filter(x=>x.decision==="planned").length;
   const unresolvedParts = parts.filter(x=>!x.mapped && !x.decision);
   const resolvedParts = parts.filter(x=>x.mapped || x.decision);
+  const unmappedParts = parts.filter(x=>!x.mapped);
   return `
     <div style="width:100%;">
     ${UseCaseCjCard(preview)}
@@ -10685,10 +10691,10 @@ function UcStepResult(w){
       <div class="table-wrap-fit" style="margin-bottom:var(--space-7);">
         <table class="fixed-table">
           <colgroup>
-            <col style="width:4%"><col style="width:11%"><col style="width:11%"><col style="width:13%">
-            <col style="width:10%"><col style="width:15%"><col style="width:12%"><col style="width:7%"><col style="width:17%">
+            <col style="width:5%"><col style="width:13%"><col style="width:13%"><col style="width:20%">
+            <col style="width:16%"><col style="width:13%"><col style="width:7%"><col style="width:13%">
           </colgroup>
-          <thead><tr><th>Шаг</th><th>Вызывающий</th><th>Вызываемый</th><th>Действие</th><th>API</th><th>Вызов</th><th>TC</th><th>Dynamic</th><th>Статус</th></tr></thead>
+          <thead><tr><th>Шаг</th><th>Вызывающий</th><th>Вызываемый</th><th>Действие</th><th>Вызов</th><th>TC</th><th>Dynamyc</th><th>Статус вызова</th></tr></thead>
           <tbody>
             ${resolvedParts.map(x=>{
               const pp = splitParticipant(x.participant);
@@ -10699,7 +10705,6 @@ function UcStepResult(w){
                 <td>${participantCell(pp.caller)}</td>
                 <td>${participantCell(pp.callee)}</td>
                 <td>${clampCell(x.action)}</td>
-                <td>${clampCell(x.api)}</td>
                 <td>${clampCell(x.call)}</td>
                 <td>${x.tcCode ? `<span class="req-chip">${escapeHtml(x.tcCode)}</span>` : '<span class="empty-cell">—</span>'}</td>
                 <td style="white-space:nowrap;">${escapeHtml(x.dynamic||"—")}</td>
@@ -10715,9 +10720,27 @@ function UcStepResult(w){
     ` : ""}
     <div class="section-head-row" style="margin-bottom:var(--space-4);">
       <h3 style="margin:0;font-size:15px;">Несмаппированные части</h3>
-      <span style="font-size:13px;color:var(--text-secondary);">кол-во частей ${unresolvedParts.length}</span>
+      <span style="font-size:13px;color:var(--text-secondary);">Кол-во частей: ${unmappedParts.length}</span>
     </div>
-    ${unresolvedParts.length ? unresolvedParts.map(UcUnmappedPartCard).join("") : `<div class="card empty-state" style="padding:var(--space-7) var(--space-5);"><p style="color:var(--text-secondary);margin:0;">Несопоставленных частей не осталось</p></div>`}
+    ${unmappedParts.length ? `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-5);">${unmappedParts.map(x=>x.decision ? UcResolvedUnmappedCard(x) : UcUnmappedPartCard(x)).join("")}</div>` : `<div class="card empty-state" style="padding:var(--space-7) var(--space-5);"><p style="color:var(--text-secondary);margin:0;">Несопоставленных частей не осталось</p></div>`}
+    </div>
+  `;
+}
+
+// A part stays visible here after its decision is saved (не пропадает из списка) — только
+// сворачивается в статус-карточку с карандашом, вместо того чтобы исчезать: пользователь видит
+// весь исходный набор несмаппированных частей и что с каждой уже решено, не считая по памяти.
+function UcResolvedUnmappedCard(x){
+  const confirmed = x.decision==="specified";
+  return `
+    <div class="card uc-unmapped-card">
+      <div class="uc-unmapped-head">
+        <div><b><span class="uc-part-code">${x.part}</span> ${escapeHtml(x.participant)} ${escapeHtml(x.action)}</b></div>
+        <div style="display:flex;align-items:center;gap:var(--space-3);">
+          ${scenarioStatusBadge(confirmed ? "confirmed" : "planned")}
+          <button class="btn btn-outline btn-icon-only btn-sm" data-action="uc-reset-part" data-id="${x.id}" title="Изменить решение">${icon("pencil")}</button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -11957,7 +11980,6 @@ function handleAction(action, el){
     case "reset-uc-filters": state.ucSearch=""; state.ucSourceFilter="Все"; state.ucStatusFilter="Все"; render(); break;
     case "uc-source-filter-set": state.ucSourceFilter = el.dataset.value; state.popover=null; render(); break;
     case "uc-status-filter-set": state.ucStatusFilter = el.dataset.value; state.popover=null; render(); break;
-    case "noop-uc-edit": showToast("Редактирование Use Case не входит в состав переданных макетов"); break;
     case "open-hub-interface": showToast(`Переход в карточку интерфейса «${el.dataset.call}» в Хабе приложений — вне периметра прототипа`); break;
     case "open-uc-dynamic": {
       const p = findProject(el.dataset.id);
