@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260930-111310">
+<meta name="beeatlas-build" content="20260930-113558">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1164,6 +1164,50 @@
   .ds-select-item:hover{background:var(--color-background-base-hover);}
   .ds-select-item.selected{background:var(--color-background-base-selected);}
   .ds-select-item:active{background:var(--color-background-base-pressed);}
+
+  /* Banner (ДС components/banner): padding 16, радиус 16, иконка 20 с отступом 16,
+     текст 15/18/.2; фон и цвет иконки — по статусной модели (здесь нужен только info).
+     Именно Banner, а не Inline alert: у второго padding 8/16 и радиус 8 — плашка
+     получается вдвое ниже, чем в макете. */
+  .ds-banner{
+    display:flex;align-items:flex-start;gap:var(--size-spacing-x4);
+    padding:var(--size-spacing-x4);border-radius:var(--size-border-radius-x8);
+    font-size:15px;line-height:18px;letter-spacing:.2px;color:var(--color-text-active);
+  }
+  .ds-banner > svg{flex:0 0 auto;width:20px;height:20px;}
+  .ds-banner .ds-banner-text{padding-top:1px;}
+  .ds-banner.info{background:var(--color-status-info-background);}
+  .ds-banner.info > svg{color:var(--color-status-info);}
+
+  /* File uploader (ДС components/fileUploader): пунктирная зона, padding 16, радиус 12,
+     высота 104, текст 15/18/.2, строка форматов 13/16 цветом inactive; на hover и
+     drag over — фон base-selected, на drag over граница красится в status-info. */
+  .ds-uploader{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--size-spacing-x2);
+    min-height:104px;padding:var(--size-spacing-x4);text-align:center;cursor:pointer;
+    border:1px dashed var(--color-border);border-radius:var(--size-border-radius-x6);
+    font-size:15px;line-height:18px;letter-spacing:.2px;color:var(--color-text-active);
+  }
+  .ds-uploader:hover{background:var(--color-background-base-selected);}
+  .ds-uploader.drag{border-color:var(--color-status-info);background:var(--color-background-base-selected);}
+  .ds-uploader .ds-uploader-link{color:var(--color-text-link);}
+  .ds-uploader .ds-uploader-formats{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--color-text-inactive);}
+
+  /* Загруженный файл — строка под зоной загрузки: иконка типа, имя, вес, удаление. */
+  .ds-file-row{display:flex;align-items:center;gap:var(--size-spacing-x4);padding:var(--size-spacing-x3) 0;}
+  .ds-file-icon{
+    flex:0 0 auto;width:40px;height:40px;border-radius:var(--size-border-radius-x4);
+    display:flex;align-items:center;justify-content:center;
+    background:var(--color-status-info-background);color:var(--color-status-info);
+  }
+  .ds-file-icon svg{width:20px;height:20px;}
+  .ds-file-row .ds-file-body{flex:1;min-width:0;}
+  .ds-file-row .ds-file-name{font-size:15px;line-height:18px;letter-spacing:.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ds-file-row .ds-file-sub{font-size:13px;line-height:16px;letter-spacing:.2px;color:var(--color-text-inactive);margin-top:var(--size-spacing-x1);}
+
+  /* Заголовок блока внутри формы визарда — как заголовки секций шага «Результат». */
+  .uc-form-section{display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-4);}
+  .uc-form-section h3{margin:0;font-size:19px;line-height:24px;letter-spacing:.2px;font-weight:500;}
 
   .textarea{
     width:100%;border:1px solid transparent;background:var(--input-bg);border-radius:var(--size-border-radius-x6);
@@ -9075,16 +9119,16 @@ function UseCaseDetailPage(projectId, ucId){
       ${ucStatusBadge(u.status)}
       <div class="actions">
         <div style="position:relative;">
-          <button class="btn btn-outline" data-action="toggle-popover" data-popover="uc-export">${icon("upload")} Экспорт</button>
+          <button class="btn btn-outline btn-icon-only" data-action="toggle-popover" data-popover="uc-export" title="Экспорт">${icon("upload")}</button>
           ${state.popover==="uc-export" ? `
-            <div class="popover" style="min-width:180px;">
+            <div class="popover" style="min-width:180px;right:0;left:auto;">
               <div class="pv-item" data-action="export-uc" data-format="puml" data-id="${p.id}" data-uc="${u.id}">Экспорт в PUML</div>
               <div class="pv-item" data-action="export-uc" data-format="markdown" data-id="${p.id}" data-uc="${u.id}">Экспорт в Markdown</div>
             </div>
           ` : ""}
         </div>
-        <button class="btn btn-outline" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}">${icon("history")} История импорта</button>
-        <button class="btn btn-outline" data-action="edit-usecase" data-id="${p.id}" data-uc="${u.id}">${icon("pencil")} Редактировать</button>
+        <button class="btn btn-outline btn-icon-only" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}" title="История импорта">${icon("history")}</button>
+        <button class="btn btn-outline btn-icon-only" data-action="edit-usecase" data-id="${p.id}" data-uc="${u.id}" title="Редактировать сценарий">${icon("pencil")}</button>
       </div>
     </div>
     ${UseCaseMetaRow(u, lastRun)}
@@ -10588,6 +10632,8 @@ function startUcWizard(projectId, opts){
       existingUcId: editUc ? editUc.id : ((p.useCases && p.useCases[0]) ? p.useCases[0].id : ""),
       cjStepCode: editUc && editUc.cjStep ? (CJ_STEP_POOL.some(st=>st.code===editUc.cjStep.code) ? editUc.cjStep.code : "") : "",
       plantUml: editUc ? (editUc.rawPlantUml || UC_SAMPLE_PLANTUML) : "",
+      file: null,
+      fileDragOver: false,
       stages: UC_IMPORT_STAGES.map(s=>Object.assign({status:"pending"}, s)),
       parts: [],
     },
@@ -10704,7 +10750,7 @@ function UcWizardStepFooter(w){
   const step = UC_WIZARD_STEPS[w.stepIndex].key;
   if(step==="setup"){
     const modeOk = w.data.mode==="new" ? w.data.ucName.trim().length>0 : !!w.data.existingUcId;
-    const canGo = modeOk && w.data.plantUml.trim().length>0;
+    const canGo = modeOk && (w.data.plantUml.trim().length>0 || !!w.data.file);
     return WizardFooter(null, "Импорт в Staging", "uc-wiz-to-import", !canGo);
   }
   if(step==="result"){
@@ -10728,6 +10774,10 @@ function UcStepSetup(w){
   const currentCj = cjOptions.find(o=>o.code===d.cjStepCode) || cjOptions[0];
   return `
     <div class="uc-step-setup" style="width:100%;max-width:909px;margin:0 auto;">
+      <div class="ds-banner info" style="margin-bottom:var(--space-6);">
+        ${icon("info")}
+        <div class="ds-banner-text">Для добавления данных доступно два варианта: вставка текста или добавление файла</div>
+      </div>
       ${w.editing ? "" : `
       <div class="pill-toggle">
         <div class="pill-item ${d.mode==="new"?"active":""}" data-action="uc-set-mode" data-mode="new">Новый сценарий</div>
@@ -10759,16 +10809,54 @@ function UcStepSetup(w){
         </div>
       </div>
 
+      <div class="uc-form-section">
+        <h3>Вставить PlantUml текстом</h3>
+        <span class="reset-link" data-action="uc-fill-sample">Подставить пример</span>
+      </div>
       <div class="field-block">
         <div class="ffield${d.plantUml?" filled":""}" style="position:relative;">
           <textarea class="textarea" id="ucWizPlantUml" style="min-height:220px;padding-top:28px;font-family:ui-monospace,monospace;font-size:13px;">${escapeHtml(d.plantUml)}</textarea>
           <label class="ffield-label">PlantUml</label>
         </div>
       </div>
-      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-5);">Вставь текст диаграммы последовательности в нотации PlantUML. Используй названия систем/контейнеров, соответствующие существующим в ландшафте BeeAtlas — так части сценария будут сопоставлены автоматически.</p>
-      <button class="btn btn-outline btn-sm" data-action="uc-fill-sample">Подставить пример</button>
+      <p style="color:var(--text-secondary);font-size:15px;margin:0 0 var(--space-7);">Вставь текст диаграммы последовательности в нотации PlantUML. Используй названия систем/контейнеров, соответствующие существующим в ландшафте BeeAtlas — так части сценария будут сопоставлены автоматически.</p>
+
+      <div class="uc-form-section">
+        <h3>Добавить файл</h3>
+      </div>
+      ${UcFileUploader(d)}
     </div>
   `;
+}
+
+/* Зона загрузки файла с описанием сценария — второй источник данных наравне с текстом
+   PlantUML (см. баннер вверху шага). Прототип файл не разбирает: запоминает имя и вес,
+   показывает их строкой ДС «загруженный файл» и добавляет замечание в историю импорта. */
+function UcFileUploader(d){
+  return `
+    <div class="ds-uploader${d.fileDragOver?" drag":""}" data-action="uc-pick-file" data-dropzone="ucfile">
+      <div><span class="ds-uploader-link">Выбери файл</span> или перемести его сюда</div>
+      <div class="ds-uploader-formats">markdown до 100 Мб</div>
+    </div>
+    <input type="file" id="ucWizFileInput" accept=".md,.markdown,text/markdown" style="display:none"/>
+    ${d.file ? `
+      <div class="ds-file-row">
+        <div class="ds-file-icon">${icon("doc")}</div>
+        <div class="ds-file-body">
+          <div class="ds-file-name" title="${escapeHtml(d.file.name)}">${escapeHtml(d.file.name)}</div>
+          <div class="ds-file-sub">${escapeHtml(formatFileSize(d.file.size))}</div>
+        </div>
+        <button class="icon-btn" data-action="uc-remove-file" title="Удалить файл">${icon("trash")}</button>
+      </div>
+    ` : ""}
+  `;
+}
+
+function formatFileSize(bytes){
+  if(!bytes && bytes!==0) return "";
+  if(bytes < 1024) return bytes + " Б";
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(1).replace(".",",") + " Кб";
+  return (bytes/(1024*1024)).toFixed(1).replace(".",",") + " Мб";
 }
 
 function UcStepImport(w){
@@ -11009,6 +11097,7 @@ function ucConfirmApply(){
     return `${x.part}: ${x.note || "часть не сопоставлена"}`;
   });
   if(!notices.length) notices.push("Все части сопоставлены с известными системами ландшафта автоматически");
+  if(d.file) notices.unshift("К импорту приложен файл «" + d.file.name + "» (" + formatFileSize(d.file.size) + ")");
 
   let uc, code;
   if(d.mode==="existing"){
@@ -11616,6 +11705,28 @@ function bindGlobalEvents(){
       if(state.cjCreatePanel && state.cjCreatePanel.dragOver){ state.cjCreatePanel.dragOver = false; render(); }
     }
   });
+  document.body.addEventListener("dragover", function(e){
+    if(e.target.closest && e.target.closest('[data-dropzone="ucfile"]')){
+      e.preventDefault();
+      if(state.ucWizard && !state.ucWizard.data.fileDragOver){ state.ucWizard.data.fileDragOver = true; render(); }
+    }
+  });
+  document.body.addEventListener("dragleave", function(e){
+    if(e.target.closest && e.target.closest('[data-dropzone="ucfile"]')){
+      if(state.ucWizard && state.ucWizard.data.fileDragOver){ state.ucWizard.data.fileDragOver = false; render(); }
+    }
+  });
+  document.body.addEventListener("drop", function(e){
+    if(e.target.closest && e.target.closest('[data-dropzone="ucfile"]')){
+      e.preventDefault();
+      if(state.ucWizard){
+        state.ucWizard.data.fileDragOver = false;
+        const f = e.dataTransfer.files && e.dataTransfer.files[0];
+        if(f) state.ucWizard.data.file = {name:f.name, size:f.size};
+        render();
+      }
+    }
+  });
   document.body.addEventListener("drop", function(e){
     if(e.target.closest && e.target.closest('[data-dropzone="bpmn"]')){
       e.preventDefault();
@@ -11802,6 +11913,10 @@ document.addEventListener("change", function(e){
   else if(e.target.id==="cjFilterFormatSelect"){ state.cjFilters.format = e.target.value; render(); }
   else if(e.target.id==="cjFilterTypeSelect"){ state.cjFilters.type = e.target.value; render(); }
   else if(e.target.id==="cjFilterChannelSelect"){ state.cjFilters.channel = e.target.value; render(); }
+  else if(e.target.id==="ucWizFileInput"){
+    const f = e.target.files && e.target.files[0];
+    if(f && state.ucWizard){ state.ucWizard.data.file = {name:f.name, size:f.size}; render(); }
+  }
   else if(e.target.id==="cjBpmnFileInput"){
     const f = e.target.files && e.target.files[0];
     if(f && state.cjCreatePanel){ state.cjCreatePanel.bpmnFile = f.name; render(); }
@@ -12177,6 +12292,8 @@ function handleAction(action, el){
     case "uc-wiz-set-cjstep": state.ucWizard.data.cjStepCode = el.dataset.value; state.popover = null; render(); break;
     case "uc-wiz-back": { const w=state.ucWizard; w.stepIndex = Math.max(0, w.stepIndex-1); render(); break; }
     case "uc-fill-sample": state.ucWizard.data.plantUml = UC_SAMPLE_PLANTUML; render(); break;
+    case "uc-pick-file": { const inp = document.getElementById("ucWizFileInput"); if(inp) inp.click(); break; }
+    case "uc-remove-file": state.ucWizard.data.file = null; render(); break;
     case "uc-wiz-to-import": ucWizardRunImport(); break;
     case "uc-abort-import": ucAbortImport(); break;
     case "uc-wiz-restart": ucWizardRestart(); break;
