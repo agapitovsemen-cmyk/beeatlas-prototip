@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260930-113558">
+<meta name="beeatlas-build" content="20260930-114351">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -382,9 +382,9 @@
      это «Вариант 1» из гайда ДС (переопределение на классах компонентов).
      .popover здесь НЕТ намеренно: в прототипе этот класс — дропдаун-меню (DS Menu),
      а не подсказка; настоящий Popover — только .cj-merge-help-popover. */
-  :root .invertedTheme, :root .toast, :root .fab, :root .cell-tooltip, :root .cj-merge-help-popover,
+  :root .invertedTheme, :root .toast, :root .fab, :root .cell-tooltip, :root .ds-tip, :root .cj-merge-help-popover,
   [data-theme="light"] .invertedTheme, [data-theme="light"] .toast, [data-theme="light"] .fab,
-  [data-theme="light"] .cell-tooltip, [data-theme="light"] .cj-merge-help-popover{
+  [data-theme="light"] .cell-tooltip, [data-theme="light"] .ds-tip, [data-theme="light"] .cj-merge-help-popover{
     /* Color / Dark / Accent */
     --color-accent-teal: #4dd0e7;
     --color-accent-teal-background: #123035;
@@ -505,7 +505,7 @@
     --input-bg:       var(--color-control-background);
   }
   [data-theme="dark"] .invertedTheme, [data-theme="dark"] .toast, [data-theme="dark"] .fab,
-  [data-theme="dark"] .cell-tooltip, [data-theme="dark"] .cj-merge-help-popover{
+  [data-theme="dark"] .cell-tooltip, [data-theme="dark"] .ds-tip, [data-theme="dark"] .cj-merge-help-popover{
     /* Color / Light / Accent */
     --color-accent-teal: #00adc7;
     --color-accent-teal-background: #e0f7fb;
@@ -1362,6 +1362,24 @@
     white-space:normal;max-width:280px;min-width:160px;color:var(--color-text-active);
   }
   .cell-clamp-wrap:hover .cell-tooltip{display:block;}
+
+  /* Tooltip (ДС: components/tooltip) на произвольном элементе — для icon-only кнопок,
+     у которых подпись не видна. Padding 4/8, радиус 8, текст 13/16/0.2, одна строка,
+     ширина по содержимому (ДС ограничивает 348px), инвертированная тема. Появляется по
+     центру под элементом на расстоянии 8px; у крайних правых кнопок — прижат правым
+     краем, чтобы не выходить за границу контента (ДС допускает боковое позиционирование). */
+  .ds-tip-wrap{position:relative;display:inline-flex;}
+  .ds-tip{
+    display:none;position:absolute;top:calc(100% + var(--size-spacing-x2));left:50%;transform:translateX(-50%);
+    z-index:60;background:var(--color-background-base);border-radius:var(--size-border-radius-x4);
+    box-shadow:var(--elevation-high);padding:var(--size-spacing-x1) var(--size-spacing-x2);
+    font-size:13px;line-height:16px;letter-spacing:.2px;font-weight:400;color:var(--color-text-active);
+    white-space:nowrap;max-width:348px;pointer-events:none;
+  }
+  .ds-tip.tip-right{left:auto;right:0;transform:none;}
+  .ds-tip-wrap:hover > .ds-tip, .ds-tip-wrap:focus-within > .ds-tip{display:block;}
+  /* Пока у кнопки раскрыто меню, подсказка не нужна — иначе она ложится поверх пунктов. */
+  .ds-tip-wrap:has(> .popover) > .ds-tip{display:none;}
 
   /* ДС Pagination: ячейка 40×40, radius 12, gap 8, иконка 24, текст 17/400/22/0.2, disabled — opacity .48 */
   .pagination-row{display:flex;align-items:center;justify-content:flex-end;gap:var(--size-spacing-x2);padding:var(--space-4) var(--space-1) 0;color:var(--text-secondary);font-size:15px;line-height:18px;letter-spacing:.2px;}
@@ -9118,8 +9136,9 @@ function UseCaseDetailPage(projectId, ucId){
       <h1>${escapeHtml(u.name)}</h1>
       ${ucStatusBadge(u.status)}
       <div class="actions">
-        <div style="position:relative;">
-          <button class="btn btn-outline btn-icon-only" data-action="toggle-popover" data-popover="uc-export" title="Экспорт">${icon("upload")}</button>
+        <div class="ds-tip-wrap" style="position:relative;">
+          <button class="btn btn-outline btn-icon-only" data-action="toggle-popover" data-popover="uc-export">${icon("upload")}</button>
+          <span class="ds-tip">Экспорт</span>
           ${state.popover==="uc-export" ? `
             <div class="popover" style="min-width:180px;right:0;left:auto;">
               <div class="pv-item" data-action="export-uc" data-format="puml" data-id="${p.id}" data-uc="${u.id}">Экспорт в PUML</div>
@@ -9127,8 +9146,14 @@ function UseCaseDetailPage(projectId, ucId){
             </div>
           ` : ""}
         </div>
-        <button class="btn btn-outline btn-icon-only" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}" title="История импорта">${icon("history")}</button>
-        <button class="btn btn-outline btn-icon-only" data-action="edit-usecase" data-id="${p.id}" data-uc="${u.id}" title="Редактировать сценарий">${icon("pencil")}</button>
+        <span class="ds-tip-wrap">
+          <button class="btn btn-outline btn-icon-only" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}">${icon("history")}</button>
+          <span class="ds-tip">История импорта</span>
+        </span>
+        <span class="ds-tip-wrap">
+          <button class="btn btn-outline btn-icon-only" data-action="edit-usecase" data-id="${p.id}" data-uc="${u.id}">${icon("pencil")}</button>
+          <span class="ds-tip tip-right">Редактировать сценарий</span>
+        </span>
       </div>
     </div>
     ${UseCaseMetaRow(u, lastRun)}
