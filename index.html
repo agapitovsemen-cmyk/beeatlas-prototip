@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260929-124108">
+<meta name="beeatlas-build" content="20260930-111310">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1159,6 +1159,8 @@
     padding:var(--size-spacing-x4);font-size:17px;line-height:22px;letter-spacing:.2px;color:var(--text);
     cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
+  .ds-select-item.two-line{white-space:normal;}
+  .ds-select-item .ds-select-sub{font-size:15px;line-height:20px;color:var(--text-secondary);margin-top:2px;}
   .ds-select-item:hover{background:var(--color-background-base-hover);}
   .ds-select-item.selected{background:var(--color-background-base-selected);}
   .ds-select-item:active{background:var(--color-background-base-pressed);}
@@ -8700,7 +8702,7 @@ function UseCaseTab(p){
     ` : `
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Сценарий</th><th>Статус</th><th>Источник</th><th>Дата изменения</th><th>История</th></tr></thead>
+        <thead><tr><th>Сценарий</th><th>Статус</th><th>Источник</th><th>Дата изменения</th><th>История</th><th></th></tr></thead>
         <tbody>
           ${list.length ? list.map(u=>`
             <tr>
@@ -8712,9 +8714,10 @@ function UseCaseTab(p){
               <td>${escapeHtml(u.source)}</td>
               <td>${escapeHtml(u.updated)}</td>
               <td><span class="proj-link" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}">Посмотреть</span></td>
+              <td style="width:44px;"><button class="icon-btn" data-action="edit-usecase" data-id="${p.id}" data-uc="${u.id}" title="Редактировать сценарий">${icon("pencil")}</button></td>
             </tr>
           `).join("") : `
-            <tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измени фильтры или сбрось их</td></tr>
+            <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:var(--space-8);">Ничего не нашлось. Измени фильтры или сбрось их</td></tr>
           `}
         </tbody>
       </table>
@@ -8727,7 +8730,7 @@ function UseCaseTab(p){
 function UseCaseCard(projectId, u){
   return `
     <div class="card uc-card">
-      <div class="uc-card-head">${ucStatusBadge(u.status)}</div>
+      <div class="uc-card-head">${ucStatusBadge(u.status)}<button class="icon-btn" data-action="edit-usecase" data-id="${projectId}" data-uc="${u.id}" title="Редактировать сценарий">${icon("pencil")}</button></div>
       <div class="uc-card-name" data-action="open-usecase" data-id="${projectId}" data-uc="${u.id}" title="${escapeHtml(u.name)}">${escapeHtml(u.name)}</div>
       <div class="row-sub">${escapeHtml(u.code)}</div>
       <div class="uc-card-meta">
@@ -8794,7 +8797,7 @@ function ucParticipantSystems(items){
       if(!alias || seen.has(alias)) return;
       seen.add(alias);
       const meta = UC_SYSTEM_ALIAS_META[alias] || {name:alias};
-      rows.push({alias, name:meta.name, type:"system", recognized:true});
+      rows.push({alias, name:meta.name, type:"Приложение", recognized:true});
     });
   });
   items.forEach(x=>{
@@ -8811,14 +8814,14 @@ function UcParticipantSystemsTable(rows){
   return `
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Alias</th><th>Название</th><th>Тип</th><th>Статус</th></tr></thead>
+        <thead><tr><th>Мнемоника</th><th>Название</th><th>Тип</th><th>Статус</th></tr></thead>
         <tbody>
           ${rows.map(r=>`
             <tr>
               <td>${escapeHtml(r.alias)}</td>
               <td>${escapeHtml(r.name)}</td>
               <td>${escapeHtml(r.type)}</td>
-              <td>${r.recognized ? '<span class="badge green">Распознана</span>' : '<span class="badge orange">Не распознана</span>'}</td>
+              <td>${r.recognized ? '<span class="badge green">Распознано</span>' : '<span class="badge red">Не распознано</span>'}</td>
             </tr>
           `).join("")}
         </tbody>
@@ -9081,15 +9084,11 @@ function UseCaseDetailPage(projectId, ucId){
           ` : ""}
         </div>
         <button class="btn btn-outline" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}">${icon("history")} История импорта</button>
+        <button class="btn btn-outline" data-action="edit-usecase" data-id="${p.id}" data-uc="${u.id}">${icon("pencil")} Редактировать</button>
       </div>
     </div>
     ${UseCaseMetaRow(u, lastRun)}
     ${UseCaseCjCard(u, p.id)}
-
-    <div class="section" id="sec-systems">
-      <h2>Системы-участники</h2>
-      ${UcParticipantSystemsTable(ucParticipantSystems(u.scenarios))}
-    </div>
 
     <div class="section" id="sec-scenarios">
       <div class="section-head-row">
@@ -9100,6 +9099,11 @@ function UseCaseDetailPage(projectId, ucId){
         </div>
       </div>
       ${state.ucScenariosView==="diagram" ? UcDiagramCard(u) : UseCaseScenariosTable(u, p.id, u.id)}
+    </div>
+
+    <div class="section" id="sec-systems">
+      <h2>Список участников</h2>
+      ${UcParticipantSystemsTable(ucParticipantSystems(u.scenarios))}
     </div>
     ${state.ucDiagramModalOpen ? UcDiagramModal(u) : ""}
   `;
@@ -10559,31 +10563,47 @@ function hldFlowDoneMsg(type, r){
 /* ============================= WIZARD: ИМПОРТ USECASE ============================= */
 const UC_WIZARD_STEPS = [
   {key:"setup", label:"Данные сценария"},
-  {key:"result", label:"Разбор и решения"},
+  {key:"result", label:"Результат"},
 ];
 
-function startUcWizard(projectId){
+// opts.editUcId — визард открыт как «Редактирование сценария» (карандаш в списке Use Case
+// или на карточке сценария): те же два шага, но без выбора «новый/существующий», с
+// предзаполненными полями существующего сценария и другими подписями кнопок.
+function startUcWizard(projectId, opts){
   const p = findProject(projectId);
   if(!p) return;
+  const editUc = opts && opts.editUcId ? findUseCase(p, opts.editUcId) : null;
   const nextNum = (p.useCases||[]).length + 1;
   state.ucWizard = {
     projectId,
+    editing: !!editUc,
     stepIndex: 0,
     loading: false,
     importing: false,
     timer: null,
     data:{
-      mode:"new",
+      mode: editUc ? "existing" : "new",
       ucCode: "UC-" + String(nextNum).padStart(3,"0"),
       ucName:"",
-      existingUcId: (p.useCases && p.useCases[0]) ? p.useCases[0].id : "",
-      cjStepCode:"",
-      plantUml:"",
+      existingUcId: editUc ? editUc.id : ((p.useCases && p.useCases[0]) ? p.useCases[0].id : ""),
+      cjStepCode: editUc && editUc.cjStep ? (CJ_STEP_POOL.some(st=>st.code===editUc.cjStep.code) ? editUc.cjStep.code : "") : "",
+      plantUml: editUc ? (editUc.rawPlantUml || UC_SAMPLE_PLANTUML) : "",
       stages: UC_IMPORT_STAGES.map(s=>Object.assign({status:"pending"}, s)),
       parts: [],
     },
   };
   render();
+}
+
+// Существующий сценарий подставляет в форму то, что у него уже есть: привязку к BI step
+// всегда, а исходный PlantUML — только в режиме редактирования (при импорте текст приносит
+// пользователь, поле остаётся пустым).
+function ucWizardSyncExisting(w){
+  const p = findProject(w.projectId);
+  const uc = findUseCase(p, w.data.existingUcId);
+  if(!uc) return;
+  w.data.cjStepCode = uc.cjStep && CJ_STEP_POOL.some(st=>st.code===uc.cjStep.code) ? uc.cjStep.code : "";
+  if(w.editing) w.data.plantUml = uc.rawPlantUml || UC_SAMPLE_PLANTUML;
 }
 function ruPlural(n, one, few, many){
   const mod10 = n % 10, mod100 = n % 100;
@@ -10605,8 +10625,10 @@ function closeUcWizard(){
   if(step==="result") logUcInterruptedRun(w, w.importing ? "import" : "result");
   if(w.timer) clearInterval(w.timer);
   const projectId = w.projectId;
+  const backToUcId = w.editing ? w.data.existingUcId : null;
   state.ucWizard = null;
-  openProjectUseCaseTab(projectId);
+  if(backToUcId) openUseCase(projectId, backToUcId);
+  else openProjectUseCaseTab(projectId);
 }
 
 function logUcInterruptedRun(w, step){
@@ -10639,7 +10661,7 @@ function UcWizardOverlay(){
   // отступы, что и контент, вместо разметки от края до края (см. .wiz-col .wizard-stepper-wrap).
   return `<div class="wizard-overlay wiz-col">
     <div class="wizard-head">
-      <h2>Импортирование сценария</h2>
+      <h2>${w.editing ? "Редактирование сценария" : "Импортирование сценария"}</h2>
       <button class="wizard-close" data-action="close-uc-wizard">${icon("x")}</button>
     </div>
     <div class="wizard-body${centerCls}">
@@ -10691,7 +10713,7 @@ function UcWizardStepFooter(w){
     }
     return `
       <button class="btn btn-outline" data-action="uc-wiz-restart">Переделать сценарий</button>
-      <button class="btn btn-primary" data-action="uc-confirm-apply">Применить сценарий</button>
+      <button class="btn btn-primary" data-action="uc-confirm-apply">${w.editing ? "Применить изменения сценария" : "Применить сценарий"}</button>
     `;
   }
   return "";
@@ -10702,14 +10724,15 @@ function UcStepSetup(w){
   const d = w.data;
   const existingLabel = u => `${u.code} — ${u.name}`;
   const currentExisting = (p.useCases||[]).find(u=>u.id===d.existingUcId);
-  const cjOptions = [{code:"", label:"Без привязки к CJ"}].concat(CJ_STEP_POOL.map(s=>({code:s.code, label:`${s.cjName} → ${s.name} (${s.code})`})));
+  const cjOptions = [{code:"", label:"Без привязки к CJ", sub:""}].concat(CJ_STEP_POOL.map(s=>({code:s.code, label:`${s.cjName} → ${s.name}`, sub:s.code})));
   const currentCj = cjOptions.find(o=>o.code===d.cjStepCode) || cjOptions[0];
   return `
     <div class="uc-step-setup" style="width:100%;max-width:909px;margin:0 auto;">
+      ${w.editing ? "" : `
       <div class="pill-toggle">
         <div class="pill-item ${d.mode==="new"?"active":""}" data-action="uc-set-mode" data-mode="new">Новый сценарий</div>
         <div class="pill-item ${d.mode==="existing"?"active":""}" data-action="uc-set-mode" data-mode="existing">Существующий сценарий</div>
-      </div>
+      </div>`}
       <div class="uc-step-setup-row">
         <div class="field-block">
           ${d.mode==="new" ? `
@@ -10721,9 +10744,9 @@ function UcStepSetup(w){
             </div>
           ` : FloatingSelect({
               id:"ucWizExisting",
-              label:"Существующий сценарий",
-              valueLabel: currentExisting ? existingLabel(currentExisting) : "Выбрать сценарий",
-              menuHtml: (p.useCases||[]).map(u=>`<div class="ds-select-item${d.existingUcId===u.id?" selected":""}" data-action="uc-wiz-set-existing" data-value="${u.id}" title="${escapeHtml(existingLabel(u))}">${escapeHtml(existingLabel(u))}</div>`).join("")
+              label:"Название сценария",
+              valueLabel: currentExisting ? currentExisting.name : "Выбрать сценарий",
+              menuHtml: (p.useCases||[]).map(u=>`<div class="ds-select-item two-line${d.existingUcId===u.id?" selected":""}" data-action="uc-wiz-set-existing" data-value="${u.id}" title="${escapeHtml(existingLabel(u))}"><div>${escapeHtml(u.name)}</div><div class="ds-select-sub">${escapeHtml(u.code)}</div></div>`).join("")
             })}
         </div>
         <div class="field-block">
@@ -10731,7 +10754,7 @@ function UcStepSetup(w){
             id:"ucWizCjStep",
             label:"BI step для привязки к CJ (опционально)",
             valueLabel: currentCj.label,
-            menuHtml: cjOptions.map(o=>`<div class="ds-select-item${o.code===d.cjStepCode?" selected":""}" data-action="uc-wiz-set-cjstep" data-value="${o.code}" title="${escapeHtml(o.label)}">${escapeHtml(o.label)}</div>`).join("")
+            menuHtml: cjOptions.map(o=>`<div class="ds-select-item two-line${o.code===d.cjStepCode?" selected":""}" data-action="uc-wiz-set-cjstep" data-value="${o.code}" title="${escapeHtml(o.label)}"><div>${escapeHtml(o.label)}</div>${o.sub?`<div class="ds-select-sub">${escapeHtml(o.sub)}</div>`:""}</div>`).join("")
           })}
         </div>
       </div>
@@ -10753,8 +10776,8 @@ function UcStepImport(w){
   return `
     <div class="search-loading" style="padding-top:var(--space-10);">
       <div class="spinner"></div>
-      <div>${running ? escapeHtml(running.label) : "Импорт сценария…"}</div>
-      <p style="color:var(--text-secondary);font-size:15px;text-align:center;max-width:420px;margin:0;">Процесс можно прервать в любой момент — уже сохранённые данные останутся доступны в истории импорта</p>
+      <div>Обрабатываем PlantUML</div>
+      <p style="color:var(--text-secondary);font-size:15px;text-align:center;max-width:420px;margin:0;">Не закрывай страницу до завершения обработки. Процесс можно прервать — уже сохранённые данные останутся в истории импорта</p>
     </div>
   `;
 }
@@ -10779,7 +10802,7 @@ function UcStepResult(w){
       <div class="uc-stat-card"><div class="val">${unresolvedParts.length}</div><div class="lbl"><span class="dot orange"></span>Требуют решения</div></div>
     </div>
     <div class="section-head-row" style="margin-bottom:var(--space-4);">
-      <h3 style="margin:0;font-size:15px;">Системы-участники</h3>
+      <h3 style="margin:0;font-size:15px;">Список участников</h3>
     </div>
     <div style="margin-bottom:var(--space-7);">${UcParticipantSystemsTable(ucParticipantSystems(parts))}</div>
     ${resolvedParts.length ? `
@@ -11016,8 +11039,9 @@ function ucConfirmApply(){
   p.ucImportRuns.push(run);
 
   const projectId = p.id, ucId = uc.id;
+  const wasExisting = d.mode==="existing";
   state.ucWizard = null;
-  showToast("Сценарий применён в канонической модели BeeAtlas");
+  showToast(wasExisting ? "Изменения сохранены" : "Сценарий создан");
   openUseCase(projectId, ucId);
 }
 
@@ -12066,6 +12090,7 @@ function handleAction(action, el){
     case "open-project-usecase": openProjectUseCaseTab(el.dataset.id); break;
     case "open-usecase": openUseCase(el.dataset.id, el.dataset.uc); break;
     case "open-usecase-history": go("usecase-history", {projectId: el.dataset.id, ucId: el.dataset.uc}); break;
+    case "edit-usecase": startUcWizard(el.dataset.id, {editUcId: el.dataset.uc}); break;
     case "reset-uc-filters": state.ucSearch=""; state.ucSourceFilter="Все"; state.ucStatusFilter="Все"; render(); break;
     case "uc-source-filter-set": state.ucSourceFilter = el.dataset.value; state.popover=null; render(); break;
     case "uc-status-filter-set": state.ucStatusFilter = el.dataset.value; state.popover=null; render(); break;
@@ -12136,8 +12161,19 @@ function handleAction(action, el){
       if(wasActive) showToast("Импорт прерван. Запуск сохранён в истории импорта");
       break;
     }
-    case "uc-set-mode": state.ucWizard.data.mode = el.dataset.mode; render(); break;
-    case "uc-wiz-set-existing": state.ucWizard.data.existingUcId = el.dataset.value; state.popover = null; render(); break;
+    case "uc-set-mode": {
+      const w = state.ucWizard;
+      w.data.mode = el.dataset.mode;
+      if(w.data.mode==="existing") ucWizardSyncExisting(w);
+      else w.data.cjStepCode = "";
+      render(); break;
+    }
+    case "uc-wiz-set-existing": {
+      const w = state.ucWizard;
+      w.data.existingUcId = el.dataset.value;
+      ucWizardSyncExisting(w);
+      state.popover = null; render(); break;
+    }
     case "uc-wiz-set-cjstep": state.ucWizard.data.cjStepCode = el.dataset.value; state.popover = null; render(); break;
     case "uc-wiz-back": { const w=state.ucWizard; w.stepIndex = Math.max(0, w.stepIndex-1); render(); break; }
     case "uc-fill-sample": state.ucWizard.data.plantUml = UC_SAMPLE_PLANTUML; render(); break;
