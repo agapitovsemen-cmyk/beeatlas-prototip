@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260930-114351">
+<meta name="beeatlas-build" content="20260930-173025">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1517,6 +1517,36 @@
   .inline-alert.info .ia-ico{color:var(--color-status-info);}
   .inline-alert.neutral{background:var(--color-status-neutral-background);}
   .inline-alert.neutral .ia-ico{color:var(--color-status-neutral);}
+
+  /* Ошибка шага визарда «Проведение оценки». Отказ сервиса — это не ошибка заполнения
+     формы, поэтому не Inline alert над пустым экраном (как сейчас в бою), а отдельное
+     состояние шага: иконка статуса, что случилось, что делать дальше и технические
+     подробности под раскрывашкой — их видит только тот, кому они нужны для тикета.
+     Сырое тело ответа (HTML-страница nginx) в интерфейс не попадает никогда. */
+  .wiz-error{display:flex;flex-direction:column;align-items:center;text-align:center;
+    max-width:560px;margin:0 auto;padding:var(--space-10) var(--space-5) var(--space-5);}
+  .wiz-error .we-ico{width:64px;height:64px;border-radius:var(--size-border-radius-circle);
+    display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-6);}
+  .wiz-error .we-ico svg{width:28px;height:28px;}
+  .wiz-error.status-error .we-ico{background:var(--color-status-error-background);color:var(--color-status-error);}
+  .wiz-error.status-warning .we-ico{background:var(--color-status-warning-background);color:var(--color-status-warning);}
+  .wiz-error h2{font-size:23px;line-height:28px;letter-spacing:.2px;font-weight:500;margin:0 0 var(--space-3);}
+  .wiz-error .we-text{font-size:17px;line-height:22px;letter-spacing:.2px;color:var(--text-secondary);margin:0 0 var(--space-4);}
+  .wiz-error .we-hint{font-size:15px;line-height:18px;letter-spacing:.2px;color:var(--text-secondary);margin:0;}
+  .wiz-error .we-details{width:100%;margin-top:var(--space-7);}
+  .wiz-error .we-details-head{display:inline-flex;align-items:center;gap:var(--size-spacing-x1);cursor:pointer;}
+  .wiz-error .we-details-head svg{width:20px;height:20px;transition:transform .15s;}
+  .wiz-error .we-details-head:hover{text-decoration:none;}
+  .wiz-error .we-details-head:hover .we-details-label{text-decoration:underline;}
+  .wiz-error .we-details.open .we-details-head svg{transform:rotate(180deg);}
+  .wiz-error .we-card{margin-top:var(--space-4);text-align:left;background:var(--gray-bg);
+    border-radius:var(--size-border-radius-x6);padding:var(--space-5);}
+  .wiz-error .we-row{display:grid;grid-template-columns:148px 1fr;gap:var(--space-4);
+    font-size:13px;line-height:20px;letter-spacing:.2px;}
+  .wiz-error .we-row .k{color:var(--text-secondary);}
+  .wiz-error .we-row .v{word-break:break-word;}
+  .wiz-error .we-row .v.mono{font-family:ui-monospace,monospace;}
+  .wiz-error .we-card-foot{margin-top:var(--space-4);}
 
   /* ===== агент «Оценка»: шаг ТС и отображение результата (макеты 2026-09) ===== */
 
@@ -9932,6 +9962,7 @@ function startWizard(projectId){
       questions: DEFAULT_QUESTIONS.map(q=>({id:uid("q"),text:q})),
       tc: [],
       tcPage:0,
+      failMode:null,
       tcAppFilter:null,
       coachDismissed:false,
     },
@@ -9946,8 +9977,8 @@ function closeWizard(){
 function WizardOverlay(){
   const w = state.wizard;
   const step = WIZARD_STEPS[w.stepIndex].key;
-  const centerCls = w.loading ? " wizard-body-center" : "";
-  const contentCentered = w.loading ? " centered" : "";
+  const centerCls = (w.loading || w.error) ? " wizard-body-center" : "";
+  const contentCentered = (w.loading || w.error) ? " centered" : "";
   return `<div class="wizard-overlay wiz-col">
     <div class="wizard-head">
       <h2>Проведение оценки</h2>
@@ -9978,6 +10009,7 @@ function WizardStepContent(w){
   if(w.loading){
     return WizardLoadingPanel(w);
   }
+  if(w.error) return WizardStepError(w);
   if(step==="business") return WizardStepBusiness(w);
   if(step==="requirements") return WizardStepRequirements(w);
   if(step==="tc") return WizardStepTc(w);
@@ -10001,6 +10033,13 @@ function WizardStepFooter(w){
   }
   const step = WIZARD_STEPS[w.stepIndex].key;
   const backBtn = step==="business" ? "" : `<button class="btn btn-outline" data-action="wiz-back">Назад</button>`;
+  if(w.error){
+    return `
+      ${backBtn}
+      ${WizardFailDemoLink(w)}
+      <button class="btn btn-primary" data-action="wiz-retry-step" data-step="${escapeHtml(w.error.step)}">${escapeHtml(w.error.retryLabel)}</button>
+    `;
+  }
   if(step==="business"){
     const canGo = w.data.bpUrl.trim().length>0 || w.data.bpText.trim().length>0;
     return `<button class="btn btn-primary" data-action="wiz-to-requirements" ${canGo?"":"disabled"}>Выявить требования</button>`;
@@ -10008,6 +10047,7 @@ function WizardStepFooter(w){
   if(step==="requirements") return `${backBtn}<button class="btn btn-primary" data-action="wiz-to-tc">Выявить ТС</button>`;
   if(step==="tc") return `
     ${backBtn}
+    ${WizardFailDemoLink(w)}
     <button class="btn btn-outline" data-action="wiz-restart-step" data-step="tc">Перезапустить ТС</button>
     <button class="btn btn-primary" data-action="wiz-to-result" ${w.data.tc.some(c=>c.decision)?"":"disabled"}>Провести оценку</button>
   `;
@@ -10318,10 +10358,125 @@ function WizardLoadingPanel(w){
   `;
 }
 
+/* ===== Ошибка шага визарда =====
+   Два состояния, которые пользователь должен различать, потому что дальше он делает
+   разное: «сервис не ответил» лечится повтором, «не уложились во время» повтором чаще
+   всего не лечится — надо уменьшить объём. В бою оба показываются одним красным
+   Inline alert, причём во второй случай в него попадает целиком HTML-страница nginx. */
+const WIZ_ERROR_KINDS = {
+  unavailable: {
+    status: "status-error",
+    icon: "alertTriangle",
+    title: "Сервис подбора ТС не ответил",
+    text: "Запрос не дошёл до сервиса или соединение оборвалось. Данные шага не потеряны — бизнес-постановка и требования остались на месте.",
+    hint: "Чаще всего это разовый сбой: повтори подбор.",
+    retryLabel: "Повторить подбор ТС",
+    code: "502 Bad Gateway",
+    note: "Ответ вернул прокси, сервис за ним не отвечал",
+  },
+  timeout: {
+    status: "status-warning",
+    icon: "history",
+    title: "Подбор ТС не уложился во время",
+    text: "Сервис принял запрос, но не успел ответить за 60 секунд — обработку остановил шлюз. Данные шага не потеряны.",
+    hint: "Повтор имеет смысл, но при большом объёме требований он упрётся в тот же лимит. Тогда вернись на шаг «Требования» и исключи лишнее.",
+    retryLabel: "Повторить подбор ТС",
+    code: "504 Gateway Timeout",
+    note: "Превышен лимит ожидания ответа: 60 с",
+  },
+};
+
+function WizardStepError(w){
+  const e = w.error;
+  const open = !!w.errorDetailsOpen;
+  return `
+    <div class="wiz-error ${e.status}">
+      <div class="we-ico">${icon(e.icon)}</div>
+      <h2>${escapeHtml(e.title)}</h2>
+      <p class="we-text">${escapeHtml(e.text)}</p>
+      <p class="we-hint">${escapeHtml(e.hint)}</p>
+
+      <div class="we-details${open?" open":""}">
+        <span class="reset-link we-details-head" data-action="wiz-toggle-error-details"><span class="we-details-label">Технические подробности</span>${icon("chevronDown")}</span>
+        ${open ? `
+          <div class="we-card">
+            ${[
+              ["Код ответа", e.code, true],
+              ["Что это значит", e.note, false],
+              ["Шаг", "Выявление Technical Capability", false],
+              ["Запрос", e.endpoint, true],
+              ["ID запроса", e.requestId, true],
+              ["Время", e.at, false],
+            ].map(([k,v,mono])=>`<div class="we-row"><span class="k">${escapeHtml(k)}</span><span class="v${mono?" mono":""}">${escapeHtml(v)}</span></div>`).join("")}
+            <div class="we-card-foot">
+              <button class="btn btn-outline btn-sm" data-action="wiz-copy-error">Скопировать для поддержки</button>
+            </div>
+          </div>
+        ` : ""}
+      </div>
+    </div>
+  `;
+}
+
+/* Демо-переключатель: в прототипе сбой нужно уметь показать по требованию.
+   На бою этой ссылки нет — сбой приходит от сервиса. */
+function WizardFailDemoLink(w){
+  const open = state.popover==="wiz-fail";
+  return `
+    <span style="position:relative;margin-right:auto;">
+      <span class="reset-link" style="color:var(--text-secondary);" data-action="toggle-popover" data-popover="wiz-fail">Смоделировать сбой</span>
+      ${open ? `
+        <div class="popover" style="top:auto;bottom:calc(100% + var(--size-spacing-x2));left:0;right:auto;min-width:260px;">
+          <div class="pv-item" data-action="wiz-sim-fail" data-kind="unavailable">Сервис не ответил</div>
+          <div class="pv-item" data-action="wiz-sim-fail" data-kind="timeout">Таймаут обработки</div>
+        </div>
+      ` : ""}
+    </span>
+  `;
+}
+
+function tcAnalyzeStages(w, pool){
+  const tiles = [
+    {lbl:"FR для анализа", val: w.data.fr.length},
+    {lbl:"NFR для анализа", val: w.data.nfr.length},
+    {lbl:"Кандидатов ТС", val: pool.length},
+  ];
+  return [
+    {title:"Выявление Technical Capability", subtitle:"Формирование кандидатов ТС из требований…", tiles, delay:900},
+    {title:"Выявление Technical Capability", subtitle:"Поиск подходящих ВС в каталоге…", tiles, delay:900},
+    {title:"Выявление Technical Capability", subtitle:"Сопоставление кандидатов с найденными ТС…", tiles, delay:900},
+  ];
+}
+
+function failWizardStep(kind){
+  const w = state.wizard;
+  const meta = WIZ_ERROR_KINDS[kind];
+  w.errorDetailsOpen = false;
+  w.error = Object.assign({}, meta, {
+    kind, step:"tc",
+    endpoint: "POST /api/v1/assessment/tc/analyze",
+    requestId: "req_" + Math.random().toString(16).slice(2, 8),
+    at: NOW_DATE,
+  });
+  w.stepIndex = WIZARD_STEPS.findIndex(s=>s.key==="tc");
+  render();
+}
+
+function wizErrorClipboardText(e){
+  return [
+    "Ошибка шага «ТС» (Проведение оценки)",
+    "Код ответа: " + e.code,
+    "Запрос: " + e.endpoint,
+    "ID запроса: " + e.requestId,
+    "Время: " + e.at,
+  ].join("\n");
+}
+
 /* Запускает переход/пересчёт шага визарда с экраном загрузки; applyFn выполняет фактическое
    изменение данных и должен сам проставить нужный w.stepIndex, если это переход на другой шаг. */
 function startWizardLoading(info, delay, applyFn, doneMsg){
   const w = state.wizard;
+  w.error = null;
   w.loading = true;
   w.loadingInfo = info;
   render();
@@ -10341,6 +10496,7 @@ function startWizardLoading(info, delay, applyFn, doneMsg){
    как процесс, а не как один короткий спиннер. */
 function startWizardLoadingStaged(stages, applyFn, doneMsg){
   const w = state.wizard;
+  w.error = null;
   w.loading = true;
   let i = 0;
   const nextStage = ()=>{
@@ -12398,7 +12554,7 @@ function handleAction(action, el){
     case "wiz-back": {
       const w = state.wizard;
       if(w.loadingTimer){ clearTimeout(w.loadingTimer); w.loadingTimer = null; }
-      w.loading = false; w.loadingInfo = null;
+      w.loading = false; w.loadingInfo = null; w.error = null;
       w.stepIndex = Math.max(0, w.stepIndex-1); render(); setTimeout(bindTocScroll,30); break;
     }
     case "wiz-abort-loading": {
@@ -12424,17 +12580,8 @@ function handleAction(action, el){
     case "wiz-to-tc": {
       const w = state.wizard;
       const pool = w.data.tc.length ? w.data.tc : makeTcCandidatePool();
-      const tiles = [
-        {lbl:"FR для анализа", val: w.data.fr.length},
-        {lbl:"NFR для анализа", val: w.data.nfr.length},
-        {lbl:"Кандидатов ТС", val: pool.length},
-      ];
       startWizardLoadingStaged(
-        [
-          {title:"Выявление Technical Capability", subtitle:"Формирование кандидатов ТС из требований…", tiles, delay:900},
-          {title:"Выявление Technical Capability", subtitle:"Поиск подходящих ВС в каталоге…", tiles, delay:900},
-          {title:"Выявление Technical Capability", subtitle:"Сопоставление кандидатов с найденными ТС…", tiles, delay:900},
-        ],
+        tcAnalyzeStages(w, pool),
         ()=>{
           w.data.tc = analyzeTcPool(pool);
           w.data.tcPage = 0;
@@ -12443,6 +12590,36 @@ function handleAction(action, el){
         },
         "Кандидатов ТС: " + pool.length
       );
+      break;
+    }
+    case "wiz-sim-fail": {
+      const w = state.wizard;
+      state.popover = null;
+      const kind = el.dataset.kind;
+      const pool = w.data.tc.length ? w.data.tc : makeTcCandidatePool();
+      startWizardLoadingStaged(tcAnalyzeStages(w, pool), ()=>failWizardStep(kind));
+      break;
+    }
+    case "wiz-retry-step": {
+      const w = state.wizard;
+      const pool = w.data.tc.length ? w.data.tc : makeTcCandidatePool();
+      startWizardLoadingStaged(
+        tcAnalyzeStages(w, pool),
+        ()=>{
+          w.data.tc = analyzeTcPool(pool);
+          w.data.tcPage = 0;
+          w.data.tcAppFilter = null;
+          w.stepIndex = WIZARD_STEPS.findIndex(s=>s.key==="tc");
+        },
+        "Кандидатов ТС: " + pool.length
+      );
+      break;
+    }
+    case "wiz-toggle-error-details": state.wizard.errorDetailsOpen = !state.wizard.errorDetailsOpen; render(); break;
+    case "wiz-copy-error": {
+      const txt = wizErrorClipboardText(state.wizard.error);
+      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).catch(()=>{});
+      showToast("Подробности скопированы");
       break;
     }
     case "wiz-restart-step": {
