@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20261001-133837">
+<meta name="beeatlas-build" content="20261001-152104">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -5591,7 +5591,8 @@ const DS_ICONS = {
   send:'send', box:'safebox', pencil:'edit', alertTriangle:'warning_triangle',
   moreVertical:'more_vert', info:'info_circled', download:'download', gear:'settings',
   externalLink:'open_in_window', eye:'eye', zoomIn:'zoom_in', zoomOut:'zoom_out',
-  minimize:'collapse', gitBranch:'split', gitMerge:'merge', trash:'delete', history:'clock'
+  minimize:'collapse', gitBranch:'split', gitMerge:'merge', trash:'delete', history:'clock',
+  filter:'filter'
 };
 function icon(name){
   const ds = DS_ICONS[name];
@@ -7702,7 +7703,7 @@ function CjLibraryPage(){
         ${icon("search")}
         <input class="input" id="cjSearchInput" placeholder="Название или ID CJ" value="${escapeHtml(state.cjSearch)}">
       </div>
-      <button class="btn btn-outline" data-action="cj-open-filters">${icon("layers")} Фильтры${activeCount?` <span class="badge blue" style="margin-left:4px;">${activeCount}</span>`:""}</button>
+      <button class="btn btn-outline" data-action="cj-open-filters">${icon("filter")} Фильтры${activeCount?` <span class="badge blue" style="margin-left:4px;">${activeCount}</span>`:""}</button>
       ${hasReset ? `<span class="reset-link" data-action="cj-reset-search-all">Сбросить</span>` : ""}
       <div class="view-toggle">
         <button class="view-toggle-btn ${state.cjView==="grid"?"active":""}" data-action="cj-set-view" data-mode="grid" title="Карточки">${icon("grid")}</button>
