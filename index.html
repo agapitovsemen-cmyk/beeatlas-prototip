@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20261001-152104">
+<meta name="beeatlas-build" content="20261001-153142">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -2023,7 +2023,6 @@
   .cj-merge-info-card .hd{font-weight:700;font-size:13.5px;display:flex;align-items:baseline;gap:6px;}
   .cj-merge-info-card .hd .sub{font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.03em;}
   .cj-merge-info-card .upd{font-size:12.5px;color:var(--text-secondary);margin-top:var(--space-2);}
-  .cj-merge-info-card .desc{font-size:12.5px;color:var(--text-tertiary);margin-top:4px;line-height:1.45;}
   .cj-merge-strategy{display:flex;flex-direction:column;gap:var(--space-3);}
   .cj-merge-strategy-card{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:var(--space-4);cursor:pointer;}
   .cj-merge-strategy-card .t{font-weight:700;font-size:13.5px;margin-bottom:4px;}
@@ -4784,7 +4783,7 @@ function ucSystemBranchMeta(){
 }
 function ucBranchList(u){ return u.branches || []; }
 function ucBranchInfo(u, branchId){
-  return (u.branchInfo && u.branchInfo[branchId]) || {updatedAt:null, changeDescription:null};
+  return (u.branchInfo && u.branchInfo[branchId]) || {updatedAt:null};
 }
 function ucCaptureBranch(u){
   const snap = {};
@@ -4823,9 +4822,9 @@ function ensureUcBranches(u){
     main: ucCaptureBranch(u),
   };
   u.branchInfo = {
-    design: {updatedAt:null, changeDescription:"Черновик: начало сценария"},
-    develop: {updatedAt:null, changeDescription:null},
-    main: {updatedAt:u.updated, changeDescription:"Текущее состояние сценария"},
+    design: {updatedAt:null},
+    develop: {updatedAt:null},
+    main: {updatedAt:u.updated},
   };
 }
 /* Ветка открывается по тому же правилу, что и в Библиотеке CJ: main, если он заполнен,
@@ -4912,7 +4911,6 @@ function seedHeroUcBranches(useCases){
   const uc1 = useCases[0];
   if(!uc1) return;
   uc1.branchInfo.design.updatedAt = "22.01.2025";
-  uc1.branchInfo.design.changeDescription = "Черновая проработка первых шагов сценария";
 
   const develop = deepClone(ucBranchData(uc1, "main"));
   develop.scenarios[0].action = "Пользователь вводит логин и пароль. Приложение передаёт учётные данные во внешний шлюз авторизации, который проверяет их и возвращает токен доступа; при ошибке — код и текст сообщения для показа пользователю.";
@@ -4922,7 +4920,7 @@ function seedHeroUcBranches(useCases){
     api:"fraud_api", call:"POST /api/v1/fraud/check", status:"planned",
   });
   uc1.branchStore.develop = develop;
-  uc1.branchInfo.develop = {updatedAt:"05.02.2025", changeDescription:"Переформулирован шаг авторизации и добавлена проверка антифрода"};
+  uc1.branchInfo.develop = {updatedAt:"05.02.2025"};
 }
 
 function existingProject(i){
@@ -5372,23 +5370,23 @@ function cjSystemBranchMeta(){
 }
 ["cj2","cj3","cj4","cj5","cj6"].forEach(id=>{ CJ_BRANCH_META[id] = cjSystemBranchMeta(); });
 
-// updatedAt/changeDescription — per-branch "last change" metadata shown on the merge
-// panel's compare cards (2026-09-23 walkthrough: replaces raw stage/scenario/source
-// counts, which the team found unhelpful, with recency + what changed). Seeded here for
-// the demo branches that already have real content; null means "never touched" and
-// renders as "Ещё не обновлялась" — set for real once a merge actually writes the branch
-// (see cj-merge-submit) or a user branch is created (see cj-branch-create-submit).
+// updatedAt — дата последнего изменения ветки, показывается на карточках «Откуда/Куда»
+// в форме объединения. null означает «ветку ещё не трогали» и рисуется как «Ещё не
+// обновлялась»; реальная дата проставляется при объединении (cj-merge-submit) и при
+// создании пользовательской ветки (cj-branch-create-submit).
+// Поля с описанием изменения здесь раньше не было смысла: его можно было прочитать
+// только в той же форме, где оно и вводилось, поэтому и поле, и хранение убраны.
 const CJ_BRANCHES = {
   cj1: {
-    design: { stages: CJ_DESIGN_STAGES, updatedAt:"22.01.2025", changeDescription:"Черновая проработка первых 2 этапов" },
-    develop: { stages: CJ_DEVELOP_STAGES, updatedAt:"05.02.2025", changeDescription:"Переформулирован шаг отключения услуги (SMS) и добавлен новый сценарий отключения через IVR" },
-    main: { stages: CJ_MAIN_STAGES, updatedAt:"20.01.2025", changeDescription:"Опубликованная версия" },
+    design: { stages: CJ_DESIGN_STAGES, updatedAt:"22.01.2025" },
+    develop: { stages: CJ_DEVELOP_STAGES, updatedAt:"05.02.2025" },
+    main: { stages: CJ_MAIN_STAGES, updatedAt:"20.01.2025" },
   },
-  cj2: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ2_STAGES, updatedAt:"20.01.2025", changeDescription:"Опубликованная версия"} },
-  cj3: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ3_STAGES, updatedAt:"20.01.2025", changeDescription:"Опубликованная версия"} },
-  cj4: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ4_STAGES, updatedAt:"18.01.2025", changeDescription:"Опубликованная версия"} },
-  cj5: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ5_STAGES, updatedAt:"18.01.2025", changeDescription:"Опубликованная версия"} },
-  cj6: { design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null}, main:{stages:CJ6_STAGES, updatedAt:"18.01.2025", changeDescription:"Опубликованная версия"} },
+  cj2: { design:{stages:[cjUnfilledStage()], updatedAt:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null}, main:{stages:CJ2_STAGES, updatedAt:"20.01.2025"} },
+  cj3: { design:{stages:[cjUnfilledStage()], updatedAt:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null}, main:{stages:CJ3_STAGES, updatedAt:"20.01.2025"} },
+  cj4: { design:{stages:[cjUnfilledStage()], updatedAt:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null}, main:{stages:CJ4_STAGES, updatedAt:"18.01.2025"} },
+  cj5: { design:{stages:[cjUnfilledStage()], updatedAt:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null}, main:{stages:CJ5_STAGES, updatedAt:"18.01.2025"} },
+  cj6: { design:{stages:[cjUnfilledStage()], updatedAt:null}, develop:{stages:[cjUnfilledStage()], updatedAt:null}, main:{stages:CJ6_STAGES, updatedAt:"18.01.2025"} },
 };
 
 // Simplified stand-in for "does this branch's product/method catalog resolve this call" —
@@ -5473,9 +5471,9 @@ function ensureCjBranches(cjId){
   // только что созданный CJ — во всех трёх ветках есть черновик-заготовка (незаполненный
   // этап), а не буквально пустая матрица; см. cjUnfilledStage.
   CJ_BRANCHES[cjId] = {
-    design:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null},
-    develop:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null},
-    main:{stages:[cjUnfilledStage()], updatedAt:null, changeDescription:null},
+    design:{stages:[cjUnfilledStage()], updatedAt:null},
+    develop:{stages:[cjUnfilledStage()], updatedAt:null},
+    main:{stages:[cjUnfilledStage()], updatedAt:null},
   };
 }
 function activeCjStages(){
@@ -8371,19 +8369,16 @@ function CjBranchCreatePanel(){
 // - откуда/куда pill rows → field-styled custom selects (see CjSelectField)
 // - the schematic "откуда→куда" compare cards with stage/scenario/source counts were
 //   called excessive and unhelpful — replaced with a plain description+date per branch
-// - added an optional merge-description field (no "commit" entity exists otherwise, so
-//   there'd be no record of *what* was merged) and a conflict-blocking validation step
+// - добавлена проверка конфликтов, блокирующая объединение
 // - moved from a side panel into a full-screen modal (richer content no longer fits
 //   compressed in a 560px-wide side panel) — same wizard-overlay pattern as CjBpmnOverlay
 function CjMergeBranchInfo(cjId, branchId, label){
   const b = CJ_BRANCHES[cjId] && CJ_BRANCHES[cjId][branchId];
   const updated = b && b.updatedAt;
-  const desc = b && b.changeDescription;
   return `
     <div class="cj-merge-info-card">
       <div class="hd">${escapeHtml(branchId)}<span class="sub">${label}</span></div>
       <div class="upd">${updated ? `Обновлено: ${escapeHtml(updated)}` : "Ещё не обновлялась"}</div>
-      <div class="desc">${desc ? escapeHtml(desc) : "—"}</div>
     </div>
   `;
 }
@@ -8442,11 +8437,6 @@ function CjMergePanel(){
               <div class="d">Весь состав «${escapeHtml(p.target)}» будет полностью заменён составом «${escapeHtml(p.source)}».</div>
             </div>
           </div>
-        </div>
-
-        <div class="field-block">
-          <label class="field-label">Описание объединения (необязательно)</label>
-          <textarea class="textarea" id="cjMergeDescInput" style="min-height:70px;" placeholder="Что перелили и зачем — пригодится, когда вернёшься к этой ветке позже">${escapeHtml(p.description||"")}</textarea>
         </div>
 
         ${p.conflicts && p.conflicts.length ? `
@@ -8607,7 +8597,6 @@ function UcMergeBranchInfo(u, branchId, label){
     <div class="cj-merge-info-card">
       <div class="hd">${escapeHtml(branchId)}<span class="sub">${label}</span></div>
       <div class="upd">${info.updatedAt ? `Обновлено: ${escapeHtml(info.updatedAt)}` : "Ещё не обновлялась"} · ${steps ? `Шагов: ${steps}` : "Сценарий не заполнен"}</div>
-      <div class="desc">${info.changeDescription ? escapeHtml(info.changeDescription) : "—"}</div>
     </div>
   `;
 }
@@ -8669,11 +8658,6 @@ function UcMergePanel(){
               <div class="d">Весь состав «${escapeHtml(m.target)}» будет полностью заменён составом «${escapeHtml(m.source)}».</div>
             </div>
           </div>
-        </div>
-
-        <div class="field-block">
-          <label class="field-label">Описание объединения (необязательно)</label>
-          <textarea class="textarea" id="ucMergeDescInput" style="min-height:70px;" placeholder="Что перенесли и зачем — пригодится, когда вернёшься к этой ветке позже">${escapeHtml(m.description||"")}</textarea>
         </div>
 
         ${m.conflicts && m.conflicts.length ? `
@@ -12483,8 +12467,6 @@ function handleInput(el){
   else if(el.id==="cjCreateName"){ state.cjCreatePanel.name = el.value; render(); reFocus("cjCreateName"); }
   else if(el.id==="cjBranchName"){ state.cjBranchPanel.name = el.value; render(); reFocus("cjBranchName"); }
   else if(el.id==="ucBranchName"){ state.ucBranchPanel.name = el.value; render(); reFocus("ucBranchName"); }
-  else if(el.id==="ucMergeDescInput"){ state.ucMergePanel.description = el.value; render(); reFocus("ucMergeDescInput"); }
-  else if(el.id==="cjMergeDescInput"){ state.cjMergePanel.description = el.value; render(); reFocus("cjMergeDescInput"); }
   else if(el.id==="cjCreatePortrait"){ state.cjCreatePanel.portrait = el.value; render(); reFocus("cjCreatePortrait"); }
   else if(el.id==="cjCreateOwner"){ state.cjCreatePanel.owner = el.value; render(); reFocus("cjCreateOwner"); }
   else if(el.id==="cjCreateTags"){ state.cjCreatePanel.tags = el.value; render(); reFocus("cjCreateTags"); }
@@ -12648,7 +12630,7 @@ function handleAction(action, el){
       const existing = cjBranchList(cjId).map(b=>b.id.toLowerCase());
       if(!name || reserved.includes(name.toLowerCase()) || existing.includes(name.toLowerCase())) break;
       if(!CJ_BRANCHES[cjId]) CJ_BRANCHES[cjId] = {};
-      CJ_BRANCHES[cjId][name] = { stages: deepClone(cjBranchTree(cjId, p.parent)), updatedAt: NOW_DATE, changeDescription: `Создана как клон «${p.parent}»` };
+      CJ_BRANCHES[cjId][name] = { stages: deepClone(cjBranchTree(cjId, p.parent)), updatedAt: NOW_DATE };
       cjBranchList(cjId).push({id:name, kind:"user", parent:p.parent, createdBy:ARCHITECT, createdAt:NOW_DATE});
       state.cjOpen.branch = name;
       state.cjBranchPanel = null;
@@ -12678,7 +12660,7 @@ function handleAction(action, el){
       const branches = cjBranchList(cjId).map(b=>b.id);
       const source = state.cjOpen.branch;
       const target = branches.find(b=>b!==source) || source;
-      state.cjMergePanel = {source, target, strategy:"add", description:"", conflicts:null};
+      state.cjMergePanel = {source, target, strategy:"add", conflicts:null};
       state.popover = null;
       render();
       break;
@@ -12726,7 +12708,7 @@ function handleAction(action, el){
       // target branch's own product methods, which takes time in the real system. Panel
       // closes right away; a persistent banner in CjBranchBar shows progress and the
       // target branch stays visible (read-only) so the user can "провалиться и посмотреть".
-      state.cjMergeRunning = {cjId, source:p.source, target:p.target, strategy:p.strategy, description:p.description};
+      state.cjMergeRunning = {cjId, source:p.source, target:p.target, strategy:p.strategy};
       state.cjMergePanel = null;
       state.popover = null;
       render();
@@ -12736,7 +12718,6 @@ function handleAction(action, el){
         cjMergeExecute(r.cjId, r.source, r.target, r.strategy);
         if(CJ_BRANCHES[r.cjId] && CJ_BRANCHES[r.cjId][r.target]){
           CJ_BRANCHES[r.cjId][r.target].updatedAt = NOW_DATE;
-          CJ_BRANCHES[r.cjId][r.target].changeDescription = (r.description||"").trim() || "(без описания)";
         }
         state.cjMergeRunning = null;
         showToast(`Ветка «${r.source}» объединена с «${r.target}» (${r.strategy==="replace"?"замена":"добавление"})`);
@@ -12776,7 +12757,7 @@ function handleAction(action, el){
       const existing = ucBranchList(u).map(b=>b.id.toLowerCase());
       if(!name || UC_SYSTEM_BRANCHES.includes(name.toLowerCase()) || existing.includes(name.toLowerCase())) break;
       u.branchStore[name] = deepClone(ucBranchData(u, panel.parent));
-      u.branchInfo[name] = {updatedAt: NOW_DATE, changeDescription:`Создана как клон «${panel.parent}»`};
+      u.branchInfo[name] = {updatedAt: NOW_DATE};
       ucBranchList(u).push({id:name, kind:"user", parent:panel.parent, createdBy:ARCHITECT, createdAt:NOW_DATE});
       ucApplyBranch(u, name);
       state.ucBranchPanel = null;
@@ -12812,7 +12793,7 @@ function handleAction(action, el){
       const ids = ucBranchList(u).map(b=>b.id);
       const source = u.branch;
       const target = ids.find(b=>b!==source) || source;
-      state.ucMergePanel = {projectId:p.id, ucId:u.id, source, target, strategy:"add", description:"", conflicts:null};
+      state.ucMergePanel = {projectId:p.id, ucId:u.id, source, target, strategy:"add", conflicts:null};
       state.popover = null;
       render();
       break;
@@ -12858,7 +12839,7 @@ function handleAction(action, el){
       // Объединение не мгновенное: ссылки пересобираются под ландшафт целевой ветки.
       // Панель закрывается сразу, прогресс виден в строке веток, а целевую ветку в это
       // время можно открыть и посмотреть — но не редактировать.
-      state.ucMergeRunning = {projectId:p.id, ucId:u.id, source:m.source, target:m.target, strategy:m.strategy, description:m.description};
+      state.ucMergeRunning = {projectId:p.id, ucId:u.id, source:m.source, target:m.target, strategy:m.strategy};
       state.ucMergePanel = null;
       state.popover = null;
       render();
@@ -12869,10 +12850,7 @@ function handleAction(action, el){
         const uc = proj && findUseCase(proj, r.ucId);
         if(uc){
           ucMergeExecute(uc, r.source, r.target, r.strategy);
-          uc.branchInfo[r.target] = {
-            updatedAt: NOW_DATE,
-            changeDescription: (r.description||"").trim() || "(без описания)",
-          };
+          uc.branchInfo[r.target] = {updatedAt: NOW_DATE};
         }
         state.ucMergeRunning = null;
         showToast(`Ветка «${r.source}» объединена с «${r.target}» (${r.strategy==="replace"?"замена":"добавление"})`);
