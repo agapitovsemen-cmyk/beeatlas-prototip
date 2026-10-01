@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20260930-173025">
+<meta name="beeatlas-build" content="20261001-121205">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1908,6 +1908,13 @@
   .cj-menu-item .beeline-icons{width:17px;height:17px;color:var(--text-secondary);font-size:17px;}
 
   /* ---------- CJ branches (design/develop/main + user) ---------- */
+  /* Строка веток на странице проекта: та же раскладка, что у .cj-branch-bar в оверлее CJ,
+     но в виде блока на обычной странице — со своей рамкой и скруглением, без разделителя. */
+  .proj-branch-block{margin-bottom:var(--space-6);}
+  .proj-branch-bar{display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;padding:var(--space-3) var(--space-4);border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-alt);}
+  /* Блокировка и прогресс объединения — одной группой справа: по отдельности они упираются
+     в край строки и обрезаются, а вместе переносятся на следующую строку целиком. */
+  .proj-branch-status{display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;margin-left:auto;}
   .cj-branch-bar{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border);background:var(--bg-alt);flex-wrap:wrap;}
   .cj-branch-toggle-wrap{position:relative;height:0;flex:0 0 auto;z-index:5;}
   .cj-branch-toggle-pill{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);box-shadow:var(--shadow);font-size:12.5px;font-weight:500;color:var(--text-secondary);cursor:pointer;white-space:nowrap;}
@@ -4593,7 +4600,7 @@ function makeAssessment(name){
    держится восстановление открытой страницы (см. saveLocation/restoreRoute). */
 let projSeq = 0;
 function freshProject(name, code){
-  return {
+  return Object.assign({
     id: "proj-" + (++projSeq),
     name, code,
     status:"Активен",
@@ -4601,6 +4608,14 @@ function freshProject(name, code){
     jira:"SFDM-6789",
     updated: NOW_DATE,
     mine:true,
+  }, projEmptyBranchData());
+}
+
+/* Содержимое проекта, которое висит на ветке, а не на самом проекте, — в одном месте,
+   чтобы новый проект и новая (пустая) ветка собирались из одного источника.
+   Остальные поля (название, код, статус, архитектор) веткой не управляются. */
+function projEmptyBranchData(){
+  return {
     assessmentScore:null,
     business:null,
     useCases:[],
@@ -4720,6 +4735,198 @@ const MOCK_ARCHITECT_POOL = [
   "Шестопалов Денис Валерьевич",
 ];
 
+/* ============================= ВЕТКИ ПРОЕКТА ============================= */
+/* Та же модель «артефакт → ветка → состав», что у Библиотеки CJ (VISION §1, принцип 2),
+   только корень агрегата — проект целиком. Сам проект (название, код, статус,
+   архитектор) — стабильный якорь, а содержимое — бизнес-постановка, Use Case вместе с
+   историей импорта, оценка и агенты — висит на ветке. Отдельного ветвления у Use Case и
+   оценки нет: в каждой ветке проекта они свои.
+
+   Активная ветка лежит прямо в полях проекта (p.business / p.useCases / p.agents / …),
+   остальные — снимками в p.branchStore. Поэтому весь существующий код страниц проекта,
+   визардов и агентов продолжает читать и писать p.* напрямую и становится
+   ветко-зависимым бесплатно — ровно так же, как activeCjStages() сделал это для CJ. */
+const PROJ_BRANCH_FIELDS = ["assessmentScore","business","useCases","ucImportRuns","agents"];
+const PROJ_SYSTEM_BRANCHES = ["design","develop","main"];
+
+function projSystemBranchMeta(){
+  return PROJ_SYSTEM_BRANCHES.map(id=>({id, kind:"system", parent:null, createdBy:null, createdAt:null}));
+}
+function projBranchList(p){ return p.branches || []; }
+function projBranchInfo(p, branchId){
+  return (p.branchInfo && p.branchInfo[branchId]) || {updatedAt:null, changeDescription:null};
+}
+/* Снимок активной ветки — то, что прямо сейчас лежит в полях проекта. */
+function projCaptureBranch(p){
+  const snap = {};
+  PROJ_BRANCH_FIELDS.forEach(f=>{ snap[f] = p[f]; });
+  return snap;
+}
+/* Читать можно любую ветку: активная живёт в полях проекта, остальные — в branchStore. */
+function projBranchData(p, branchId){
+  if(branchId === p.branch) return projCaptureBranch(p);
+  return (p.branchStore && p.branchStore[branchId]) || projEmptyBranchData();
+}
+function projWriteBranch(p, branchId, data){
+  if(branchId === p.branch) PROJ_BRANCH_FIELDS.forEach(f=>{ p[f] = data[f]; });
+  p.branchStore[branchId] = data;
+}
+function projApplyBranch(p, branchId){
+  p.branchStore[p.branch] = projCaptureBranch(p);   // убираем текущую ветку обратно в хранилище
+  const snap = p.branchStore[branchId] || projEmptyBranchData();
+  PROJ_BRANCH_FIELDS.forEach(f=>{ p[f] = snap[f]; });
+  p.branch = branchId;
+}
+
+/* Создание проекта = создание трёх системных веток (VISION §3.1). Текущее содержимое
+   уезжает в main — это та же миграция, что описана в вижне для существующих данных;
+   design и develop стартуют своей, независимой копией (ветки полностью изолированы,
+   состав между ними не расшаривается). Пользовательские ветки клонируются от выбранного
+   родителя, системные удалить нельзя (§4.3/§6.6). */
+function ensureProjBranches(p){
+  if(p.branches) return;
+  p.branches = projSystemBranchMeta();
+  p.branch = "main";
+  p.branchInfo = {
+    design:{updatedAt:null, changeDescription:null},
+    develop:{updatedAt:null, changeDescription:null},
+    main:{updatedAt:p.updated, changeDescription:"Текущее состояние проекта"},
+  };
+  p.branchStore = {
+    design: projEmptyBranchData(),
+    develop: projEmptyBranchData(),
+    main: projCaptureBranch(p),
+  };
+}
+
+/* Пока идёт объединение, целевая ветка доступна только на чтение: ссылки в ней
+   пересобираются под ландшафт, и писать туда в этот момент нельзя. Одновременно
+   выполняется только одно объединение — на всё приложение, а не на проект. */
+function projBranchLocked(p, branchId){
+  const r = state.projMergeRunning;
+  return !!(r && p && r.projectId === p.id && r.target === branchId);
+}
+/* Общая проверка для точек редактирования: вернёт true и покажет подсказку,
+   если прямо сейчас писать в активную ветку нельзя. */
+function projActiveBranchLocked(projectId){
+  const p = findProject(projectId);
+  if(p && projBranchLocked(p, p.branch)){
+    showToast("Ветка обновляется, дождитесь завершения объединения");
+    return true;
+  }
+  return false;
+}
+
+/* Упрощённая модель «какие интерфейсы известны ландшафту ветки». В вижне это отдельная
+   ось — ветки продуктовой модели (§3.2), которые прототип не моделирует, поэтому
+   ключуем по системной ветке; пользовательские наследуют набор от родителя. */
+const PROJ_BRANCH_KNOWN_APIS = {
+  design:  ["users_api","cart_api","pricing_api","orders_api","billing_api","notify_api","loyalty_api"],
+  develop: ["users_api","cart_api","pricing_api","orders_api","billing_api","notify_api","loyalty_api","fraud_api"],
+  main:    ["users_api","cart_api","pricing_api","orders_api","billing_api","notify_api","loyalty_api"],
+};
+function projBranchKnownApis(p, branchId){
+  if(PROJ_BRANCH_KNOWN_APIS[branchId]) return PROJ_BRANCH_KNOWN_APIS[branchId];
+  const meta = projBranchList(p).find(b=>b.id===branchId);
+  return meta && meta.parent ? projBranchKnownApis(p, meta.parent) : PROJ_BRANCH_KNOWN_APIS.main;
+}
+/* Объединение не мгновенное: ссылки Use Case пересобираются под ландшафт целевой ветки
+   и могут не разрешиться (шаг из develop зовёт интерфейс, которого в main ещё нет).
+   Тогда объединение блокируется целиком — частичного и принудительного переноса в первой
+   версии нет. Проверяем только то, что объединение реально принесёт: при стратегии
+   «добавление» части, которые и так пропускаются по коду, в расчёт не идут. */
+function projMergeConflicts(p, source, target, strategy){
+  const known = new Set(projBranchKnownApis(p, target));
+  const src = projBranchData(p, source);
+  const tgt = projBranchData(p, target);
+  const conflicts = [];
+  const seen = new Set();
+  (src.useCases||[]).forEach(uc=>{
+    const tgtUc = strategy==="replace" ? null : (tgt.useCases||[]).find(u=>u.code===uc.code);
+    (uc.scenarios||[]).forEach(sc=>{
+      if(strategy==="add" && tgtUc && (tgtUc.scenarios||[]).some(x=>x.part===sc.part)) return;
+      if(sc.api && !known.has(sc.api) && !seen.has(sc.api)){
+        seen.add(sc.api);
+        conflicts.push({api:sc.api, call:sc.call, ucName:uc.name});
+      }
+    });
+  });
+  return conflicts;
+}
+
+/* Ветки полностью изолированы, поэтому объединение — это запись в снимок целевой ветки
+   (так же, как cjMergeExecute мутирует CJ_BRANCHES). Стратегии те же две, без
+   трёхстороннего диффа и cherry-pick (§4.2):
+   replace — целевая ветка целиком заменяется исходной;
+   add     — переносится только то, чего в целевой нет: Use Case по коду, внутри
+             существующего Use Case — части сценария по коду части. Бизнес-постановка
+             и оценка переносятся, только если в целевой ветке их ещё нет. */
+function projMergeExecute(p, source, target, strategy){
+  const src = deepClone(projBranchData(p, source));
+  if(strategy === "replace"){ projWriteBranch(p, target, src); return; }
+
+  const tgt = deepClone(projBranchData(p, target));
+  (src.useCases||[]).forEach(srcUc=>{
+    const tgtUc = tgt.useCases.find(u=>u.code===srcUc.code);
+    if(!tgtUc){ tgt.useCases.push(srcUc); return; }
+    if(!tgtUc.scenarios) tgtUc.scenarios = [];
+    (srcUc.scenarios||[]).forEach(sc=>{
+      if(!tgtUc.scenarios.some(x=>x.part===sc.part)) tgtUc.scenarios.push(sc);
+    });
+  });
+  (src.ucImportRuns||[]).forEach(run=>{
+    if(!tgt.ucImportRuns.some(x=>x.id===run.id)) tgt.ucImportRuns.push(run);
+  });
+  if(!tgt.business && src.business) tgt.business = src.business;
+  if(tgt.agents.assessment.status !== "passed" && src.agents.assessment.status === "passed"){
+    tgt.agents.assessment = src.agents.assessment;
+    tgt.assessmentScore = src.assessmentScore;
+  }
+  projWriteBranch(p, target, tgt);
+}
+
+/* Ветки hero-проекта смоделированы руками — так же, как состав cj1 в Библиотеке CJ:
+   main    — текущее состояние проекта (миграция существующих данных);
+   design  — ранний черновик: постановка и первые два сценария, оценки ещё нет;
+   develop — копия main с реальным расхождением: переформулирован шаг UC-001 (код части
+             тот же, поэтому «добавление» его пропустит, а «замена» заберёт) и добавлен
+             UC-007, который ходит в loyalty_api и fraud_api. Этих интерфейсов нет в
+             ландшафте main, поэтому develop → main честно упирается в конфликт на живых
+             данных, а design → develop проходит чисто. */
+function seedHeroProjectBranches(hero){
+  ensureProjBranches(hero);
+
+  const design = projEmptyBranchData();
+  design.business = deepClone(hero.business);
+  design.useCases = deepClone(hero.useCases.slice(0,2));
+  design.useCases.forEach(u=>{ u.id = uid("uc"); u.status = "draft"; });
+  hero.branchStore.design = design;
+  hero.branchInfo.design = {updatedAt:"22.01.2025", changeDescription:"Черновая проработка постановки и первых двух сценариев"};
+
+  const develop = deepClone(projCaptureBranch(hero));
+  develop.useCases.forEach(u=>{ u.id = uid("uc"); });
+  develop.ucImportRuns.forEach(r=>{ r.id = uid("run"); });
+  const reworded = develop.useCases[0];
+  if(reworded && reworded.scenarios[0]){
+    reworded.scenarios[0].action = "Пользователь вводит логин и пароль. Приложение передаёт учётные данные во внешний шлюз авторизации, который проверяет их и возвращает токен доступа; при ошибке возвращается код и текст сообщения для показа пользователю.";
+  }
+  const bonus = deepClone(develop.useCases[0]);
+  bonus.id = uid("uc");
+  bonus.code = "UC-007";
+  bonus.name = "Онлайн заказ: начисление бонусов";
+  bonus.status = "draft";
+  bonus.source = "Автоматический импорт";
+  bonus.rawPlantUml = "";
+  bonus.scenarios = [
+    {part:"P-01", participant:"app — order_service", action:"Приложение запрашивает состав заказа, чтобы рассчитать сумму к начислению бонусов.", api:"orders_api", call:"GET /api/v1/orders/{id}", tcName:"Возможность получения заказа", tcCode:"TC-142", status:"confirmed"},
+    {part:"P-02", participant:"order_service — loyalty_service", action:"Сервис заказов передаёт сумму заказа в лояльность, та начисляет бонусы на счёт клиента и возвращает итоговый баланс.", api:"loyalty_api", call:"POST /api/v1/loyalty/apply", status:"planned"},
+    {part:"P-03", participant:"order_service — fraud_check", action:"Начисление проверяется антифродом на подозрительную активность.", api:"fraud_api", call:"POST /api/v1/fraud/check", status:"planned"},
+  ];
+  develop.useCases.push(bonus);
+  hero.branchStore.develop = develop;
+  hero.branchInfo.develop = {updatedAt:"05.02.2025", changeDescription:"Переформулирован шаг авторизации в UC-001 и добавлен сценарий начисления бонусов (UC-007)"};
+}
+
 function existingProject(i){
   const [pName, pCode] = MOCK_PROJECT_NAMES[i % MOCK_PROJECT_NAMES.length];
   const p = freshProject(pName, pCode);
@@ -4792,6 +4999,14 @@ const state = {
   cjMergeRunning:null,    // {cjId, source, target, strategy, description} while a merge is being processed (global — only one at a time)
   cjBranchPanelOpen:true, // whether the branch bar (select + new branch + merge) is expanded
 
+  // Ветки проекта — та же механика, что у CJ. Активная ветка хранится на самом проекте
+  // (p.branch), здесь только состояние панелей; projMergeRunning — глобальный, потому что
+  // одновременно выполняется лишь одно объединение на всё приложение.
+  projBranchPanel:null,       // {projectId, name, parent} — панель создания ветки
+  projMergePanel:null,        // {projectId, source, target, strategy, description, conflicts}
+  projBranchDeleteConfirm:null, // id ветки, для которой открыт запрос подтверждения
+  projMergeRunning:null,      // {projectId, source, target, strategy, description} пока идёт объединение
+
   appcat: defaultAppcatState(),
   graph: defaultGraphState(),
 };
@@ -4840,6 +5055,8 @@ const state = {
   list.push(searchable);
 
   state.projects = list;
+  list.forEach(ensureProjBranches);
+  seedHeroProjectBranches(hero);
 })();
 
 function findProject(id){ return state.projects.find(p=>p.id===id); }
@@ -5445,6 +5662,8 @@ function renderShell(){
     ${state.wizard ? WizardOverlay() : ""}
     ${state.hldWizard ? HldWizardOverlay() : ""}
     ${state.ucWizard ? UcWizardOverlay() : ""}
+    ${state.projBranchPanel ? ProjBranchCreatePanel() : ""}
+    ${state.projMergePanel ? ProjMergePanel() : ""}
     ${state.createPanel ? CreatePanelWrap() : ""}
     ${state.sidePanel ? SidePanelWrap() : ""}
     ${state.cjOpen ? CjOverlay() : ""}
@@ -8255,6 +8474,186 @@ function CjMergePanel(){
   `;
 }
 
+/* ============================= ВЕТКИ ПРОЕКТА — UI ============================= */
+/* Компоненты повторяют ветки Библиотеки CJ: поле-селект по ДС (CjSelectField, не нативный
+   <select>), создание ветки в боковой панели, объединение — полноэкранным визардом.
+   Классы оформления переиспользуются как есть, чтобы ветки везде выглядели одинаково. */
+function ProjBranchBar(p){
+  const branches = projBranchList(p);
+  const active = p.branch;
+  const activeMeta = branches.find(b=>b.id===active);
+  const running = state.projMergeRunning;
+  const runningHere = running && running.projectId===p.id;
+  const locked = projBranchLocked(p, active);
+  return `
+    <div class="proj-branch-block">
+      <div class="proj-branch-bar">
+        ${CjSelectField({id:"proj-branch-switch", branches, activeId:active, action:"proj-switch-branch"})}
+        ${activeMeta && activeMeta.kind==="user" ? `<button class="icon-btn" data-action="proj-branch-delete-ask" data-branch="${escapeHtml(active)}" title="Удалить ветку">${icon("trash")}</button>` : ""}
+        <button class="btn btn-outline btn-sm" data-action="proj-open-branch-create">${icon("plus")} Новая ветка</button>
+        <button class="btn btn-outline btn-sm" data-action="proj-open-merge" ${running?"disabled":""} title="${running?"Дождитесь завершения текущего объединения":""}">Объединить ветки</button>
+        ${runningHere ? `
+          <div class="proj-branch-status">
+            ${locked ? `<span class="cj-branch-lock-badge"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
+            <span class="cj-merge-running-banner"><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>
+          </div>` : ""}
+      </div>
+      ${state.projBranchDeleteConfirm===active ? `
+        <div style="margin-top:var(--space-3);">
+          <div class="cj-branch-del-confirm">
+            <div class="txt">Удалить «${escapeHtml(active)}»? Содержимое ветки будет потеряно без восстановления.</div>
+            <div class="row">
+              <button class="btn btn-outline btn-sm" data-action="proj-branch-delete-cancel">Отмена</button>
+              <button class="btn btn-primary btn-sm" data-action="proj-branch-delete-do" data-branch="${escapeHtml(active)}">Удалить</button>
+            </div>
+          </div>
+        </div>` : ""}
+    </div>
+  `;
+}
+
+function ProjBranchCreatePanel(){
+  const panel = state.projBranchPanel;
+  const p = findProject(panel.projectId);
+  if(!p) return "";
+  const branches = projBranchList(p);
+  const name = panel.name.trim();
+  const existing = branches.map(b=>b.id.toLowerCase());
+  const taken = !!name && (PROJ_SYSTEM_BRANCHES.includes(name.toLowerCase()) || existing.includes(name.toLowerCase()));
+  const canCreate = !!name && !taken;
+  // Панель перерисовывается целиком на каждый ввод и клик, поэтому класс анимации
+  // появления ставим только на первую отрисовку — иначе она переигрывается и мигает.
+  const enter = panel._entered ? "" : " enter";
+  panel._entered = true;
+  return `
+    <div class="backdrop${enter}" data-action="proj-close-branch-create"></div>
+    <div class="side-panel${enter}">
+      <div class="side-head">
+        <h2>Новая ветка проекта</h2>
+        <button class="wizard-close" data-action="proj-close-branch-create">${icon("x")}</button>
+      </div>
+      <div class="side-body">
+        <div class="field-block">
+          <label class="field-label">Название ветки*</label>
+          <input class="input${taken?" error":""}" id="projBranchName" value="${escapeHtml(panel.name)}" placeholder="Например, ivanov-uc-007" autocomplete="off">
+          ${taken?`<div style="color:var(--red-text);font-size:12.5px;margin-top:4px;">Ветка с таким названием уже существует</div>`:""}
+        </div>
+        <div class="field-block">
+          <label class="field-label">Клонировать содержимое из ветки</label>
+          ${CjSelectField({id:"proj-branch-parent", branches, activeId:panel.parent, action:"proj-branch-set-parent", wide:true})}
+        </div>
+        <div class="readonly-note" style="align-items:flex-start;">
+          ${icon("info")}
+          <span>Новая ветка получит полную независимую копию бизнес-постановки, Use Case и оценки выбранной ветки. Дальнейшие изменения в одной ветке не затронут другую.</span>
+        </div>
+      </div>
+      <div class="side-foot">
+        <button class="btn btn-outline" data-action="proj-close-branch-create">Отменить</button>
+        <button class="btn btn-primary" data-action="proj-branch-create-submit" ${canCreate?"":"disabled"}>Создать</button>
+      </div>
+    </div>
+  `;
+}
+
+function ProjMergeBranchInfo(p, branchId, label){
+  const info = projBranchInfo(p, branchId);
+  const data = projBranchData(p, branchId);
+  const ucCount = (data.useCases||[]).length;
+  return `
+    <div class="cj-merge-info-card">
+      <div class="hd">${escapeHtml(branchId)}<span class="sub">${label}</span></div>
+      <div class="upd">${info.updatedAt ? `Обновлено: ${escapeHtml(info.updatedAt)}` : "Ещё не обновлялась"} · ${ucCount ? `Use Case: ${ucCount}` : "Use Case нет"}</div>
+      <div class="desc">${info.changeDescription ? escapeHtml(info.changeDescription) : "—"}</div>
+    </div>
+  `;
+}
+
+function ProjMergePanel(){
+  const m = state.projMergePanel;
+  const p = findProject(m.projectId);
+  if(!p) return "";
+  const branches = projBranchList(p);
+  const canMerge = !!m.source && !!m.target && m.source!==m.target && !state.projMergeRunning;
+  return `
+    <div class="wizard-overlay">
+      <div class="wizard-head">
+        <div class="proj-link" style="display:flex;align-items:center;gap:var(--space-2);color:var(--text);font-weight:600;" data-action="proj-close-merge">${icon("chevronLeft")} Назад</div>
+      </div>
+      <div class="wizard-body">
+       <div style="max-width:640px;margin:0 auto;">
+        <div class="cj-merge-title-wrap">
+          <h2 style="margin-bottom:var(--space-2);">Объединение веток проекта</h2>
+          <button class="icon-btn cj-merge-help-btn" data-action="toggle-popover" data-popover="proj-merge-help" title="Как это работает">${icon("info")}</button>
+          ${state.popover==="proj-merge-help" ? `
+            <div class="popover cj-merge-help-popover">
+              <div class="pv-title">Как работает объединение</div>
+              <ul class="cj-merge-help-list">
+                <li><b>Откуда → Куда</b> — из какой ветки берём изменения и в какую их вносим</li>
+                <li><b>Добавление</b> — добавит только то, чего нет в целевой ветке; то, что там уже есть, не трогает</li>
+                <li><b>Замена</b> — полностью заменит содержимое целевой ветки содержимым исходной</li>
+              </ul>
+            </div>` : ""}
+        </div>
+        <div style="color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-6);">Выбери, откуда и куда переносим изменения проекта «${escapeHtml(p.name)}»</div>
+
+        <div style="display:flex;gap:var(--space-4);">
+          <div class="field-block" style="flex:1;">
+            <label class="field-label">Откуда</label>
+            ${CjSelectField({id:"proj-merge-source", branches, activeId:m.source, action:"proj-merge-set-source", wide:true})}
+          </div>
+          <div class="field-block" style="flex:1;">
+            <label class="field-label">Куда</label>
+            ${CjSelectField({id:"proj-merge-target", branches, activeId:m.target, action:"proj-merge-set-target", disabledId:m.source, disabledTitle:"Совпадает с источником", wide:true})}
+          </div>
+        </div>
+
+        <div class="cj-merge-info-cards">
+          ${ProjMergeBranchInfo(p, m.source, "Откуда")}
+          ${ProjMergeBranchInfo(p, m.target, "Куда")}
+        </div>
+
+        <div class="field-block" style="margin-top:var(--space-5);">
+          <label class="field-label">Стратегия объединения</label>
+          <div class="cj-merge-strategy">
+            <div class="cj-merge-strategy-card ${m.strategy==="add"?"active":""}" data-action="proj-merge-set-strategy" data-strategy="add">
+              <div class="t">Добавление (add)</div>
+              <div class="d">Use Case и части сценариев, которых нет в «${escapeHtml(m.target)}», будут добавлены. Существующие — не тронуты, без диффа и cherry-pick.</div>
+            </div>
+            <div class="cj-merge-strategy-card ${m.strategy==="replace"?"active":""}" data-action="proj-merge-set-strategy" data-strategy="replace">
+              <div class="t">Замена (replace)</div>
+              <div class="d">Содержимое «${escapeHtml(m.target)}» будет полностью заменено содержимым «${escapeHtml(m.source)}» — постановка, Use Case и оценка.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-block">
+          <label class="field-label">Описание объединения (необязательно)</label>
+          <textarea class="textarea" id="projMergeDescInput" style="min-height:70px;" placeholder="Что перенесли и зачем — пригодится, когда вернёшься к этой ветке позже">${escapeHtml(m.description||"")}</textarea>
+        </div>
+
+        ${m.conflicts && m.conflicts.length ? `
+          <div class="cj-merge-conflict-box">
+            <div class="t">${icon("info")} Объединение невозможно: в ландшафте ветки «${escapeHtml(m.target)}» нет интерфейсов, на которые ссылается «${escapeHtml(m.source)}»</div>
+            <ul>
+              ${m.conflicts.map(c=>`<li><b>${escapeHtml(c.api)}</b> — ${escapeHtml(c.call||"")}${c.ucName?` (сценарий «${escapeHtml(c.ucName)}»)`:""}</li>`).join("")}
+            </ul>
+            <div class="hint">Опиши недостающие интерфейсы в ветке «${escapeHtml(m.target)}» и повтори объединение.</div>
+          </div>
+        ` : ""}
+
+        ${m.target==="main" ? `<div class="readonly-note" style="align-items:flex-start;margin-top:var(--space-5);background:var(--blue-bg);color:var(--blue-text);">${icon("info")} Объединение с main обновит канон сразу после подтверждения — действие необратимо.</div>` : ""}
+       </div>
+      </div>
+      <div class="wizard-foot">
+        <div style="max-width:640px;width:100%;margin:0 auto;display:flex;gap:var(--space-3);justify-content:flex-end;">
+          <button class="btn btn-outline" data-action="proj-close-merge">Отменить</button>
+          <button class="btn btn-primary" data-action="proj-merge-submit" ${canMerge?"":"disabled"} title="${state.projMergeRunning?"Дождитесь завершения текущего объединения":""}">Объединить</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 /* ============================= CJ BPMN VIEW ============================= */
 function bpmnWrapLines(text, maxChars, maxLines){
   const words = text.split(" ");
@@ -8731,6 +9130,8 @@ function ProjectDetailPage(projectId){
       <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Архитектор проекта</div><div style="font-size:15px;font-weight:500;">${escapeHtml(p.architect)}</div></div>
       <div><div style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-2);">Дата изменения</div><div style="font-size:15px;font-weight:500;">${escapeHtml(p.updated)}</div></div>
     </div>
+
+    ${ProjBranchBar(p)}
 
     <div class="page-tabs">
       <div class="page-tab ${state.projectTab==="data"?"active":""}" data-action="set-project-tab" data-tab="data">Данные проекта</div>
@@ -12047,6 +12448,8 @@ function handleInput(el){
   else if(el.id==="cjSearchInput"){ state.cjSearch = el.value; render(); reFocus("cjSearchInput"); }
   else if(el.id==="cjCreateName"){ state.cjCreatePanel.name = el.value; render(); reFocus("cjCreateName"); }
   else if(el.id==="cjBranchName"){ state.cjBranchPanel.name = el.value; render(); reFocus("cjBranchName"); }
+  else if(el.id==="projBranchName"){ state.projBranchPanel.name = el.value; render(); reFocus("projBranchName"); }
+  else if(el.id==="projMergeDescInput"){ state.projMergePanel.description = el.value; render(); reFocus("projMergeDescInput"); }
   else if(el.id==="cjMergeDescInput"){ state.cjMergePanel.description = el.value; render(); reFocus("cjMergeDescInput"); }
   else if(el.id==="cjCreatePortrait"){ state.cjCreatePanel.portrait = el.value; render(); reFocus("cjCreatePortrait"); }
   else if(el.id==="cjCreateOwner"){ state.cjCreatePanel.owner = el.value; render(); reFocus("cjCreateOwner"); }
@@ -12307,6 +12710,135 @@ function handleAction(action, el){
       }, 2200);
       break;
     }
+    /* ---------- ветки проекта ---------- */
+    case "proj-switch-branch": {
+      const p = findProject(state.route.projectId);
+      const branch = el.dataset.branch;
+      state.popover = null;
+      if(!p || branch===p.branch){ render(); break; }
+      projApplyBranch(p, branch);
+      state.ucHistoryOpenId = null;
+      state.projBranchDeleteConfirm = null;
+      render();
+      break;
+    }
+    case "proj-open-branch-create": {
+      const p = findProject(state.route.projectId);
+      if(!p) break;
+      state.projBranchPanel = {projectId:p.id, name:"", parent:p.branch};
+      state.popover = null;
+      render();
+      break;
+    }
+    case "proj-close-branch-create": state.projBranchPanel = null; state.popover = null; render(); break;
+    case "proj-branch-set-parent": state.projBranchPanel.parent = el.dataset.branch; state.popover = null; render(); break;
+    case "proj-branch-create-submit": {
+      const panel = state.projBranchPanel;
+      const p = findProject(panel.projectId);
+      if(!p) break;
+      const name = panel.name.trim();
+      const existing = projBranchList(p).map(b=>b.id.toLowerCase());
+      if(!name || PROJ_SYSTEM_BRANCHES.includes(name.toLowerCase()) || existing.includes(name.toLowerCase())) break;
+      p.branchStore[name] = deepClone(projBranchData(p, panel.parent));
+      p.branchInfo[name] = {updatedAt: NOW_DATE, changeDescription:`Создана как клон «${panel.parent}»`};
+      projBranchList(p).push({id:name, kind:"user", parent:panel.parent, createdBy:ARCHITECT, createdAt:NOW_DATE});
+      projApplyBranch(p, name);
+      state.projBranchPanel = null;
+      state.popover = null;
+      showToast(`Ветка «${name}» создана из «${panel.parent}»`);
+      render();
+      break;
+    }
+    case "proj-branch-delete-ask": state.projBranchDeleteConfirm = el.dataset.branch; render(); break;
+    case "proj-branch-delete-cancel": state.projBranchDeleteConfirm = null; render(); break;
+    case "proj-branch-delete-do": {
+      const p = findProject(state.route.projectId);
+      const branch = el.dataset.branch;
+      if(!p) break;
+      if(projBranchLocked(p, branch)){ showToast("Ветка обновляется, дождитесь завершения объединения"); break; }
+      const list = projBranchList(p);
+      const idx = list.findIndex(b=>b.id===branch);
+      if(idx>=0) list.splice(idx,1);
+      if(p.branch===branch) projApplyBranch(p, "main");  // projApplyBranch сам уберёт снимок, поэтому удаляем после
+      delete p.branchStore[branch];
+      delete p.branchInfo[branch];
+      state.projBranchDeleteConfirm = null;
+      showToast(`Ветка «${branch}» удалена`);
+      render();
+      break;
+    }
+    case "proj-open-merge": {
+      if(state.projMergeRunning){ showToast("Дождитесь завершения текущего объединения"); break; }
+      const p = findProject(state.route.projectId);
+      if(!p) break;
+      const ids = projBranchList(p).map(b=>b.id);
+      const source = p.branch;
+      const target = ids.find(b=>b!==source) || source;
+      state.projMergePanel = {projectId:p.id, source, target, strategy:"add", description:"", conflicts:null};
+      state.popover = null;
+      render();
+      break;
+    }
+    case "proj-close-merge": state.projMergePanel = null; state.popover = null; render(); break;
+    case "proj-merge-set-source": {
+      const m = state.projMergePanel;
+      const p = findProject(m.projectId);
+      m.source = el.dataset.branch;
+      if(m.target===m.source){
+        const alt = projBranchList(p).map(b=>b.id).find(b=>b!==m.source);
+        m.target = alt || m.source;
+      }
+      m.conflicts = null;
+      state.popover = null;
+      render();
+      break;
+    }
+    case "proj-merge-set-target": {
+      const m = state.projMergePanel;
+      if(el.dataset.branch===m.source) break;
+      m.target = el.dataset.branch;
+      m.conflicts = null;
+      state.popover = null;
+      render();
+      break;
+    }
+    case "proj-merge-set-strategy": {
+      const m = state.projMergePanel;
+      m.strategy = el.dataset.strategy;
+      m.conflicts = null;
+      render();
+      break;
+    }
+    case "proj-merge-submit": {
+      const m = state.projMergePanel;
+      const p = findProject(m.projectId);
+      if(!p || !m.source || !m.target || m.source===m.target || state.projMergeRunning) break;
+      const conflicts = projMergeConflicts(p, m.source, m.target, m.strategy);
+      if(conflicts.length){ m.conflicts = conflicts; render(); break; }
+      // Объединение не мгновенное: ссылки пересобираются под ландшафт целевой ветки.
+      // Панель закрывается сразу, прогресс виден в строке веток, а целевую ветку в это
+      // время можно открыть и посмотреть — но не редактировать.
+      state.projMergeRunning = {projectId:p.id, source:m.source, target:m.target, strategy:m.strategy, description:m.description};
+      state.projMergePanel = null;
+      state.popover = null;
+      render();
+      setTimeout(()=>{
+        const r = state.projMergeRunning;
+        if(!r) return;
+        const proj = findProject(r.projectId);
+        if(proj){
+          projMergeExecute(proj, r.source, r.target, r.strategy);
+          proj.branchInfo[r.target] = {
+            updatedAt: NOW_DATE,
+            changeDescription: (r.description||"").trim() || "(без описания)",
+          };
+        }
+        state.projMergeRunning = null;
+        showToast(`Ветка «${r.source}» объединена с «${r.target}» (${r.strategy==="replace"?"замена":"добавление"})`);
+        render();
+      }, 2200);
+      break;
+    }
     case "cj-toggle-menu": state.cjMenuOpen = !state.cjMenuOpen; render(); break;
     case "cj-toggle-branch-panel": state.cjBranchPanelOpen = !state.cjBranchPanelOpen; render(); break;
     case "cj-noop": state.cjMenuOpen=false; showToast("Не входит в состав переданных макетов"); break;
@@ -12386,7 +12918,7 @@ function handleAction(action, el){
     case "open-project-usecase": openProjectUseCaseTab(el.dataset.id); break;
     case "open-usecase": openUseCase(el.dataset.id, el.dataset.uc); break;
     case "open-usecase-history": go("usecase-history", {projectId: el.dataset.id, ucId: el.dataset.uc}); break;
-    case "edit-usecase": startUcWizard(el.dataset.id, {editUcId: el.dataset.uc}); break;
+    case "edit-usecase": if(projActiveBranchLocked(el.dataset.id)) break; startUcWizard(el.dataset.id, {editUcId: el.dataset.uc}); break;
     case "reset-uc-filters": state.ucSearch=""; state.ucSourceFilter="Все"; state.ucStatusFilter="Все"; render(); break;
     case "uc-source-filter-set": state.ucSourceFilter = el.dataset.value; state.popover=null; render(); break;
     case "uc-status-filter-set": state.ucStatusFilter = el.dataset.value; state.popover=null; render(); break;
@@ -12444,6 +12976,7 @@ function handleAction(action, el){
     case "set-project-agents-subtab": state.projectAgentsSubTab = el.dataset.sub; render(); break;
     case "launch-agent": {
       const key = el.dataset.agent, pid = el.dataset.id;
+      if(projActiveBranchLocked(pid)) break;   // пока ветка обновляется — только чтение
       if(key==="assessment") startWizard(pid);
       else if(key==="hld") startHldWizard(pid);
       else if(key==="usecase") startUcWizard(pid);
