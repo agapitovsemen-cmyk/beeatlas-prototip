@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20261001-122300">
+<meta name="beeatlas-build" content="20261001-133837">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -659,6 +659,11 @@
     --shadow-sm:        var(--elevation-low);
     --radius:           var(--size-border-radius-x8);   /* 16px */
     --radius-sm:        var(--size-border-radius-x6);   /* 12px */
+    /* ДС components/menu — таблица токенов компонента */
+    --menu-width:            280px;
+    --menu-width-min:        112px;
+    --menu-padding-vertical: var(--size-spacing-x2);   /* 8px */
+    --menu-item-height:      46px;
 
     /* Шкала отступов ДС — строго 4 × N, максимум x10 = 40px */
     --space-1:  var(--size-spacing-x1);   /*  4px */
@@ -1908,17 +1913,47 @@
   .cj-menu-item .beeline-icons{width:17px;height:17px;color:var(--text-secondary);font-size:17px;}
 
   /* ---------- CJ branches (design/develop/main + user) ---------- */
-  /* Строка веток на странице Use Case: та же раскладка, что у .cj-branch-bar в оверлее CJ,
-     но блоком на обычной странице — со своей рамкой и скруглением, без разделителя. */
-  .uc-branch-block{margin-bottom:var(--space-7);}
-  .uc-branch-bar{display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;padding:var(--space-3) var(--space-4);border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-alt);}
-  /* Блокировка и прогресс объединения — одной группой справа: по отдельности они упираются
-     в край строки и обрезаются, а вместе переносятся на следующую строку целиком. */
-  .uc-branch-status{display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;margin-left:auto;}
+  /* Меню действий Use Case (ДС: components/menu). Все действия страницы — переключение
+     ветки, работа с ветками, экспорт, история, редактирование — собраны под одной
+     иконочной кнопкой в заголовке. Значения взяты из таблицы токенов компонента:
+     ширина 280, вертикальный паддинг 8, радиус 12, высота пункта 46, горизонтальный
+     паддинг пункта 16, отступ иконки 8, ховер — --color-background-base-hover,
+     группы разделяются divider. Отдельный класс, а не .cj-menu: тот сверстан до сверки
+     с ДС (220/12/12) и используется в оверлее CJ — трогать его тут нечего. */
+  .uc-menu-wrap{position:relative;}
+  .uc-menu{position:absolute;top:calc(100% + 4px);right:0;width:var(--menu-width);min-width:var(--menu-width-min);
+    background:var(--color-background-medium);border-radius:var(--size-border-radius-x6);
+    box-shadow:0 4px 30px rgba(0,0,0,.1),0 0 10px rgba(0,0,0,.1);
+    padding:var(--menu-padding-vertical) 0;z-index:60;}
+  .uc-menu-item{display:flex;align-items:center;gap:var(--size-spacing-x2);height:var(--menu-item-height);
+    padding:0 var(--size-spacing-x4);font-size:15px;line-height:20px;letter-spacing:.2px;color:var(--text);
+    cursor:pointer;white-space:nowrap;}
+  .uc-menu-item:hover{background:var(--color-background-base-hover);}
+  .uc-menu-item.disabled{opacity:.48;cursor:default;}
+  .uc-menu-item.disabled:hover{background:transparent;}
+  .uc-menu-item svg{width:20px;height:20px;flex:0 0 auto;color:var(--text-secondary);}
+  .uc-menu-item .beeline-icons{width:20px;height:20px;font-size:20px;color:var(--text-secondary);}
+  .uc-menu-item .txt{flex:1;overflow:hidden;text-overflow:ellipsis;}
+  .uc-menu-item .tag{font-size:13px;color:var(--text-tertiary);}
+  .uc-menu-item .check{display:flex;color:var(--text);}
+  .uc-menu-item .check svg{width:20px;height:20px;color:var(--text);}
+  .uc-menu-divider{height:1px;background:var(--color-divider);margin:var(--menu-padding-vertical) 0;}
+  /* Подпись группы — в ДС у меню её нет (только divider), поэтому собрана из токенов
+     типографики и отступов, как разрешает сборный компонент. */
+  .uc-menu-cap{padding:var(--size-spacing-x2) var(--size-spacing-x4);font-size:13px;line-height:16px;
+    color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.4px;}
+  /* Бейдж ветки в заголовке — ДС badge, тип fade, семантика neutral (.badge.gray).
+     Рядом уже стоит бейдж статуса, поэтому fill здесь не годится по правилу ДС. */
+  .uc-branch-badge svg{width:15px;height:15px;}
+  .uc-branch-badge .beeline-icons{width:15px;height:15px;font-size:15px;}
+  /* Блокировка и прогресс объединения — строкой под заголовком, одной группой. */
+  .uc-branch-status{display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;margin-bottom:var(--space-6);}
   .cj-branch-bar{flex:0 0 auto;display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border);background:var(--bg-alt);flex-wrap:wrap;}
   .cj-branch-toggle-wrap{position:relative;height:0;flex:0 0 auto;z-index:5;}
-  .cj-branch-toggle-pill{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);box-shadow:var(--shadow);font-size:12.5px;font-weight:500;color:var(--text-secondary);cursor:pointer;white-space:nowrap;}
-  .cj-branch-toggle-pill:hover{color:var(--text);border-color:var(--border-strong);}
+  /* Без рамки: пилюля и так отделена от матрицы тенью, рамка поверх тени читается как
+     вторая граница. */
+  .cj-branch-toggle-pill{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:none;background:var(--bg);box-shadow:var(--shadow);font-size:12.5px;font-weight:500;color:var(--text-secondary);cursor:pointer;white-space:nowrap;}
+  .cj-branch-toggle-pill:hover{color:var(--text);}
   .cj-branch-toggle-pill .chev{display:flex;transition:transform .12s ease;}
   .cj-branch-toggle-pill .chev svg{width:14px;height:14px;}
   .cj-branch-toggle-pill .chev .beeline-icons{width:14px;height:14px;font-size:14px;}
@@ -8440,40 +8475,70 @@ function CjMergePanel(){
 /* Компоненты повторяют ветки Библиотеки CJ: поле-селект по ДС (CjSelectField, не нативный
    <select>), создание ветки в боковой панели, объединение — полноэкранным визардом.
    Классы оформления переиспользуются как есть, чтобы ветки везде выглядели одинаково. */
-function UcBranchBar(p, u){
+/* Все действия страницы Use Case — под одной иконочной кнопкой в заголовке (ДС:
+   components/menu — «если есть несколько действий, которые необходимо скрыть из-за
+   ограниченного пространства интерфейса»). Первая группа переключает ветку, активная
+   помечена галочкой — та же конвенция, что у CjSelectField; какая ветка открыта, видно
+   по бейджу рядом с заголовком, поэтому отдельное поле-селект тут не нужно. */
+function UcActionsMenu(p, u){
   const branches = ucBranchList(u);
-  const active = u.branch;
-  const activeMeta = branches.find(b=>b.id===active);
+  const activeMeta = branches.find(b=>b.id===u.branch);
   const running = state.ucMergeRunning;
-  const runningHere = running && running.ucId===u.id;
-  const locked = ucBranchLocked(u, active);
+  const mergeBlocked = !!running;
+  const item = (action, data, ico, txt, extra) =>
+    `<div class="uc-menu-item" data-action="${action}" ${data}>${icon(ico)}<span class="txt">${txt}</span>${extra||""}</div>`;
   return `
-    <div class="uc-branch-block">
-      <div class="uc-branch-bar">
-        ${CjSelectField({id:"uc-branch-switch", branches, activeId:active, action:"uc-switch-branch"})}
-        ${activeMeta && activeMeta.kind==="user" ? `<button class="icon-btn" data-action="uc-branch-delete-ask" data-branch="${escapeHtml(active)}" title="Удалить ветку">${icon("trash")}</button>` : ""}
-        <button class="btn btn-outline btn-sm" data-action="uc-open-branch-create">${icon("plus")} Новая ветка</button>
-        <button class="btn btn-outline btn-sm" data-action="uc-open-merge" ${running?"disabled":""} title="${running?"Дождитесь завершения текущего объединения":""}">Объединить ветки</button>
-        ${runningHere ? `
-          <div class="uc-branch-status">
-            ${locked ? `<span class="cj-branch-lock-badge"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
-            <span class="cj-merge-running-banner"><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>
-          </div>` : ""}
+    <div class="uc-menu">
+      <div class="uc-menu-cap">Ветка сценария</div>
+      ${branches.map(b=>`
+        <div class="uc-menu-item" data-action="uc-switch-branch" data-branch="${escapeHtml(b.id)}">
+          ${icon("gitBranch")}<span class="txt">${escapeHtml(b.id)}</span>
+          ${b.kind==="user"?`<span class="tag">своя</span>`:""}
+          ${b.id===u.branch?`<span class="check">${icon("check")}</span>`:""}
+        </div>`).join("")}
+      <div class="uc-menu-divider"></div>
+      ${item("uc-open-branch-create","","plus","Новая ветка")}
+      <div class="uc-menu-item${mergeBlocked?" disabled":""}" ${mergeBlocked?`title="Дождитесь завершения текущего объединения"`:`data-action="uc-open-merge"`}>
+        ${icon("gitMerge")}<span class="txt">Объединить ветки</span>
       </div>
-      ${state.ucBranchDeleteConfirm===active ? `
-        <div style="margin-top:var(--space-3);">
-          <div class="cj-branch-del-confirm">
-            <div class="txt">Удалить «${escapeHtml(active)}»? Состав ветки будет потерян без восстановления.</div>
-            <div class="row">
-              <button class="btn btn-outline btn-sm" data-action="uc-branch-delete-cancel">Отмена</button>
-              <button class="btn btn-primary btn-sm" data-action="uc-branch-delete-do" data-branch="${escapeHtml(active)}">Удалить</button>
-            </div>
-          </div>
-        </div>` : ""}
+      ${activeMeta && activeMeta.kind==="user" ? item("uc-branch-delete-ask",`data-branch="${escapeHtml(u.branch)}"`,"trash",`Удалить ветку «${escapeHtml(u.branch)}»`) : ""}
+      <div class="uc-menu-divider"></div>
+      ${item("edit-usecase",`data-id="${p.id}" data-uc="${u.id}"`,"pencil","Редактировать сценарий")}
+      ${item("open-usecase-history",`data-id="${p.id}" data-uc="${u.id}"`,"history","История импорта")}
+      <div class="uc-menu-divider"></div>
+      ${item("export-uc",`data-format="puml" data-id="${p.id}" data-uc="${u.id}"`,"upload","Экспорт в PUML")}
+      ${item("export-uc",`data-format="markdown" data-id="${p.id}" data-uc="${u.id}"`,"upload","Экспорт в Markdown")}
     </div>
   `;
 }
 
+/* Прогресс объединения и запрос подтверждения на удаление ветки — отдельной строкой под
+   заголовком: в выпадающем меню им не место (меню закрывается по выбору пункта), а
+   плавающий блок внутри меню повторил бы ошибку с обрезкой, уже пойманную на ветках CJ. */
+function UcBranchStatusRow(p, u){
+  const running = state.ucMergeRunning;
+  const runningHere = running && running.ucId===u.id;
+  const locked = ucBranchLocked(u, u.branch);
+  const confirm = state.ucBranchDeleteConfirm===u.branch;
+  if(!runningHere && !confirm) return "";
+  return `
+    ${runningHere ? `
+      <div class="uc-branch-status">
+        ${locked ? `<span class="cj-branch-lock-badge"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
+        <span class="cj-merge-running-banner"><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>
+      </div>` : ""}
+    ${confirm ? `
+      <div style="margin-bottom:var(--space-6);">
+        <div class="cj-branch-del-confirm">
+          <div class="txt">Удалить «${escapeHtml(u.branch)}»? Состав ветки будет потерян без восстановления.</div>
+          <div class="row">
+            <button class="btn btn-outline btn-sm" data-action="uc-branch-delete-cancel">Отмена</button>
+            <button class="btn btn-primary btn-sm" data-action="uc-branch-delete-do" data-branch="${escapeHtml(u.branch)}">Удалить</button>
+          </div>
+        </div>
+      </div>` : ""}
+  `;
+}
 /* Ноль шагов — сценарий в этой ветке ещё не заводили. Ветки полностью изолированы (§3.1),
    состав не расшаривается, поэтому подсказываем, из какой ветки его можно склонировать. */
 function UcBranchEmptyState(u){
@@ -9544,29 +9609,16 @@ function UseCaseDetailPage(projectId, ucId){
     <div class="page-title-row">
       <h1>${escapeHtml(u.name)}</h1>
       ${ucStatusBadge(u.status)}
+      <span class="badge gray uc-branch-badge" title="Ветка, состав которой показан на странице">${icon("gitBranch")}${escapeHtml(u.branch)}</span>
       <div class="actions">
-        <div class="ds-tip-wrap" style="position:relative;">
-          <button class="btn btn-outline btn-icon-only" data-action="toggle-popover" data-popover="uc-export">${icon("upload")}</button>
-          <span class="ds-tip">Экспорт</span>
-          ${state.popover==="uc-export" ? `
-            <div class="popover" style="min-width:180px;right:0;left:auto;">
-              <div class="pv-item" data-action="export-uc" data-format="puml" data-id="${p.id}" data-uc="${u.id}">Экспорт в PUML</div>
-              <div class="pv-item" data-action="export-uc" data-format="markdown" data-id="${p.id}" data-uc="${u.id}">Экспорт в Markdown</div>
-            </div>
-          ` : ""}
+        <div class="uc-menu-wrap">
+          <button class="btn btn-outline btn-icon-only" data-action="toggle-popover" data-popover="uc-actions" title="Действия">${icon("moreVertical")}</button>
+          ${state.popover==="uc-actions" ? UcActionsMenu(p, u) : ""}
         </div>
-        <span class="ds-tip-wrap">
-          <button class="btn btn-outline btn-icon-only" data-action="open-usecase-history" data-id="${p.id}" data-uc="${u.id}">${icon("history")}</button>
-          <span class="ds-tip">История импорта</span>
-        </span>
-        <span class="ds-tip-wrap">
-          <button class="btn btn-outline btn-icon-only" data-action="edit-usecase" data-id="${p.id}" data-uc="${u.id}">${icon("pencil")}</button>
-          <span class="ds-tip tip-right">Редактировать сценарий</span>
-        </span>
       </div>
     </div>
     ${UseCaseMetaRow(u, lastRun)}
-    ${UcBranchBar(p, u)}
+    ${UcBranchStatusRow(p, u)}
     ${UseCaseCjCard(u, p.id)}
 
     <div class="section" id="sec-scenarios">
@@ -12732,7 +12784,7 @@ function handleAction(action, el){
       render();
       break;
     }
-    case "uc-branch-delete-ask": state.ucBranchDeleteConfirm = el.dataset.branch; render(); break;
+    case "uc-branch-delete-ask": state.ucBranchDeleteConfirm = el.dataset.branch; state.popover = null; render(); break;
     case "uc-branch-delete-cancel": state.ucBranchDeleteConfirm = null; render(); break;
     case "uc-branch-delete-do": {
       const p = findProject(state.route.projectId);
@@ -12905,8 +12957,8 @@ function handleAction(action, el){
     case "open-project-assessment": openProjectAssessmentTab(el.dataset.id); break;
     case "open-project-usecase": openProjectUseCaseTab(el.dataset.id); break;
     case "open-usecase": openUseCase(el.dataset.id, el.dataset.uc); break;
-    case "open-usecase-history": go("usecase-history", {projectId: el.dataset.id, ucId: el.dataset.uc}); break;
-    case "edit-usecase": if(ucActiveBranchLocked(el.dataset.id, el.dataset.uc)) break; startUcWizard(el.dataset.id, {editUcId: el.dataset.uc}); break;
+    case "open-usecase-history": state.popover = null; go("usecase-history", {projectId: el.dataset.id, ucId: el.dataset.uc}); break;
+    case "edit-usecase": state.popover = null; if(ucActiveBranchLocked(el.dataset.id, el.dataset.uc)){ render(); break; } startUcWizard(el.dataset.id, {editUcId: el.dataset.uc}); break;
     case "reset-uc-filters": state.ucSearch=""; state.ucSourceFilter="Все"; state.ucStatusFilter="Все"; render(); break;
     case "uc-source-filter-set": state.ucSourceFilter = el.dataset.value; state.popover=null; render(); break;
     case "uc-status-filter-set": state.ucStatusFilter = el.dataset.value; state.popover=null; render(); break;
