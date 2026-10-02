@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20261002-140827">
+<meta name="beeatlas-build" content="20261002-150535">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1146,19 +1146,24 @@
   /* Снизу не хватает места (мешает Bottom action bar) — меню раскрывается вверх.
      Сторону и высоту считает positionDsSelectMenus() после каждого рендера. */
   .ds-select-menu.up{top:auto;bottom:100%;}
-  /* Скроллбар — как на сайте ДС (styles.css): дорожка прозрачная, ползунок шириной 7
+  /* Скроллбар обоих собственных меню (DsSelect и список веток .cj-select-menu) — как на
+     сайте ДС (styles.css): дорожка прозрачная, ползунок шириной 7
      (15 минус прозрачная рамка 4+4), полностью скруглён, минимум 28, цвет text-inactive.
      Стандартные scrollbar-width/color заданы только там, где нет webkit-псевдоэлементов:
      в Chrome они бы их отключили, и на macOS вместо ползунка ДС остался бы системный
      overlay-скроллбар, который виден только в момент прокрутки. */
-  .ds-select-menu::-webkit-scrollbar{width:15px;}
-  .ds-select-menu::-webkit-scrollbar-track{background-color:transparent;}
-  .ds-select-menu::-webkit-scrollbar-thumb{
+  .ds-select-menu::-webkit-scrollbar,
+  .cj-select-menu::-webkit-scrollbar{width:15px;}
+  .ds-select-menu::-webkit-scrollbar-track,
+  .cj-select-menu::-webkit-scrollbar-track{background-color:transparent;}
+  .ds-select-menu::-webkit-scrollbar-thumb,
+  .cj-select-menu::-webkit-scrollbar-thumb{
     background-color:var(--color-text-inactive);border:4px solid transparent;
     background-clip:content-box;border-radius:100px;min-height:28px;
   }
   @supports not selector(::-webkit-scrollbar){
-    .ds-select-menu{scrollbar-width:thin;scrollbar-color:var(--color-text-inactive) transparent;}
+    .ds-select-menu,
+    .cj-select-menu{scrollbar-width:thin;scrollbar-color:var(--color-text-inactive) transparent;}
   }
   .ds-select-item{
     padding:var(--size-spacing-x4);font-size:17px;line-height:22px;letter-spacing:.2px;color:var(--text);
@@ -1993,7 +1998,7 @@
   .cj-select-menu{
     position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:320px;
     background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);
-    padding:var(--space-2);z-index:60;max-height:260px;overflow-y:auto;
+    padding:var(--space-2);z-index:60;max-height:260px;overflow-y:auto;overscroll-behavior:contain;
   }
   .cj-select-field.wide .cj-select-menu{width:100%;max-width:none;}
   .cj-select-item{display:flex;align-items:center;gap:6px;padding:var(--space-3) var(--space-4);border-radius:8px;font-size:14.5px;cursor:pointer;}
