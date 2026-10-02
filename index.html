@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20261001-153142">
+<meta name="beeatlas-build" content="20261002-135551">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1277,6 +1277,8 @@
   .ffield.filled .ffield-input{padding-top:22px;padding-bottom:6px;line-height:20px;}
   .ffield-box{height:var(--size-control-height-medium);background:var(--input-bg);border-radius:var(--size-border-radius-x6);border:1px solid transparent;}
   .ffield-box.focus{background:var(--bg);border-color:var(--text);}
+  .ffield-box.error{border-color:var(--red-text);background:var(--red-bg);}
+  [data-theme="dark"] .ffield-box.error{background:#2a1616;}
 
   /* filters row */
   .filters-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);flex-wrap:wrap;}
@@ -1963,6 +1965,8 @@
      both the text and the chevron); menu is absolutely positioned below the trigger so it
      never depends on the browser's native <select> placement. */
   .cj-select-field{position:relative;display:inline-block;flex:0 0 auto;}
+  .cj-branch-bar > .cj-select-field{width:260px;}
+  .cj-branch-bar > .cj-select-field .cj-select-trigger{min-width:0;}
   .cj-select-field.wide{display:block;width:100%;}
   .cj-select-trigger{
     display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);width:100%;min-width:160px;
@@ -1977,10 +1981,10 @@
   .cj-select-trigger .beeline-icons{width:16px;height:16px;color:var(--text-secondary);flex:0 0 auto;transition:transform .12s ease;font-size:16px;}
   .cj-select-trigger.open svg{transform:rotate(180deg);}
   .cj-select-trigger.open .beeline-icons{transform:rotate(180deg);}
-  /* menu is its own fully-rounded floating panel positioned directly under the field —
-     zero gap (touches the field edge), own shadow/border on all sides, not merged into the trigger. */
+  /* menu is its own fully-rounded floating panel positioned under the field — небольшой
+     отступ 4px, собственная тень и скругление со всех сторон, не слито с триггером. */
   .cj-select-menu{
-    position:absolute;top:100%;left:0;min-width:100%;width:max-content;max-width:320px;
+    position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:320px;
     background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);
     padding:var(--space-2);z-index:60;max-height:260px;overflow-y:auto;
   }
@@ -2032,6 +2036,35 @@
   .cj-merge-conflict-box .t{display:flex;align-items:flex-start;gap:var(--space-2);font-weight:600;font-size:13.5px;color:var(--red-text);}
   .cj-merge-conflict-box ul{margin:var(--space-3) 0 0;padding-left:34px;font-size:12.5px;color:var(--text);line-height:1.6;}
   .cj-merge-conflict-box .hint{margin-top:var(--space-3);padding-left:34px;font-size:12.5px;color:var(--text-secondary);}
+
+  /* Поле-селект с подписью (ДС, filled field): пока значение не выбрано — одна строка
+     с плейсхолдером, после выбора подпись уезжает наверх мелким текстом, значение под
+     ней. Та же механика, что у .ffield в остальном приложении, но внутри триггера. */
+  .cj-select-trigger.labeled{align-items:center;min-height:var(--size-control-height-medium);padding:var(--space-2) var(--space-4);}
+  .cj-select-trigger.labeled .txt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
+  .cj-select-trigger.labeled .lbl{font-size:13px;line-height:16px;color:var(--text-secondary);}
+  .cj-select-trigger .name.placeholder{color:var(--text-tertiary);}
+  .cj-select-trigger.labeled .name{font-size:15px;line-height:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* пункт меню в две строки: ветка + когда её последний раз обновляли */
+  .cj-select-item.two-line{flex-direction:column;align-items:flex-start;gap:2px;}
+  .cj-select-item.two-line .name{flex:0 0 auto;font-size:15px;line-height:20px;}
+  .cj-select-item .sub{font-size:13px;line-height:16px;color:var(--text-secondary);}
+
+  /* стратегия объединения — радио-карточки (ДС Radiobutton: жёлтая точка у выбранной) */
+  .cj-merge-strategy-card.radio{display:flex;align-items:flex-start;gap:var(--space-4);border-color:var(--border);}
+  .cj-merge-strategy-card.radio .dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border-strong);flex:0 0 auto;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .cj-merge-strategy-card.radio .t{font-size:15px;line-height:20px;font-weight:600;margin-bottom:var(--space-1);}
+  .cj-merge-strategy-card.radio .d{font-size:13px;line-height:18px;}
+  .cj-merge-strategy-card.radio.active{border-color:var(--yellow);background:transparent;}
+  .cj-merge-strategy-card.radio.active .dot{border-color:var(--yellow);}
+  .cj-merge-strategy-card.radio.active .dot::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--yellow);}
+
+  /* подтверждение необратимого действия поверх панели (ДС Dialog) */
+  .cj-dialog-backdrop{position:fixed;inset:0;z-index:320;display:flex;align-items:center;justify-content:center;padding:var(--space-6);}
+  .cj-dialog{background:var(--bg);border-radius:var(--size-border-radius-x8);box-shadow:var(--elevation-high);padding:var(--size-spacing-x8);width:100%;max-width:560px;}
+  .cj-dialog h3{font-size:19px;line-height:24px;font-weight:500;margin:0 0 var(--space-4);}
+  .cj-dialog .txt{font-size:15px;line-height:20px;color:var(--text);margin-bottom:var(--size-spacing-x8);}
+  .cj-dialog .row{display:flex;gap:var(--space-3);justify-content:flex-end;}
 
   /* ДС Progress indicator, circle small: 20×20, толщина 3, трек — divider */
   .mini-spinner{box-sizing:border-box;width:20px;height:20px;border-radius:50%;border:3px solid var(--color-divider);border-top-color:var(--yellow);animation:spin .8s linear infinite;flex:0 0 auto;}
@@ -4287,6 +4320,8 @@ function renderToast(){
 /* ============================= DATA ============================= */
 const ARCHITECT = "Крестовоздвиженский Филипп Пантелеймонович";
 const NOW_DATE = "18.08.2026, 14:56";
+// даты веток — без времени: в списке и в поле это одна строка «обновлено 18.08.2026»
+const NOW_DAY = "18.08.2026";
 
 function uid(prefix){ return prefix + "_" + Math.random().toString(36).slice(2,9); }
 
@@ -4992,7 +5027,8 @@ const state = {
   cjBranchPanel:null,    // {name, parent} — create-branch side panel
   cjMergePanel:null,     // {source, target, strategy, description, conflicts} — merge side panel
   cjBranchDeleteConfirm:null, // branch id pending delete confirmation
-  cjMergeRunning:null,    // {cjId, source, target, strategy, description} while a merge is being processed (global — only one at a time)
+  cjMergeConfirm:false,   // показан ли диалог «Объединить ветки?» поверх панели
+  cjMergeRunning:null,    // {cjId, source, target, strategy} while a merge is being processed (global — only one at a time)
   cjBranchPanelOpen:true, // whether the branch bar (select + new branch + merge) is expanded
 
   // Ветки Use Case — та же механика, что у CJ. Активная ветка хранится на самом UC
@@ -8155,7 +8191,7 @@ function CjBranchBar(cjId){
     <div class="cj-branch-bar">
       ${CjSelectField({id:"cj-branch-switch", branches, activeId:active, action:"cj-switch-branch"})}
       ${activeMeta && activeMeta.kind==="user" ? `<button class="icon-btn" data-action="cj-branch-delete-ask" data-branch="${active}" title="Удалить ветку">${icon("trash")}</button>` : ""}
-      <button class="btn btn-outline btn-sm" data-action="cj-open-branch-create">${icon("plus")} Новая ветка</button>
+      <button class="btn btn-outline btn-sm" data-action="cj-open-branch-create">Новая ветка</button>
       <button class="btn btn-outline btn-sm" data-action="cj-open-merge" ${running?"disabled":""} title="${running?"Дождитесь завершения текущего объединения":""}">Объединить ветки</button>
       ${cjBranchLocked(cjId, active) ? `<span class="cj-branch-lock-badge" style="margin-left:auto;"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
       ${runningHere ? `<span class="cj-merge-running-banner"${cjBranchLocked(cjId, active)?"":' style="margin-left:auto;"'}><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>` : ""}
@@ -8169,20 +8205,30 @@ function CjBranchBar(cjId){
 // state.popover). `excludeId`/`disabledId` let the merge panel keep its "target can't
 // equal source" rule. `wide` (merge panel: fills its field-block) vs auto-width
 // (branch bar: sits inline with buttons, sized to its longest option).
-function CjSelectField({id, branches, activeId, action, excludeId, disabledId, disabledTitle, wide}){
+/* `label` + `meta` — вариант поля с макетов панелей веток: подпись над значением и
+   вторая строка «обновлено …» у каждого пункта. Без них компонент рисуется как раньше
+   (одна строка + галочка у выбранного), поэтому вызовы на странице Use Case не меняются. */
+function CjSelectField({id, branches, activeId, action, excludeId, disabledId, disabledTitle, wide, label, placeholder, meta}){
   const opts = branches.filter(b=>b.id!==excludeId);
   const open = state.popover===id;
+  const metaOf = typeof meta==="function" ? meta : null;
+  const hasValue = !!activeId;
+  const valueText = hasValue ? (metaOf ? `${activeId}, ${metaOf(activeId)}` : activeId) : (placeholder||label||"—");
+  const trigger = label
+    ? `<span class="txt">${hasValue?`<span class="lbl">${escapeHtml(label)}</span>`:""}<span class="name${hasValue?"":" placeholder"}">${escapeHtml(valueText)}</span></span>`
+    : `<span class="name">${escapeHtml(valueText)}</span>`;
   return `
     <div class="cj-select-field${wide?" wide":""}">
-      <button class="cj-select-trigger${open?" open":""}" data-action="toggle-popover" data-popover="${id}">
-        <span class="name">${escapeHtml(activeId||"—")}</span>${icon("chevronDown")}
+      <button class="cj-select-trigger${open?" open":""}${label?" labeled":""}" data-action="toggle-popover" data-popover="${id}">
+        ${trigger}${icon("chevronDown")}
       </button>
       ${open ? `
         <div class="cj-select-menu">
           ${opts.map(b=>{
             const isDisabled = b.id===disabledId;
-            return `<div class="cj-select-item ${b.id===activeId?"active":""} ${isDisabled?"disabled":""}" ${isDisabled?`title="${escapeHtml(disabledTitle||"")}"`:`data-action="${action}" data-branch="${b.id}"`}>
-              <span class="name">${escapeHtml(b.id)}</span>${b.kind==="user"?`<span class="tag">своя</span>`:""}${b.id===activeId?`<span class="check">${icon("check")}</span>`:""}
+            const sub = metaOf ? metaOf(b.id) : "";
+            return `<div class="cj-select-item ${sub?"two-line":""} ${!sub&&b.id===activeId?"active":""} ${isDisabled?"disabled":""}" ${isDisabled?`title="${escapeHtml(disabledTitle||"")}"`:`data-action="${action}" data-branch="${b.id}"`}>
+              <span class="name">${escapeHtml(b.id)}${b.kind==="user"?`<span class="tag" style="margin-left:6px;">своя</span>`:""}</span>${sub?`<span class="sub">${escapeHtml(sub)}</span>`:`${b.id===activeId?`<span class="check">${icon("check")}</span>`:""}`}
             </div>`;
           }).join("")}
         </div>` : ""}
@@ -8324,6 +8370,14 @@ function CjBranchEmptyState(){
   `;
 }
 
+/* «обновлено 18.08.2026» / «ещё не обновлялась» — вторая строка у пунктов списка веток
+   и хвост значения в поле; даты берём из CJ_BRANCHES, отдельного поля с описанием
+   изменения нет (его убрали — читалось только там же, где вводилось). */
+function cjBranchUpdNote(cjId, branchId){
+  const b = CJ_BRANCHES[cjId] && CJ_BRANCHES[cjId][branchId];
+  return b && b.updatedAt ? `обновлено ${b.updatedAt}` : "ещё не обновлялась";
+}
+
 function CjBranchCreatePanel(){
   const p = state.cjBranchPanel;
   const cjId = state.cjOpen.cjId;
@@ -8332,29 +8386,28 @@ function CjBranchCreatePanel(){
   const reserved = ["design","develop","main"];
   const existing = branches.map(b=>b.id.toLowerCase());
   const taken = !!name && (reserved.includes(name.toLowerCase()) || existing.includes(name.toLowerCase()));
-  const canCreate = !!name && !taken;
+  const canCreate = !!name && !taken && !!p.parent;
   return `
     <div class="backdrop enter" data-action="cj-close-branch-create"></div>
     <div class="side-panel enter">
-      <div class="side-head">
-        <h2>Новая ветка</h2>
-        <button class="wizard-close" data-action="cj-close-branch-create">${icon("x")}</button>
+      <div class="side-head" style="display:block;">
+        <h2>Создание новой ветки</h2>
+        <p class="side-desc">Новая ветка получит полную независимую копию состава выбранной ветки. Дальнейшие изменения в одной ветке не затронут другую</p>
       </div>
       <div class="side-body">
         <div class="field-block">
-          <label class="field-label">Название ветки*</label>
-          <input class="input${taken?" error":""}" id="cjBranchName" value="${escapeHtml(p.name)}" placeholder="Например, ivanov-fix-st4">
+          <div class="ffield ${p.name?"filled":""}">
+            <div class="ffield-box${taken?" error":""}">
+              <input class="input ffield-input" id="cjBranchName" value="${escapeHtml(p.name)}" autocomplete="off">
+            </div>
+            <label class="ffield-label">Название ветки</label>
+          </div>
           ${taken?`<div style="color:var(--red-text);font-size:12.5px;margin-top:4px;">Ветка с таким названием уже существует</div>`:""}
         </div>
         <div class="field-block">
-          <label class="field-label">Клонировать состав из ветки</label>
-          <select class="select" id="cjBranchParentSelect">
-            ${branches.map(b=>`<option value="${b.id}" ${p.parent===b.id?"selected":""}>${escapeHtml(b.id)}</option>`).join("")}
-          </select>
-        </div>
-        <div class="readonly-note" style="align-items:flex-start;">
-          ${icon("info")}
-          <span>Новая ветка получит полную независимую копию состава выбранной ветки. Дальнейшие изменения в одной ветке не затронут другую.</span>
+          ${CjSelectField({id:"cj-branch-parent", branches, activeId:p.parent, action:"cj-branch-set-parent", wide:true,
+                           label:"Клонировать состав из ветки", placeholder:"Клонировать состав из ветки",
+                           meta:b=>cjBranchUpdNote(cjId,b)})}
         </div>
       </div>
       <div class="side-foot">
@@ -8367,74 +8420,47 @@ function CjBranchCreatePanel(){
 
 // 2026-09-23 walkthrough correction round:
 // - откуда/куда pill rows → field-styled custom selects (see CjSelectField)
-// - the schematic "откуда→куда" compare cards with stage/scenario/source counts were
-//   called excessive and unhelpful — replaced with a plain description+date per branch
 // - добавлена проверка конфликтов, блокирующая объединение
-// - moved from a side panel into a full-screen modal (richer content no longer fits
-//   compressed in a 560px-wide side panel) — same wizard-overlay pattern as CjBpmnOverlay
-function CjMergeBranchInfo(cjId, branchId, label){
-  const b = CJ_BRANCHES[cjId] && CJ_BRANCHES[cjId][branchId];
-  const updated = b && b.updatedAt;
-  return `
-    <div class="cj-merge-info-card">
-      <div class="hd">${escapeHtml(branchId)}<span class="sub">${label}</span></div>
-      <div class="upd">${updated ? `Обновлено: ${escapeHtml(updated)}` : "Ещё не обновлялась"}</div>
-    </div>
-  `;
-}
+// 2026-10-02 (по макетам «Страница CJ»): объединение вернулось из полноэкранного визарда
+// в боковую панель — дата обновления ветки переехала внутрь полей «Откуда/Куда» (поэтому
+// отдельных карточек сравнения больше нет), стратегия стала радио-карточками, а
+// необратимость объединения подтверждается отдельным диалогом, а не текстовой сноской.
 function CjMergePanel(){
   const p = state.cjMergePanel;
   const cjId = state.cjOpen.cjId;
   const branches = cjBranchList(cjId);
+  const note = b=>cjBranchUpdNote(cjId, b);
   const canMerge = !!p.source && !!p.target && p.source!==p.target && !state.cjMergeRunning;
   return `
-    <div class="wizard-overlay">
-      <div class="wizard-head">
-        <div class="proj-link" style="display:flex;align-items:center;gap:var(--space-2);color:var(--text);font-weight:600;" data-action="cj-close-merge">${icon("chevronLeft")} Назад</div>
+    <div class="backdrop enter" data-action="cj-close-merge"></div>
+    <div class="side-panel enter">
+      <div class="side-head" style="display:block;">
+        <h2>Объединение веток</h2>
       </div>
-      <div class="wizard-body">
-       <div style="max-width:640px;margin:0 auto;">
-        <div class="cj-merge-title-wrap">
-          <h2 style="margin-bottom:var(--space-2);">Объединение веток</h2>
-          <button class="icon-btn cj-merge-help-btn" data-action="toggle-popover" data-popover="cj-merge-help" title="Как это работает">${icon("info")}</button>
-          ${state.popover==="cj-merge-help" ? `
-            <div class="popover cj-merge-help-popover">
-              <div class="pv-title">Как работает объединение</div>
-              <ul class="cj-merge-help-list">
-                <li><b>Откуда → Куда</b> — из какой ветки берём изменения и в какую их вносим</li>
-                <li><b>Добавление</b> — добавит только то, чего нет в целевой ветке; то, что там уже есть, не трогает</li>
-                <li><b>Замена</b> — полностью заменит состав целевой ветки составом исходной</li>
-              </ul>
-            </div>` : ""}
+      <div class="side-body">
+        <div class="field-block">
+          ${CjSelectField({id:"cj-merge-source", branches, activeId:p.source, action:"cj-merge-set-source", wide:true,
+                           label:"Откуда", placeholder:"Откуда", meta:note})}
         </div>
-        <div style="color:var(--text-secondary);font-size:13px;margin-bottom:var(--space-6);">Выбери, откуда и куда переносим изменения</div>
-
-        <div style="display:flex;gap:var(--space-4);">
-          <div class="field-block" style="flex:1;">
-            <label class="field-label">Откуда</label>
-            ${CjSelectField({id:"cj-merge-source", branches, activeId:p.source, action:"cj-merge-set-source", wide:true})}
-          </div>
-          <div class="field-block" style="flex:1;">
-            <label class="field-label">Куда</label>
-            ${CjSelectField({id:"cj-merge-target", branches, activeId:p.target, action:"cj-merge-set-target", disabledId:p.source, disabledTitle:"Совпадает с источником", wide:true})}
-          </div>
+        <div class="field-block">
+          ${CjSelectField({id:"cj-merge-target", branches, activeId:p.target, action:"cj-merge-set-target", wide:true,
+                           label:"Куда", placeholder:"Куда", meta:note,
+                           disabledId:p.source, disabledTitle:"Совпадает с источником"})}
         </div>
 
-        <div class="cj-merge-info-cards">
-          ${CjMergeBranchInfo(cjId, p.source, "Откуда")}
-          ${CjMergeBranchInfo(cjId, p.target, "Куда")}
-        </div>
-
-        <div class="field-block" style="margin-top:var(--space-5);">
-          <label class="field-label">Стратегия объединения</label>
-          <div class="cj-merge-strategy">
-            <div class="cj-merge-strategy-card ${p.strategy==="add"?"active":""}" data-action="cj-merge-set-strategy" data-strategy="add">
-              <div class="t">Добавление (add)</div>
-              <div class="d">Элементы, которых нет в «${escapeHtml(p.target)}», будут добавлены. Существующие — не тронуты, без диффа и cherry-pick.</div>
+        <div class="cj-merge-strategy">
+          <div class="cj-merge-strategy-card radio ${p.strategy==="add"?"active":""}" data-action="cj-merge-set-strategy" data-strategy="add">
+            <div class="dot"></div>
+            <div>
+              <div class="t">Добавление</div>
+              <div class="d">Элементы, которых нет в «${escapeHtml(p.target)}», будут добавлены. Существующие — не тронуты, без диффа и cherry-pick</div>
             </div>
-            <div class="cj-merge-strategy-card ${p.strategy==="replace"?"active":""}" data-action="cj-merge-set-strategy" data-strategy="replace">
-              <div class="t">Замена (replace)</div>
-              <div class="d">Весь состав «${escapeHtml(p.target)}» будет полностью заменён составом «${escapeHtml(p.source)}».</div>
+          </div>
+          <div class="cj-merge-strategy-card radio ${p.strategy==="replace"?"active":""}" data-action="cj-merge-set-strategy" data-strategy="replace">
+            <div class="dot"></div>
+            <div>
+              <div class="t">Замена</div>
+              <div class="d">Весь состав «${escapeHtml(p.target)}» будет полностью заменён составом «${escapeHtml(p.source)}»</div>
             </div>
           </div>
         </div>
@@ -8448,14 +8474,28 @@ function CjMergePanel(){
             <div class="hint">Приведи ссылки в соответствие в ветке «${escapeHtml(p.target)}» и повтори объединение.</div>
           </div>
         ` : ""}
-
-        ${p.target==="main" ? `<div class="readonly-note" style="align-items:flex-start;margin-top:var(--space-5);background:var(--blue-bg);color:var(--blue-text);">${icon("info")} Объединение с main обновит канон сразу после подтверждения — действие необратимо.</div>` : ""}
-       </div>
       </div>
-      <div class="wizard-foot">
-        <div style="max-width:640px;width:100%;margin:0 auto;display:flex;gap:var(--space-3);justify-content:flex-end;">
-          <button class="btn btn-outline" data-action="cj-close-merge">Отменить</button>
-          <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"} title="${state.cjMergeRunning?"Дождитесь завершения текущего объединения":""}">Объединить</button>
+      <div class="side-foot">
+        <button class="btn btn-outline" data-action="cj-close-merge">Отменить</button>
+        <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"} title="${state.cjMergeRunning?"Дождитесь завершения текущего объединения":""}">Объединить</button>
+      </div>
+    </div>
+    ${state.cjMergeConfirm ? CjMergeConfirmDialog() : ""}
+  `;
+}
+
+/* Объединение необратимо — подтверждаем отдельным диалогом поверх панели. Проверка
+   конфликтов проходит раньше: диалог показывается только тогда, когда объединение
+   действительно можно выполнить. */
+function CjMergeConfirmDialog(){
+  return `
+    <div class="cj-dialog-backdrop" data-action="cj-merge-confirm-cancel">
+      <div class="cj-dialog" data-action="noop-stop">
+        <h3>Объединить ветки?</h3>
+        <div class="txt">После объединения веток их нельзя будет откатить назад</div>
+        <div class="row">
+          <button class="btn btn-outline" data-action="cj-merge-confirm-cancel">Отменить</button>
+          <button class="btn btn-primary" data-action="cj-merge-confirm-do">Объединить</button>
         </div>
       </div>
     </div>
@@ -12279,8 +12319,9 @@ function bindGlobalEvents(){
   };
   document.body.onkeydown = function(e){
     if(e.key === "Escape"){
-      if(state.cjSourcePanel){ state.cjSourcePanel=null; render(); }
-      else if(state.cjMergePanel){ state.cjMergePanel=null; render(); }
+      if(state.cjMergeConfirm){ state.cjMergeConfirm=false; render(); }
+      else if(state.cjSourcePanel){ state.cjSourcePanel=null; render(); }
+      else if(state.cjMergePanel){ state.cjMergePanel=null; state.cjMergeConfirm=false; render(); }
       else if(state.cjBranchPanel){ state.cjBranchPanel=null; render(); }
       else if(state.cjBranchDeleteConfirm){ state.cjBranchDeleteConfirm=null; render(); }
       else if(state.cjBpmnOpen){ state.cjBpmnOpen=false; state.cjBpmnStage=null; render(); }
@@ -12507,7 +12548,6 @@ document.addEventListener("change", function(e){
     const part = state.ucWizard && state.ucWizard.data.parts.find(x=>x.id===e.target.dataset.id);
     if(part){ part[e.target.dataset.partField] = e.target.value; render(); }
   }
-  else if(e.target.id==="cjBranchParentSelect"){ state.cjBranchPanel.parent = e.target.value; render(); }
   else if(e.target.id==="cjFilterProductSelect"){ state.cjFilters.product = e.target.value; render(); }
   else if(e.target.id==="cjFilterStatusSelect"){ state.cjFilters.status = e.target.value; render(); }
   else if(e.target.id==="cjFilterFormatSelect"){ state.cjFilters.format = e.target.value; render(); }
@@ -12545,6 +12585,8 @@ function handleAction(action, el){
     case "noop-doc": case "noop-ide": case "noop-logout":
       state.popover=null; showToast("Раздел вне рамок прототипа"); break;
     case "noop-assistant": showToast("Ассистент скоро будет доступен"); break;
+    /* клик внутри диалога не должен закрывать его через подложку */
+    case "noop-stop": break;
     case "nav":
       state.activeSidebar = el.dataset.nav;
       if(el.dataset.nav==="projects") go("projects"); else go(el.dataset.nav);
@@ -12607,7 +12649,7 @@ function handleAction(action, el){
       break;
     case "close-cj":
       state.cjOpen = null; state.cjMenuOpen=false; state.cjVersionsOpen=false; state.cjSourcePanel=null;
-      state.cjBranchPanel=null; state.cjMergePanel=null; state.cjBranchDeleteConfirm=null;
+      state.cjBranchPanel=null; state.cjMergePanel=null; state.cjMergeConfirm=false; state.cjBranchDeleteConfirm=null;
       state.popover=null;
       render();
       break;
@@ -12620,7 +12662,8 @@ function handleAction(action, el){
       render();
       break;
     }
-    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: state.cjOpen.branch}; state.popover = null; render(); break;
+    case "cj-open-branch-create": state.cjBranchPanel = {name:"", parent: null}; state.popover = null; render(); break;
+    case "cj-branch-set-parent": state.cjBranchPanel.parent = el.dataset.branch; state.popover = null; render(); break;
     case "cj-close-branch-create": state.cjBranchPanel = null; render(); break;
     case "cj-branch-create-submit": {
       const p = state.cjBranchPanel;
@@ -12628,13 +12671,13 @@ function handleAction(action, el){
       const name = p.name.trim();
       const reserved = ["design","develop","main"];
       const existing = cjBranchList(cjId).map(b=>b.id.toLowerCase());
-      if(!name || reserved.includes(name.toLowerCase()) || existing.includes(name.toLowerCase())) break;
+      if(!name || !p.parent || reserved.includes(name.toLowerCase()) || existing.includes(name.toLowerCase())) break;
       if(!CJ_BRANCHES[cjId]) CJ_BRANCHES[cjId] = {};
-      CJ_BRANCHES[cjId][name] = { stages: deepClone(cjBranchTree(cjId, p.parent)), updatedAt: NOW_DATE };
+      CJ_BRANCHES[cjId][name] = { stages: deepClone(cjBranchTree(cjId, p.parent)), updatedAt: NOW_DAY };
       cjBranchList(cjId).push({id:name, kind:"user", parent:p.parent, createdBy:ARCHITECT, createdAt:NOW_DATE});
       state.cjOpen.branch = name;
       state.cjBranchPanel = null;
-      showToast(`Ветка «${name}» создана из «${p.parent}»`);
+      showToast("Ветка создана");
       render();
       break;
     }
@@ -12661,11 +12704,12 @@ function handleAction(action, el){
       const source = state.cjOpen.branch;
       const target = branches.find(b=>b!==source) || source;
       state.cjMergePanel = {source, target, strategy:"add", conflicts:null};
+      state.cjMergeConfirm = false;
       state.popover = null;
       render();
       break;
     }
-    case "cj-close-merge": state.cjMergePanel = null; state.popover = null; render(); break;
+    case "cj-close-merge": state.cjMergePanel = null; state.cjMergeConfirm = false; state.popover = null; render(); break;
     case "cj-merge-set-source": {
       const p = state.cjMergePanel;
       p.source = el.dataset.branch;
@@ -12704,12 +12748,25 @@ function handleAction(action, el){
         render();
         break;
       }
+      // конфликтов нет — спрашиваем подтверждение необратимого действия (макет
+      // «Объединить ветки?»), само объединение запускает cj-merge-confirm-do
+      state.cjMergeConfirm = true;
+      state.popover = null;
+      render();
+      break;
+    }
+    case "cj-merge-confirm-cancel": state.cjMergeConfirm = false; render(); break;
+    case "cj-merge-confirm-do": {
+      const p = state.cjMergePanel;
+      if(!p || !p.source || !p.target || p.source===p.target || state.cjMergeRunning) break;
+      const cjId = state.cjOpen.cjId;
       // 2026-09-23 (Владислав): merge isn't instant — links get re-resolved against the
       // target branch's own product methods, which takes time in the real system. Panel
       // closes right away; a persistent banner in CjBranchBar shows progress and the
       // target branch stays visible (read-only) so the user can "провалиться и посмотреть".
       state.cjMergeRunning = {cjId, source:p.source, target:p.target, strategy:p.strategy};
       state.cjMergePanel = null;
+      state.cjMergeConfirm = false;
       state.popover = null;
       render();
       setTimeout(()=>{
@@ -12717,10 +12774,10 @@ function handleAction(action, el){
         if(!r) return;
         cjMergeExecute(r.cjId, r.source, r.target, r.strategy);
         if(CJ_BRANCHES[r.cjId] && CJ_BRANCHES[r.cjId][r.target]){
-          CJ_BRANCHES[r.cjId][r.target].updatedAt = NOW_DATE;
+          CJ_BRANCHES[r.cjId][r.target].updatedAt = NOW_DAY;
         }
         state.cjMergeRunning = null;
-        showToast(`Ветка «${r.source}» объединена с «${r.target}» (${r.strategy==="replace"?"замена":"добавление"})`);
+        showToast("Ветки объединены");
         render();
       }, 2200);
       break;
