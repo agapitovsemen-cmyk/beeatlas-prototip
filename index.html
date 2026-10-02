@@ -6,7 +6,7 @@
 <title>beeatlas (прототип)</title>
 <!-- Отметка сборки: подставляется deploy.sh. Видна в консоли как BUILD и в подсказке
      на логотипе — так за секунду понятно, свежую страницу показывает браузер или из кэша. -->
-<meta name="beeatlas-build" content="20261002-135551">
+<meta name="beeatlas-build" content="20261002-140827">
 <style>
   /* ══════════════════════════════════════════════════════════════════════
      Шрифты Yellowbe, вшиты в файл (прототип должен оставаться одним HTML).
@@ -1276,7 +1276,13 @@
   .ffield .ffield-input{height:100%;padding-top:0;padding-bottom:0;position:relative;background:transparent;}
   .ffield.filled .ffield-input{padding-top:22px;padding-bottom:6px;line-height:20px;}
   .ffield-box{height:var(--size-control-height-medium);background:var(--input-bg);border-radius:var(--size-border-radius-x6);border:1px solid transparent;}
-  .ffield-box.focus{background:var(--bg);border-color:var(--text);}
+  .ffield-box.focus,
+  .ffield-box:has(.ffield-input:focus){background:var(--bg);border-color:var(--text);}
+  .ffield-box:hover{background:var(--color-control-background-hover);}
+  .ffield-box.focus:hover,
+  .ffield-box:has(.ffield-input:focus):hover{background:var(--bg);}
+  .ffield:has(.ffield-input:focus) .ffield-label{top:6px;font-size:13px;color:var(--text-secondary);transform:none;}
+  .ffield:has(.ffield-input:focus) .ffield-input{padding-top:22px;padding-bottom:6px;line-height:20px;}
   .ffield-box.error{border-color:var(--red-text);background:var(--red-bg);}
   [data-theme="dark"] .ffield-box.error{background:#2a1616;}
 
@@ -1973,7 +1979,8 @@
     border:1px solid transparent;background:var(--input-bg);border-radius:var(--radius-sm);
     padding:var(--space-3) var(--space-4);font-size:15px;color:var(--text);text-align:left;
   }
-  .cj-select-trigger:hover{background:var(--bg-alt);}
+  .cj-select-trigger:hover{background:var(--color-control-background-hover);}
+  .cj-select-trigger.open:hover{background:var(--bg);}
   /* open = same treatment as this app's other field-focus state (.ffield-box.focus) —
      surfaced background + a solid border, for consistency rather than a one-off style. */
   .cj-select-trigger.open{background:var(--bg);border-color:var(--text);}
@@ -2046,8 +2053,16 @@
   .cj-select-trigger .name.placeholder{color:var(--text-tertiary);}
   .cj-select-trigger.labeled .name{font-size:15px;line-height:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   /* пункт меню в две строки: ветка + когда её последний раз обновляли */
-  .cj-select-item.two-line{flex-direction:column;align-items:flex-start;gap:2px;}
-  .cj-select-item.two-line .name{flex:0 0 auto;font-size:15px;line-height:20px;}
+  /* две строки + иконка удаления справа: текст в первой колонке, кнопка — во второй
+     на обе строки, поэтому она центрируется по высоте строки. */
+  .cj-select-item.two-line{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px var(--space-3);}
+  .cj-select-item.two-line .name{flex:0 0 auto;font-size:15px;line-height:20px;grid-column:1;}
+  .cj-select-item.two-line .sub{grid-column:1;}
+  .cj-select-item.two-line .del{grid-column:2;grid-row:1 / span 2;}
+  .cj-select-item .del{width:32px;height:32px;border:none;background:transparent;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--color-text-inactive);}
+  .cj-select-item .del:hover{background:var(--color-control-background-hover);color:var(--text);}
+  .cj-select-item .del svg{width:20px;height:20px;}
+  .cj-select-item .del .beeline-icons{width:20px;height:20px;font-size:20px;}
   .cj-select-item .sub{font-size:13px;line-height:16px;color:var(--text-secondary);}
 
   /* стратегия объединения — радио-карточки (ДС Radiobutton: жёлтая точка у выбранной) */
@@ -8189,15 +8204,17 @@ function CjBranchBar(cjId){
     </div>
     ${open ? `
     <div class="cj-branch-bar">
-      ${CjSelectField({id:"cj-branch-switch", branches, activeId:active, action:"cj-switch-branch"})}
-      ${activeMeta && activeMeta.kind==="user" ? `<button class="icon-btn" data-action="cj-branch-delete-ask" data-branch="${active}" title="Удалить ветку">${icon("trash")}</button>` : ""}
+      ${CjSelectField({id:"cj-branch-switch", branches, activeId:active, action:"cj-switch-branch",
+                       meta:b=>cjBranchUpdNote(cjId,b), deleteAction:"cj-branch-delete-ask"})}
       <button class="btn btn-outline btn-sm" data-action="cj-open-branch-create">Новая ветка</button>
       <button class="btn btn-outline btn-sm" data-action="cj-open-merge" ${running?"disabled":""} title="${running?"Дождитесь завершения текущего объединения":""}">Объединить ветки</button>
       ${cjBranchLocked(cjId, active) ? `<span class="cj-branch-lock-badge" style="margin-left:auto;"><span class="mini-spinner"></span>Ветка обновляется</span>` : ""}
       ${runningHere ? `<span class="cj-merge-running-banner"${cjBranchLocked(cjId, active)?"":' style="margin-left:auto;"'}><span class="mini-spinner"></span>Объединение «${escapeHtml(running.source)}» → «${escapeHtml(running.target)}»…</span>` : ""}
     </div>
-    ${state.cjBranchDeleteConfirm===active ? `<div style="padding:0 var(--space-6) var(--space-3);">${CjBranchDeleteConfirm(active)}</div>` : ""}
     ` : ""}
+    ${state.cjBranchDeleteConfirm ? CjConfirmDialog({title:"Удалить ветку?", text:"Удалённую ветку нельзя будет восстановить",
+                                                    confirmLabel:"Удалить", confirmAction:"cj-branch-delete-do",
+                                                    cancelAction:"cj-branch-delete-cancel", branch:state.cjBranchDeleteConfirm}) : ""}
   `;
 }
 
@@ -8208,12 +8225,12 @@ function CjBranchBar(cjId){
 /* `label` + `meta` — вариант поля с макетов панелей веток: подпись над значением и
    вторая строка «обновлено …» у каждого пункта. Без них компонент рисуется как раньше
    (одна строка + галочка у выбранного), поэтому вызовы на странице Use Case не меняются. */
-function CjSelectField({id, branches, activeId, action, excludeId, disabledId, disabledTitle, wide, label, placeholder, meta}){
+function CjSelectField({id, branches, activeId, action, excludeId, disabledId, disabledTitle, wide, label, placeholder, meta, deleteAction}){
   const opts = branches.filter(b=>b.id!==excludeId);
   const open = state.popover===id;
   const metaOf = typeof meta==="function" ? meta : null;
   const hasValue = !!activeId;
-  const valueText = hasValue ? (metaOf ? `${activeId}, ${metaOf(activeId)}` : activeId) : (placeholder||label||"—");
+  const valueText = hasValue ? ((metaOf && label) ? `${activeId}, ${metaOf(activeId)}` : activeId) : (placeholder||label||"—");
   const trigger = label
     ? `<span class="txt">${hasValue?`<span class="lbl">${escapeHtml(label)}</span>`:""}<span class="name${hasValue?"":" placeholder"}">${escapeHtml(valueText)}</span></span>`
     : `<span class="name">${escapeHtml(valueText)}</span>`;
@@ -8227,8 +8244,10 @@ function CjSelectField({id, branches, activeId, action, excludeId, disabledId, d
           ${opts.map(b=>{
             const isDisabled = b.id===disabledId;
             const sub = metaOf ? metaOf(b.id) : "";
+            const canDelete = deleteAction && b.kind==="user";
             return `<div class="cj-select-item ${sub?"two-line":""} ${!sub&&b.id===activeId?"active":""} ${isDisabled?"disabled":""}" ${isDisabled?`title="${escapeHtml(disabledTitle||"")}"`:`data-action="${action}" data-branch="${b.id}"`}>
-              <span class="name">${escapeHtml(b.id)}${b.kind==="user"?`<span class="tag" style="margin-left:6px;">своя</span>`:""}</span>${sub?`<span class="sub">${escapeHtml(sub)}</span>`:`${b.id===activeId?`<span class="check">${icon("check")}</span>`:""}`}
+              <span class="name">${escapeHtml(b.id)}${!sub&&b.kind==="user"?`<span class="tag" style="margin-left:6px;">своя</span>`:""}</span>${sub?`<span class="sub">${escapeHtml(sub)}</span>`:`${b.id===activeId?`<span class="check">${icon("check")}</span>`:""}`}
+              ${canDelete?`<button class="icon-btn del" data-action="${deleteAction}" data-branch="${b.id}" title="Удалить ветку">${icon("trash")}</button>`:""}
             </div>`;
           }).join("")}
         </div>` : ""}
@@ -8338,18 +8357,6 @@ function positionDsSelectMenus(){
   });
 }
 
-function CjBranchDeleteConfirm(branchId){
-  return `
-    <div class="cj-branch-del-confirm">
-      <div class="txt">Удалить «${escapeHtml(branchId)}»? Состав будет потерян без восстановления.</div>
-      <div class="row">
-        <button class="btn btn-outline btn-sm" data-action="cj-branch-delete-cancel">Отмена</button>
-        <button class="btn btn-primary btn-sm" data-action="cj-branch-delete-do" data-branch="${escapeHtml(branchId)}">Удалить</button>
-      </div>
-    </div>
-  `;
-}
-
 // Ноль этапов — это не "CJ пустой" (пустой CJ, если он создан в ветке, всегда имеет
 // хотя бы один незаполненный этап-заготовку, см. cjUnfilledStage/CjUnfilledStageCell) —
 // это значит, что CJ в этой ветке вообще не заводили. Более редкий случай, отдельная
@@ -8378,8 +8385,17 @@ function cjBranchUpdNote(cjId, branchId){
   return b && b.updatedAt ? `обновлено ${b.updatedAt}` : "ещё не обновлялась";
 }
 
+/* .enter нужен только на первом кадре панели — иначе анимация появления повторяется
+   при каждом render() (ввод символа, выбор ветки) и читается как мигание экрана. */
+function panelEnter(p){
+  if(p._entered) return "";
+  p._entered = true;
+  return " enter";
+}
+
 function CjBranchCreatePanel(){
   const p = state.cjBranchPanel;
+  const ent = panelEnter(p);
   const cjId = state.cjOpen.cjId;
   const branches = cjBranchList(cjId);
   const name = p.name.trim();
@@ -8388,8 +8404,8 @@ function CjBranchCreatePanel(){
   const taken = !!name && (reserved.includes(name.toLowerCase()) || existing.includes(name.toLowerCase()));
   const canCreate = !!name && !taken && !!p.parent;
   return `
-    <div class="backdrop enter" data-action="cj-close-branch-create"></div>
-    <div class="side-panel enter">
+    <div class="backdrop${ent}" data-action="cj-close-branch-create"></div>
+    <div class="side-panel${ent}">
       <div class="side-head" style="display:block;">
         <h2>Создание новой ветки</h2>
         <p class="side-desc">Новая ветка получит полную независимую копию состава выбранной ветки. Дальнейшие изменения в одной ветке не затронут другую</p>
@@ -8427,13 +8443,14 @@ function CjBranchCreatePanel(){
 // необратимость объединения подтверждается отдельным диалогом, а не текстовой сноской.
 function CjMergePanel(){
   const p = state.cjMergePanel;
+  const ent = panelEnter(p);
   const cjId = state.cjOpen.cjId;
   const branches = cjBranchList(cjId);
   const note = b=>cjBranchUpdNote(cjId, b);
   const canMerge = !!p.source && !!p.target && p.source!==p.target && !state.cjMergeRunning;
   return `
-    <div class="backdrop enter" data-action="cj-close-merge"></div>
-    <div class="side-panel enter">
+    <div class="backdrop${ent}" data-action="cj-close-merge"></div>
+    <div class="side-panel${ent}">
       <div class="side-head" style="display:block;">
         <h2>Объединение веток</h2>
       </div>
@@ -8480,22 +8497,24 @@ function CjMergePanel(){
         <button class="btn btn-primary" data-action="cj-merge-submit" ${canMerge?"":"disabled"} title="${state.cjMergeRunning?"Дождитесь завершения текущего объединения":""}">Объединить</button>
       </div>
     </div>
-    ${state.cjMergeConfirm ? CjMergeConfirmDialog() : ""}
+    ${state.cjMergeConfirm ? CjConfirmDialog({title:"Объединить ветки?", text:"После объединения веток их нельзя будет откатить назад",
+                                               confirmLabel:"Объединить", confirmAction:"cj-merge-confirm-do", cancelAction:"cj-merge-confirm-cancel"}) : ""}
   `;
 }
 
-/* Объединение необратимо — подтверждаем отдельным диалогом поверх панели. Проверка
-   конфликтов проходит раньше: диалог показывается только тогда, когда объединение
-   действительно можно выполнить. */
-function CjMergeConfirmDialog(){
+/* Подтверждение необратимого действия (объединение, удаление ветки). Для объединения
+   проверка конфликтов проходит раньше: диалог показывается только тогда, когда
+   объединение действительно можно выполнить. */
+function CjConfirmDialog({title, text, confirmLabel, confirmAction, cancelAction, branch}){
+  const br = branch ? ` data-branch="${escapeHtml(branch)}"` : "";
   return `
-    <div class="cj-dialog-backdrop" data-action="cj-merge-confirm-cancel">
+    <div class="cj-dialog-backdrop" data-action="${cancelAction}">
       <div class="cj-dialog" data-action="noop-stop">
-        <h3>Объединить ветки?</h3>
-        <div class="txt">После объединения веток их нельзя будет откатить назад</div>
+        <h3>${escapeHtml(title)}</h3>
+        <div class="txt">${escapeHtml(text)}</div>
         <div class="row">
-          <button class="btn btn-outline" data-action="cj-merge-confirm-cancel">Отменить</button>
-          <button class="btn btn-primary" data-action="cj-merge-confirm-do">Объединить</button>
+          <button class="btn btn-outline" data-action="${cancelAction}">Отменить</button>
+          <button class="btn btn-primary" data-action="${confirmAction}"${br}>${escapeHtml(confirmLabel)}</button>
         </div>
       </div>
     </div>
@@ -12681,6 +12700,7 @@ function handleAction(action, el){
       render();
       break;
     }
+    /* список веток остаётся раскрытым под диалогом — так на макете */
     case "cj-branch-delete-ask": state.cjBranchDeleteConfirm = el.dataset.branch; render(); break;
     case "cj-branch-delete-cancel": state.cjBranchDeleteConfirm = null; render(); break;
     case "cj-branch-delete-do": {
@@ -12693,7 +12713,8 @@ function handleAction(action, el){
       if(CJ_BRANCHES[cjId]) delete CJ_BRANCHES[cjId][branchId];
       if(state.cjOpen.branch===branchId) state.cjOpen.branch = "main";
       state.cjBranchDeleteConfirm = null;
-      showToast(`Ветка «${branchId}» удалена`);
+      state.popover = null;
+      showToast("Ветка удалена");
       render();
       break;
     }
